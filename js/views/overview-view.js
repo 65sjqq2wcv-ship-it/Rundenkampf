@@ -158,7 +158,7 @@ class OverviewView {
 
 		// Table header
 		const tableHeader = document.createElement('div');
-		tableHeader.style.cssText = 'background: #f8f9fa; padding: 12px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 8px; font-weight: 600; font-size: 14px;';
+		tableHeader.style.cssText = 'background: #f8f9fa; padding: 8px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 8px; font-weight: 600; font-size: 12px;';
 		tableHeader.innerHTML = `
 		<div>Name</div>
 		<div style="text-align: center;">Präz.</div>
@@ -174,11 +174,11 @@ class OverviewView {
 			
 			const row = document.createElement('div');
 			row.style.cssText = `
-			padding: 12px; 
+			padding: 8px; 
 			display: grid; 
 			grid-template-columns: 1fr 50px 50px 50px; 
-			gap: 8px; 
-			font-size: 14px;
+			gap: 4px; 
+			font-size: 12px;
 			border-top: 1px solid #f0f0f0;
 			${index % 2 === 1 ? 'background: #f8f9fa;' : ''}
 			${isWorst ? 'color: #ff3b30;' : ''}
@@ -196,8 +196,8 @@ class OverviewView {
 		const totalRow = document.createElement('div');
 		totalRow.style.cssText = 'background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr 50px; gap: 4px; font-weight: 600; border-top: 1px solid #f0f0f0;';
 		totalRow.innerHTML = `
-		<div style="text-align: left; font-size: 14px;">Mannschaft Gesamt: </div>
-		<div style="text-align: right; font-size: 14px; padding-right: 4px">${teamTotal}</div>
+		<div style="text-align: left; font-size: 12px;">Mannschaft Gesamt: </div>
+		<div style="text-align: right; font-size: 12px;">${teamTotal}</div>
 		`;
 		
 		table.appendChild(totalRow);
@@ -327,7 +327,7 @@ class OverviewView {
 
 		// Table header
 		const tableHeader = document.createElement('div');
-		tableHeader.style.cssText = 'background: #f8f9fa; padding: 12px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 8px; font-weight: 600; font-size: 14px;';
+		tableHeader.style.cssText = 'background: #f8f9fa; padding: 8px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 4px; font-weight: 600; font-size: 12px;';
 		tableHeader.innerHTML = `
 		<div>Name</div>
 		<div style="text-align: center;">Präz.</div>
@@ -353,11 +353,11 @@ class OverviewView {
 			
 			const row = document.createElement('div');
 			row.style.cssText = `
-			padding: 12px; 
+			padding: 8px; 
 			display: grid; 
 			grid-template-columns: 1fr 50px 50px 50px; 
-			gap: 8px; 
-			font-size: 14px;
+			gap: 4px; 
+			font-size: 12px;
 			border-top: 1px solid #f0f0f0;
 			${index % 2 === 1 ? 'background: #f8f9fa;' : ''}
 			`;
@@ -625,7 +625,7 @@ class OverviewView {
 					}
 				});
 			}
-
+			
 			if (storage.standaloneShooters.length > 0) {
 				exportData += '<h2>Einzelschützen</h2>';
 				
@@ -665,7 +665,7 @@ class OverviewView {
 				${exportData}
 				</div>
 				
-				<div style="border-top: 1px solid #666; padding-top: 8px; font-size: 8px; line-height: 1.3; color: #666; text-align: justify; width:90%">
+				<div style="border-top: 1px solid #666; padding-top: 8px; font-size: 8px; line-height: 1.3; color: #666; text-align: justify; width: 100%; margin: 0; max-width: 100%;">
 				Die Mannschaftsführer bestätigen, dass alle Mannschaftschützen gemäß Rundenkampfordnung startberechtigt waren und der Wettkampf nach SpO des DSB in Verbindung mit der RKO des PSSB durchgeführt wurde.
 				</div>
 				</div>
@@ -676,13 +676,13 @@ class OverviewView {
 				font-size: 14px;
 				font-weight: bold;
 				color: #333;
-				width: 90%;
+				width: 100%;
 				border-bottom: 1px solid #666;
 				padding-bottom: 3px;
 				}
 				
 				table { 
-				width: 90%; 
+				width: 100%; 
 				border-radius: 6px;
 				border: 1px solid #e9ecef;
 				border-collapse: collapse; 
@@ -716,11 +716,12 @@ class OverviewView {
 				border-top-right-radius: 6px;
 				}
 				
-				/* Radius nur für Footer-Ecken (team-total) */
+				/* KORREKTUR: Team-total Schriftgröße auf 12px wie normale td */
 				.team-total td:first-child {
 				background-color: #e9ecef;
 				text-align: right;
-				font-weight: bold;
+				font-weight: normal;
+				font-size: 12px;
 				border-bottom-left-radius: 6px;
 				}
 				
@@ -728,6 +729,7 @@ class OverviewView {
 				background-color: #e9ecef;
 				text-align: right !important;
 				font-weight: bold;
+				font-size: 12px;
 				padding: 4px 3px;
 				border-bottom-right-radius: 6px;
 				}
@@ -754,7 +756,7 @@ class OverviewView {
 				.annex-table th:nth-child(5), .annex-table td:nth-child(5) { width: 10%; text-align: center; }
 				.annex-table th:nth-child(6), .annex-table td:nth-child(6) { width: 10%; text-align: center; }
 				.annex-table th:nth-child(7), .annex-table td:nth-child(7) { width: 20%; text-align: right !important; font-weight: bold; }
-				</style>            `;
+				</style>`;
 				
 				// PDF-Optionen
 				const options = {
@@ -781,7 +783,6 @@ class OverviewView {
 				console.error('Error loading logo:', error);
 				// Fallback ohne Logo
 				alert('Logo konnte nicht geladen werden. PDF wird ohne Logo erstellt.');
-				// Hier den HTML-Code ohne Logo ausführen...
 			});
 			
 		} catch (error) {
@@ -864,8 +865,8 @@ class OverviewView {
 
 		html += `
 		<tr class="team-total">
-		<td colspan="3">Mannschaft Gesamt</td>
-		<td>${teamTotal}</td>
+		<td colspan="3" style="font-weight: bold;">Mannschaft Gesamt</td>
+		<td style="font-weight: bold;">${teamTotal}</td>
 		</tr>
 		</tbody>
 		</table>
@@ -915,8 +916,8 @@ class OverviewView {
 
 		html += `
 		<tr class="team-total">
-		<td colspan="6">Mannschaft Gesamt</td>
-		<td>${teamTotal}</td>
+		<td colspan="6" style="font-weight: bold;">Mannschaft Gesamt</td>
+		<td style="font-weight: bold;">${teamTotal}</td>
 		</tr>
 		</tbody>
 		</table>
