@@ -1,25 +1,26 @@
+// =================================================================
+// OVERVIEW VIEW - Korrigierte Version
+// =================================================================
+
 class OverviewView {
 	constructor() {
-		this.showingFilter = false;
+		this.currentFilter = null;
 	}
 
 	render() {
 		const container = document.createElement('div');
+		container.style.cssText = 'padding-bottom: 20px;'; // Zusätzlicher Container-Abstand
 
 		try {
-			// Setup navigation buttons
 			this.setupNavButtons();
 
-			// Current discipline and competition type info
-			if (storage.selectedDiscipline) {
-				const infoCard = this.createInfoCard();
-				container.appendChild(infoCard);
-			}
+			// Info Card
+			const infoCard = this.createInfoCard();
+			container.appendChild(infoCard);
 
-			// Teams overview
 			const filteredTeams = this.getFilteredTeams();
-			
-			// Always show teams even without results
+
+			// Teams
 			if (filteredTeams.length > 0) {
 				filteredTeams.forEach(team => {
 					const teamCard = this.createTeamOverviewCard(team);
@@ -27,43 +28,22 @@ class OverviewView {
 				});
 			}
 
-			// Standalone shooters overview
+			// Standalone Shooters
 			if (storage.standaloneShooters.length > 0) {
 				const soloCard = this.createSoloShootersCard();
 				container.appendChild(soloCard);
 			}
 
-			// Empty state only if NO teams AND no standalone shooters
+			// Empty state
 			if (filteredTeams.length === 0 && storage.standaloneShooters.length === 0) {
-				const emptyState = document.createElement('div');
-				emptyState.className = 'card empty-state';
-				emptyState.style.cssText = 'margin-bottom: 30px;'; // Zusätzlicher Abstand
-				emptyState.innerHTML = `
-				<h3>Keine Teams oder Schützen vorhanden</h3>
-				<p style="margin: 16px 0;">Fügen Sie zuerst Teams und Schützen hinzu.</p>
-				<div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
-				<button class="btn btn-primary" style="width: 50%; height: 70px;" onclick="app.showView('teams')">
-				Teams verwalten
-				</button>
-				<button class="btn btn-secondary" style="width: 50%; height: 70px;" onclick="app.showView('entry')">
-				Ergebnisse erfassen
-				</button>
-				</div>
+				const emptyCard = document.createElement('div');
+				emptyCard.className = 'card empty-state';
+				emptyCard.style.cssText = 'margin-bottom: 30px;';
+				emptyCard.innerHTML = `
+				<h3>Keine Daten</h3>
+				<p>Fügen Sie Teams oder Einzelschützen hinzu und erfassen Sie Ergebnisse.</p>
 				`;
-				container.appendChild(emptyState);
-			} else if (this.hasNoResults()) {
-				// Show info card if teams exist but no results
-				const infoCard = document.createElement('div');
-				infoCard.className = 'card';
-				infoCard.style.cssText = 'background: #fff3cd; border: 1px solid #ffeaa7; text-align: center; margin-bottom: 30px;';
-				infoCard.innerHTML = `
-				<h4 style="margin: 0 0 8px 0; color: #856404;">Noch keine Ergebnisse erfasst</h4>
-				<p style="margin: 0; color: #856404;">Die Teams sind angelegt, aber es wurden noch keine Schussergebnisse erfasst.</p>
-				<button class="btn btn-primary" style="width: 100%; height: 70px; margin-top: 20px;" onclick="app.showView('entry')" style="margin-top: 12px;">
-				Jetzt Ergebnisse erfassen
-				</button>
-				`;
-				container.appendChild(infoCard);
+				container.appendChild(emptyCard);
 			}
 
 		} catch (error) {
@@ -74,10 +54,6 @@ class OverviewView {
 		return container;
 	}
 
-	hasNoResults() {
-		return storage.results.length === 0;
-	}
-
 	setupNavButtons() {
 		setTimeout(() => {
 			const navButtons = document.getElementById('navButtons');
@@ -85,12 +61,14 @@ class OverviewView {
 				navButtons.innerHTML = '';
 
 				// Filter Button
-				const filterBtn = document.createElement('button');
-				filterBtn.className = 'nav-btn';
-				filterBtn.textContent = '🔍';
-				filterBtn.title = 'Filter';
-				filterBtn.addEventListener('click', () => this.showFilterModal());
-				navButtons.appendChild(filterBtn);
+				if (storage.teams.length > 1) {
+					const filterBtn = document.createElement('button');
+					filterBtn.className = 'nav-btn';
+					filterBtn.textContent = '🔍';
+					filterBtn.title = 'Filter';
+					filterBtn.addEventListener('click', () => this.showFilterModal());
+					navButtons.appendChild(filterBtn);
+				}
 
 				// PDF Export Button
 				const pdfBtn = document.createElement('button');
@@ -210,7 +188,7 @@ class OverviewView {
 		const card = document.createElement('div');
 		card.className = 'card';
 
-		// Prepare shooter data for Annex
+		// Prepare shooter data
 		const shooterData = this.prepareShooterDataAnnex(team);
 		const worstShooterId = this.getWorstShooterIdAnnex(team);
 
@@ -239,9 +217,9 @@ class OverviewView {
 		const table = document.createElement('div');
 		table.style.cssText = 'min-width: 340px;';
 
-		// Table header - narrower columns for series, wider for Gesamt
+		// Table header
 		const tableHeader = document.createElement('div');
-		tableHeader.style.cssText = 'background: #f8f9fa; padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 28px) 35px; gap: 4px; font-weight: 600; font-size: 12px;';
+		tableHeader.style.cssText = 'background: #f8f9fa; padding: 8px; display: grid; grid-template-columns: 120px repeat(5, 40px) 50px; gap: 4px; font-weight: 600; font-size: 12px;';
 		tableHeader.innerHTML = `
 		<div>Name</div>
 		<div style="text-align: center;">S1</div>
@@ -249,7 +227,7 @@ class OverviewView {
 		<div style="text-align: center;">S3</div>
 		<div style="text-align: center;">S4</div>
 		<div style="text-align: center;">S5</div>
-		<div style="text-align: right;">Ges.</div>
+		<div style="text-align: right;">Gesamt</div>
 		`;
 		table.appendChild(tableHeader);
 
@@ -262,7 +240,7 @@ class OverviewView {
 			row.style.cssText = `
 			padding: 8px; 
 			display: grid; 
-			grid-template-columns: 1fr repeat(5, 28px) 35px; 
+			grid-template-columns: 120px repeat(5, 40px) 50px; 
 			gap: 4px; 
 			font-size: 12px;
 			border-top: 1px solid #f0f0f0;
@@ -270,17 +248,17 @@ class OverviewView {
 			${isWorst ? 'color: #ff3b30;' : ''}
 			`;
 			
-			let rowHTML = `<div style="overflow: hidden; text-overflow: ellipsis; ${isWorst ? 'text-decoration: underline;' : ''}">${UIUtils.escapeHtml(shooter.name)}</div>`;
+			let rowHtml = `<div style="overflow: hidden; text-overflow: ellipsis; ${isWorst ? 'text-decoration: underline;' : ''}">${UIUtils.escapeHtml(shooter.name)}</div>`;
 			
-			// Series sums
+			// Series columns
 			for (let i = 0; i < 5; i++) {
 				const seriesValue = i < seriesSums.length ? seriesSums[i] : 0;
-				rowHTML += `<div style="text-align: center;">${seriesValue}</div>`;
+				rowHtml += `<div style="text-align: center;">${seriesValue}</div>`;
 			}
 			
-			rowHTML += `<div style="text-align: right; font-weight: 500; ${isWorst ? 'text-decoration: underline;' : ''}">${total}</div>`;
+			rowHtml += `<div style="text-align: right; font-weight: 500; ${isWorst ? 'text-decoration: underline;' : ''}">${total}</div>`;
 			
-			row.innerHTML = rowHTML;
+			row.innerHTML = rowHtml;
 			table.appendChild(row);
 		});
 
@@ -390,9 +368,9 @@ class OverviewView {
 		const table = document.createElement('div');
 		table.style.cssText = 'min-width: 340px;';
 
-		// Table header - narrower columns for series, wider for Gesamt
+		// Table header
 		const tableHeader = document.createElement('div');
-		tableHeader.style.cssText = 'background: #f8f9fa; padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 28px) 35px; gap: 4px; font-weight: 600; font-size: 12px;';
+		tableHeader.style.cssText = 'background: #f8f9fa; padding: 8px; display: grid; grid-template-columns: 120px repeat(5, 40px) 50px; gap: 4px; font-weight: 600; font-size: 12px;';
 		tableHeader.innerHTML = `
 		<div>Name</div>
 		<div style="text-align: center;">S1</div>
@@ -400,7 +378,7 @@ class OverviewView {
 		<div style="text-align: center;">S3</div>
 		<div style="text-align: center;">S4</div>
 		<div style="text-align: center;">S5</div>
-		<div style="text-align: right;">Ges.</div>
+		<div style="text-align: right;">Gesamt</div>
 		`;
 		table.appendChild(tableHeader);
 
@@ -429,24 +407,24 @@ class OverviewView {
 			row.style.cssText = `
 			padding: 8px; 
 			display: grid; 
-			grid-template-columns: 1fr repeat(5, 28px) 35px; 
+			grid-template-columns: 120px repeat(5, 40px) 50px; 
 			gap: 4px; 
 			font-size: 12px;
 			border-top: 1px solid #f0f0f0;
 			${index % 2 === 1 ? 'background: #f8f9fa;' : ''}
 			`;
 			
-			let rowHTML = `<div style="overflow: hidden; text-overflow: ellipsis;">${UIUtils.escapeHtml(shooter.name)}</div>`;
+			let rowHtml = `<div style="overflow: hidden; text-overflow: ellipsis;">${UIUtils.escapeHtml(shooter.name)}</div>`;
 			
-			// Series sums
+			// Series columns
 			for (let i = 0; i < 5; i++) {
 				const seriesValue = i < seriesSums.length ? seriesSums[i] : 0;
-				rowHTML += `<div style="text-align: center;">${seriesValue}</div>`;
+				rowHtml += `<div style="text-align: center;">${seriesValue}</div>`;
 			}
 			
-			rowHTML += `<div style="text-align: right; font-weight: 500;">${total}</div>`;
+			rowHtml += `<div style="text-align: right; font-weight: 500;">${total}</div>`;
 			
-			row.innerHTML = rowHTML;
+			row.innerHTML = rowHtml;
 			table.appendChild(row);
 		});
 
@@ -455,7 +433,6 @@ class OverviewView {
 		return card;
 	}
 
-	// Helper methods
 	prepareShooterData(team) {
 		return team.shooters.map(shooter => {
 			const precision = storage.results
@@ -464,7 +441,8 @@ class OverviewView {
 			const duell = storage.results
 			.filter(r => r.teamId === team.id && r.shooterId === shooter.id && r.discipline === Discipline.DUELL)
 			.reduce((sum, r) => sum + r.total(), 0);
-			return [shooter, precision, duell, precision + duell];
+			const total = precision + duell;
+			return [shooter, precision, duell, total];
 		}).sort((a, b) => a[0].name.localeCompare(b[0].name, 'de', { sensitivity: 'base' }));
 	}
 
@@ -590,22 +568,26 @@ class OverviewView {
 		if (showAllCheckbox && showAllCheckbox.checked) {
 			storage.visibleTeamIds = null;
 		} else {
-			const teamCheckboxes = document.querySelectorAll('.team-checkbox');
-			const visibleTeamIds = new Set();
-			
-			teamCheckboxes.forEach(checkbox => {
-				if (checkbox.checked) {
-					visibleTeamIds.add(checkbox.dataset.teamId);
-				}
+			const selectedTeamIds = new Set();
+			const teamCheckboxes = document.querySelectorAll('.team-checkbox:checked');
+			teamCheckboxes.forEach(cb => {
+				selectedTeamIds.add(cb.dataset.teamId);
 			});
-			
-			storage.visibleTeamIds = visibleTeamIds;
+			storage.visibleTeamIds = selectedTeamIds.size > 0 ? selectedTeamIds : null;
 		}
 		
 		storage.save();
-		UIUtils.showSuccessMessage('Filter aktualisiert');
 	}
 
+	// PDF-Logo als Base64 laden
+	loadLogoAsBase64() {
+		return new Promise((resolve) => {
+			// Fallback: kein Logo verfügbar
+			resolve(null);
+		});
+	}
+
+	// PDF Export
 	exportToPDF() {
 		try {
 			const filteredTeams = this.getFilteredTeams();
@@ -659,8 +641,6 @@ class OverviewView {
 				</div>
 				</div>
 				
-				<!--<hr style="border: 1px solid #ddd; margin: 15px 0;">-->
-				
 				<div style="margin-bottom: 60px;">
 				${exportData}
 				</div>
@@ -672,76 +652,76 @@ class OverviewView {
 				
 				<style>
 				h2 { 
-				margin: 20px 0 8px 0; 
-				font-size: 14px;
-				font-weight: bold;
-				color: #333;
-				width: 100%;
-				border-bottom: 1px solid #666;
-				padding-bottom: 3px;
+					margin: 20px 0 8px 0; 
+					font-size: 14px;
+					font-weight: bold;
+					color: #333;
+					width: 100%;
+					border-bottom: 1px solid #666;
+					padding-bottom: 3px;
 				}
 				
 				table { 
-				width: 100%; 
-				border-radius: 8px;
-				border: 1px solid #e9ecef;
-				border-collapse: collapse; 
-				margin-bottom: 15px;
-				font-size: 9px;
+					width: 100%; 
+					border-radius: 8px;
+					border: 1px solid #e9ecef;
+					border-collapse: collapse; 
+					margin-bottom: 15px;
+					font-size: 9px;
 				}
 				
 				td {  
-				padding: 4px 3px; 
-				text-align: left; 
-				font-size: 12px;
-				vertical-align: middle;
-				border: 0;
+					padding: 4px 3px; 
+					text-align: left; 
+					font-size: 12px;
+					vertical-align: middle;
+					border: 0;
 				}
 				
 				th { 
-				background-color: #f0f0f0; 
-				font-weight: bold;
-				text-align: center;
-				font-size: 12px;
-				padding: 6px 3px;
-				border: 0;
+					background-color: #f0f0f0; 
+					font-weight: bold;
+					text-align: center;
+					font-size: 12px;
+					padding: 6px 3px;
+					border: 0;
 				}
 				
 				/* Radius nur für Header-Ecken */
 				th:first-child {
-				border-top-left-radius: 6px;
+					border-top-left-radius: 6px;
 				}
 				
 				th:last-child {
-				border-top-right-radius: 6px;
+					border-top-right-radius: 6px;
 				}
 				
-				/* KORREKTUR: Team-total Schriftgröße auf 12px wie normale td */
+				/* KORREKTUR: Team-total "Mannschaft Gesamt" Formatierung */
 				.team-total td:first-child {
-				background-color: #e9ecef;
-				text-align: right;
-				font-weight: bold;
-				font-size: 12px;
-				border-bottom-left-radius: 6px;
+					background-color: #e9ecef;
+					text-align: right;
+					font-weight: bold;
+					font-size: 12px;
+					border-bottom-left-radius: 6px;
 				}
 				
 				.team-total td:last-child {
-				background-color: #e9ecef;
-				text-align: right !important;
-				font-weight: bold;
-				font-size: 12px;
-				padding: 4px 3px;
-				border-bottom-right-radius: 6px;
+					background-color: #e9ecef;
+					text-align: right !important;
+					font-weight: bold;
+					font-size: 12px;
+					padding: 4px 3px;
+					border-bottom-right-radius: 6px;
 				}
 				
 				.zebra { 
-				background-color: #f8f9fa; 
-				border-left: 1px solid #e9ecef;
+					background-color: #f8f9fa; 
+					border-left: 1px solid #e9ecef;
 				}
 				
 				.worst-shooter { 
-				color: #dc3545; 
-				text-decoration: underline; 
+					color: #dc3545; 
+					text-decoration: underline; 
 				}
 				
 				.standard-table th:nth-child(1), .standard-table td:nth-child(1) { width: 40%; text-align: left; }
@@ -791,44 +771,7 @@ class OverviewView {
 		}
 	}
 
-	// Hilfsfunktion zum Laden des Logos
-	loadLogoAsBase64() {
-		return new Promise((resolve, reject) => {
-			const img = new Image();
-			img.crossOrigin = 'anonymous';
-			
-			img.onload = function() {
-				const canvas = document.createElement('canvas');
-				const ctx = canvas.getContext('2d');
-				
-				canvas.width = this.naturalWidth;
-				canvas.height = this.naturalHeight;
-				
-				ctx.drawImage(this, 0, 0);
-				
-				try {
-					const base64 = canvas.toDataURL('image/png');
-					resolve(base64);
-				} catch (e) {
-					reject(e);
-				}
-			};
-			
-			img.onerror = function() {
-				resolve(null); // Kein Logo verfügbar
-			};
-			
-			// Versuche verschiedene Logo-Pfade
-			const logoPaths = [
-			'./assets/logo.png',
-			'./icons/icon-192x192.png',
-			'assets/logo.png',
-			'icons/icon-192x192.png'
-			];
-			
-			img.src = logoPaths[0];
-		});
-	}
+	// HTML für PDF-Export (Standard-Tabelle)
 	createTeamTableStandardHTML(team) {
 		const shooterData = this.prepareShooterData(team);
 		const worstShooterId = this.getWorstShooterId(team);
@@ -849,16 +792,16 @@ class OverviewView {
 
 		shooterData.forEach((data, index) => {
 			const [shooter, precision, duell, total] = data;
-			const isWorst = shooter.id === worstShooterId;
+			const isWorst = shooter.id === worstShooterId && team.shooters.length >= 4;
 			const zebraClass = index % 2 === 1 ? 'zebra' : '';
 			const worstClass = isWorst ? 'worst-shooter' : '';
 			
 			html += `
-			<tr class="${zebraClass}">
-			<td class="${worstClass}">${UIUtils.escapeHtml(shooter.name)}</td>
+			<tr class="${zebraClass} ${worstClass}">
+			<td>${UIUtils.escapeHtml(shooter.name)}</td>
 			<td>${precision}</td>
 			<td>${duell}</td>
-			<td class="${worstClass}">${total}</td>
+			<td>${total}</td>
 			</tr>
 			`;
 		});
@@ -875,6 +818,7 @@ class OverviewView {
 		return html;
 	}
 
+	// HTML für PDF-Export (Annex-Tabelle)
 	createTeamTableAnnexHTML(team) {
 		const shooterData = this.prepareShooterDataAnnex(team);
 		const worstShooterId = this.getWorstShooterIdAnnex(team);
@@ -898,19 +842,19 @@ class OverviewView {
 
 		shooterData.forEach((data, index) => {
 			const [shooter, seriesSums, total] = data;
-			const isWorst = shooter.id === worstShooterId;
+			const isWorst = shooter.id === worstShooterId && team.shooters.length >= 4;
 			const zebraClass = index % 2 === 1 ? 'zebra' : '';
 			const worstClass = isWorst ? 'worst-shooter' : '';
 			
-			html += `<tr class="${zebraClass}">`;
-			html += `<td class="${worstClass}">${UIUtils.escapeHtml(shooter.name)}</td>`;
+			html += `<tr class="${zebraClass} ${worstClass}">`;
+			html += `<td>${UIUtils.escapeHtml(shooter.name)}</td>`;
 			
 			for (let i = 0; i < 5; i++) {
 				const seriesValue = i < seriesSums.length ? seriesSums[i] : 0;
 				html += `<td>${seriesValue}</td>`;
 			}
 			
-			html += `<td class="${worstClass}">${total}</td>`;
+			html += `<td>${total}</td>`;
 			html += `</tr>`;
 		});
 
@@ -1029,5 +973,9 @@ class OverviewView {
 		`;
 
 		return html;
+	}
+
+	hasNoResults() {
+		return storage.results.length === 0;
 	}
 }
