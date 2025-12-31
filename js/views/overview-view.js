@@ -683,7 +683,7 @@ class OverviewView {
 				
 				table { 
 				width: 100%; 
-				border-radius: 6px;
+				border-radius: 8px;
 				border: 1px solid #e9ecef;
 				border-collapse: collapse; 
 				margin-bottom: 15px;
@@ -865,8 +865,8 @@ class OverviewView {
 
 		html += `
 		<tr class="team-total">
-		<td colspan="3" style="font-weight: bold;">Mannschaft Gesamt</td>
-		<td style="font-weight: bold;">${teamTotal}</td>
+		<td colspan="3" style="font-weight: bold; font-size: 12px;">Mannschaft Gesamt</td>
+		<td style="font-weight: bold; font-size: 12px;">${teamTotal}</td>
 		</tr>
 		</tbody>
 		</table>
@@ -916,8 +916,8 @@ class OverviewView {
 
 		html += `
 		<tr class="team-total">
-		<td colspan="6" style="font-weight: bold;">Mannschaft Gesamt</td>
-		<td style="font-weight: bold;">${teamTotal}</td>
+		<td colspan="6" style="font-weight: bold; font-size: 12px;">Mannschaft Gesamt</td>
+		<td style="font-weight: bold; font-size: 12px;">${teamTotal}</td>
 		</tr>
 		</tbody>
 		</table>
