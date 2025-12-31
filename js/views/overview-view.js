@@ -587,190 +587,189 @@ class OverviewView {
 		});
 	}
 
-	// PDF Export
 	exportToPDF() {
-		try {
-			const filteredTeams = this.getFilteredTeams();
-			const competitionType = storage.selectedCompetitionType;
-			
-			// Build export data (gleich wie vorher)
-			let exportData = '';
-			
-			if (filteredTeams.length > 0) {
-				filteredTeams.forEach(team => {
-					exportData += `<h2>${UIUtils.escapeHtml(team.name)} (${team.shooters.length} Schützen)</h2>`;
-					
-					if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
-						exportData += this.createTeamTableAnnexHTML(team);
-					} else {
-						exportData += this.createTeamTableStandardHTML(team);
-					}
-				});
-			}
-			
-			if (storage.standaloneShooters.length > 0) {
-				exportData += '<h2>Einzelschützen</h2>';
+	try {
+		const filteredTeams = this.getFilteredTeams();
+		const competitionType = storage.selectedCompetitionType;
+		
+		// Build export data
+		let exportData = '';
+		
+		if (filteredTeams.length > 0) {
+			filteredTeams.forEach(team => {
+				exportData += `<h2>${UIUtils.escapeHtml(team.name)} (${team.shooters.length} Schützen)</h2>`;
 				
 				if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
-					exportData += this.createSoloShootersTableAnnexHTML();
+					exportData += this.createTeamTableAnnexHTML(team);
 				} else {
-					exportData += this.createSoloShootersTableStandardHTML();
+					exportData += this.createTeamTableStandardHTML(team);
 				}
+			});
+		}
+		
+		if (storage.standaloneShooters.length > 0) {
+			exportData += '<h2>Einzelschützen</h2>';
+			
+			if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
+				exportData += this.createSoloShootersTableAnnexHTML();
+			} else {
+				exportData += this.createSoloShootersTableStandardHTML();
+			}
+		}
+		
+		// Logo laden und als base64 konvertieren
+		this.loadLogoAsBase64().then(logoBase64 => {
+			// HTML für PDF erstellen
+			const htmlContent = `
+			<div style="font-family: Arial, sans-serif; font-size: 10px; line-height: 1.2;">
+			<div style="display: flex; align-items: flex-start; margin-bottom: 15px;">
+			<div style="width: 100px; height: 100px; margin-right: 15px; flex-shrink: 0;">
+			${logoBase64 ? 
+			`<img src="${logoBase64}" style="width: 75%; height: 80%; object-fit: contain;">` :
+			`<div style="width: 100%; height: 100%; background: #4CAF50; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 9px; text-align: center; flex-direction: column;">
+			<div>SCHÜTZEN</div>
+			<div>VEREIN</div>
+			<div>LOGO</div>
+			</div>`
+			}
+			</div>
+			<div>
+			<h1 style="margin: 0 0 10px 0; font-size: 22px; font-weight: bold; color: #333;">Rundenkampfbericht</h1>
+			<div style="margin: 5px 0; font-size: 12px; color: #555;"><strong>Disziplin:</strong> ${storage.selectedDiscipline || 'Nicht gewählt'}</div>
+			<div style="margin: 5px 0; font-size: 12px; color: #555;"><strong>Wettkampfdatum:</strong> ${new Date().toLocaleDateString('de-DE')}</div>
+			</div>
+			</div>
+			
+			<div style="margin-bottom: 60px;">
+			${exportData}
+			</div>
+			
+			<div style="border-top: 1px solid #666; padding-top: 8px; font-size: 8px; line-height: 1.3; color: #666; text-align: justify; width: 100%; margin: 0; max-width: 100%;">
+			Die Mannschaftsführer bestätigen, dass alle Mannschaftschützen gemäß Rundenkampfordnung startberechtigt waren und der Wettkampf nach SpO des DSB in Verbindung mit der RKO des PSSB durchgeführt wurde.
+			</div>
+			</div>
+			
+			<style>
+			h2 { 
+				margin: 20px 0 8px 0; 
+				font-size: 14px;
+				font-weight: bold;
+				color: #333;
+				width: 100%;
+				border-bottom: 1px solid #666;
+				padding-bottom: 3px;
 			}
 			
-			// Logo laden und als base64 konvertieren
-			this.loadLogoAsBase64().then(logoBase64 => {
-				// HTML für PDF erstellen
-				const htmlContent = `
-				<div style="font-family: Arial, sans-serif; font-size: 10px; line-height: 1.2;">
-				<div style="display: flex; align-items: flex-start; margin-bottom: 15px;">
-				<div style="width: 100px; height: 100px; margin-right: 15px; flex-shrink: 0;">
-				${logoBase64 ? 
-				`<img src="${logoBase64}" style="width: 75%; height: 80%; object-fit: contain;">` :
-				`<div style="width: 100%; height: 100%; background: #4CAF50; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 9px; text-align: center; flex-direction: column;">
-				<div>SCHÜTZEN</div>
-				<div>VEREIN</div>
-				<div>LOGO</div>
-				</div>`
-				}
-				</div>
-				<div>
-				<h1 style="margin: 0 0 10px 0; font-size: 22px; font-weight: bold; color: #333;">Rundenkampfbericht</h1>
-				<div style="margin: 5px 0; font-size: 12px; color: #555;"><strong>Disziplin:</strong> ${storage.selectedDiscipline || 'Nicht gewählt'}</div>
-				<div style="margin: 5px 0; font-size: 12px; color: #555;"><strong>Wettkampfdatum:</strong> ${new Date().toLocaleDateString('de-DE')}</div>
-				</div>
-				</div>
-				
-				<div style="margin-bottom: 60px;">
-				${exportData}
-				</div>
-				
-				<div style="border-top: 1px solid #666; padding-top: 8px; font-size: 8px; line-height: 1.3; color: #666; text-align: justify; width: 100%; margin: 0; max-width: 100%;">
-				Die Mannschaftsführer bestätigen, dass alle Mannschaftschützen gemäß Rundenkampfordnung startberechtigt waren und der Wettkampf nach SpO des DSB in Verbindung mit der RKO des PSSB durchgeführt wurde.
-				</div>
-				</div>
-				
-				<style>
-				h2 { 
-					margin: 20px 0 8px 0; 
-					font-size: 14px;
-					font-weight: bold;
-					color: #333;
-					width: 100%;
-					border-bottom: 1px solid #666;
-					padding-bottom: 3px;
-				}
-				
-				table { 
-					width: 100%; 
-					border-radius: 8px;
-					border: 1px solid #e9ecef;
-					border-collapse: collapse; 
-					margin-bottom: 15px;
-					font-size: 9px;
-				}
-				
-				td {  
-					padding: 4px 3px; 
-					text-align: left; 
-					font-size: 12px;
-					vertical-align: middle;
-					border: 0;
-				}
-				
-				th { 
-					background-color: #f0f0f0; 
-					font-weight: bold;
-					text-align: center;
-					font-size: 12px;
-					padding: 6px 3px;
-					border: 0;
-				}
-				
-				/* Radius nur für Header-Ecken */
-				th:first-child {
-					border-top-left-radius: 6px;
-				}
-				
-				th:last-child {
-					border-top-right-radius: 6px;
-				}
-				
-				/* KORREKTUR: Team-total "Mannschaft Gesamt" Formatierung */
-				.team-total td:first-child {
-					background-color: #e9ecef;
-					text-align: right;
-					font-weight: bold;
-					font-size: 12px;
-					border-bottom-left-radius: 6px;
-				}
-				
-				.team-total td:last-child {
-					background-color: #e9ecef;
-					text-align: right !important;
-					font-weight: bold;
-					font-size: 12px;
-					padding: 4px 3px;
-					border-bottom-right-radius: 6px;
-				}
-				
-				.zebra { 
-					background-color: #f8f9fa; 
-					border-left: 1px solid #e9ecef;
-				}
-				
-				.worst-shooter { 
-					color: #dc3545; 
-					text-decoration: underline; 
-				}
-				
-				.standard-table th:nth-child(1), .standard-table td:nth-child(1) { width: 40%; text-align: left; }
-				.standard-table th:nth-child(2), .standard-table td:nth-child(2) { width: 20%; text-align: center; }
-				.standard-table th:nth-child(3), .standard-table td:nth-child(3) { width: 20%; text-align: center; }
-				.standard-table th:nth-child(4), .standard-table td:nth-child(4) { width: 20%; text-align: right !important; font-weight: bold; }
-				
-				.annex-table th:nth-child(1), .annex-table td:nth-child(1) { width: 30%; text-align: left; }
-				.annex-table th:nth-child(2), .annex-table td:nth-child(2) { width: 10%; text-align: center; }
-				.annex-table th:nth-child(3), .annex-table td:nth-child(3) { width: 10%; text-align: center; }
-				.annex-table th:nth-child(4), .annex-table td:nth-child(4) { width: 10%; text-align: center; }
-				.annex-table th:nth-child(5), .annex-table td:nth-child(5) { width: 10%; text-align: center; }
-				.annex-table th:nth-child(6), .annex-table td:nth-child(6) { width: 10%; text-align: center; }
-				.annex-table th:nth-child(7), .annex-table td:nth-child(7) { width: 20%; text-align: right !important; font-weight: bold; }
-				</style>`;
-				
-				// PDF-Optionen
-				const options = {
-					margin: [1, 1.5, 2.5, 1.5],
-					filename: `Rundenkampfbericht_${new Date().toLocaleDateString('de-DE').replace(/\./g, '_')}.pdf`,
-					image: { type: 'jpeg', quality: 0.98 },
-					html2canvas: { 
-						scale: 2,
-						useCORS: true,
-						letterRendering: true,
-						allowTaint: true
-					},
-					jsPDF: { 
-						unit: 'cm', 
-						format: 'a4', 
-						orientation: 'portrait' 
-					}
-				};
-				
-				// PDF erstellen und herunterladen
-				html2pdf().set(options).from(htmlContent).save();
-				
-			}).catch(error => {
-				console.error('Error loading logo:', error);
-				// Fallback ohne Logo
-				alert('Logo konnte nicht geladen werden. PDF wird ohne Logo erstellt.');
-			});
+			table { 
+				width: 100%; 
+				border-radius: 8px;
+				border: 1px solid #e9ecef;
+				border-collapse: collapse; 
+				margin-bottom: 15px;
+			}
 			
-		} catch (error) {
-			console.error('Error exporting PDF:', error);
-			alert('Fehler beim PDF-Export: ' + error.message);
-		}
+			/* WICHTIG: Allgemeine TD-Regel mit niedrigerer Spezifität */
+			td {  
+				padding: 4px 3px; 
+				text-align: left; 
+				font-size: 10px;
+				vertical-align: middle;
+				border: 0;
+			}
+			
+			th { 
+				background-color: #f0f0f0; 
+				font-weight: bold;
+				text-align: center;
+				font-size: 12px;
+				padding: 6px 3px;
+				border: 0;
+			}
+			
+			/* Header-Ecken */
+			th:first-child {
+				border-top-left-radius: 6px;
+			}
+			
+			th:last-child {
+				border-top-right-radius: 6px;
+			}
+			
+			/* KORREKTUR: Höhere Spezifität für team-total Zeilen */
+			table .team-total td {
+				background-color: #e9ecef !important;
+				font-weight: bold !important;
+				font-size: 12px !important;
+				padding: 6px 3px !important;
+			}
+			
+			table .team-total td:first-child {
+				text-align: right !important;
+				border-bottom-left-radius: 6px;
+			}
+			
+			table .team-total td:last-child {
+				text-align: right !important;
+				border-bottom-right-radius: 6px;
+			}
+			
+			.zebra { 
+				background-color: #f8f9fa; 
+				border-left: 1px solid #e9ecef;
+			}
+			
+			.worst-shooter { 
+				color: #dc3545; 
+				text-decoration: underline; 
+			}
+			
+			/* Tabellen-spezifische Spaltenbreiten */
+			.standard-table th:nth-child(1), .standard-table td:nth-child(1) { width: 40%; text-align: left; }
+			.standard-table th:nth-child(2), .standard-table td:nth-child(2) { width: 20%; text-align: center; }
+			.standard-table th:nth-child(3), .standard-table td:nth-child(3) { width: 20%; text-align: center; }
+			.standard-table th:nth-child(4), .standard-table td:nth-child(4) { width: 20%; text-align: right !important; font-weight: bold; }
+			
+			.annex-table th:nth-child(1), .annex-table td:nth-child(1) { width: 30%; text-align: left; }
+			.annex-table th:nth-child(2), .annex-table td:nth-child(2) { width: 10%; text-align: center; }
+			.annex-table th:nth-child(3), .annex-table td:nth-child(3) { width: 10%; text-align: center; }
+			.annex-table th:nth-child(4), .annex-table td:nth-child(4) { width: 10%; text-align: center; }
+			.annex-table th:nth-child(5), .annex-table td:nth-child(5) { width: 10%; text-align: center; }
+			.annex-table th:nth-child(6), .annex-table td:nth-child(6) { width: 10%; text-align: center; }
+			.annex-table th:nth-child(7), .annex-table td:nth-child(7) { width: 20%; text-align: right !important; font-weight: bold; }
+			</style>`;
+			
+			// PDF-Optionen
+			const options = {
+				margin: [1, 1.5, 2.5, 1.5],
+				filename: `Rundenkampfbericht_${new Date().toLocaleDateString('de-DE').replace(/\./g, '_')}.pdf`,
+				image: { type: 'jpeg', quality: 0.98 },
+				html2canvas: { 
+					scale: 2,
+					useCORS: true,
+					letterRendering: true,
+					allowTaint: true
+				},
+				jsPDF: { 
+					unit: 'cm', 
+					format: 'a4', 
+					orientation: 'portrait' 
+				}
+			};
+			
+			// PDF erstellen und herunterladen
+			html2pdf().set(options).from(htmlContent).save();
+			
+		}).catch(error => {
+			console.error('Error loading logo:', error);
+			// Fallback ohne Logo
+			alert('Logo konnte nicht geladen werden. PDF wird ohne Logo erstellt.');
+		});
+		
+	} catch (error) {
+		console.error('Error exporting PDF:', error);
+		alert('Fehler beim PDF-Export: ' + error.message);
 	}
-
+}
 	// HTML für PDF-Export (Standard-Tabelle)
 	createTeamTableStandardHTML(team) {
 		const shooterData = this.prepareShooterData(team);
