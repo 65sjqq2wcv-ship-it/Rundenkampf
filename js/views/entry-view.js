@@ -488,7 +488,7 @@ class EntryView {
 	createAnnexKeypad(container) {
 		const keypad = document.createElement('div');
 		keypad.className = 'keypad';
-		keypad.style.cssText = 'display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 150px; margin-bottom: 20px;';
+		keypad.style.cssText = 'display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 100px; margin-bottom: 20px;';
 
 		[0,1,2,3].forEach(num => {
 			const btn = document.createElement('button');
@@ -504,7 +504,7 @@ class EntryView {
 		const deleteBtn = document.createElement('button');
 		deleteBtn.className = 'btn btn-secondary';
 		deleteBtn.style.cssText = 'grid-column: 1 / -1; aspect-ratio: 2/1; font-size: 16px; font-weight: 500; padding: 12px; min-height: 50px;';
-		deleteBtn.textContent = '⌫ Löschen';
+		deleteBtn.textContent = '⌫';
 		
 		this.eventRegistry.register(deleteBtn, 'click', () => this.removeLastShot());
 		keypad.appendChild(deleteBtn);

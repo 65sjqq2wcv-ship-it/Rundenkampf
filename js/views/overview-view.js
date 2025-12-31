@@ -5,11 +5,11 @@ class OverviewView {
 
 render() {
 	const container = document.createElement('div');
-
+	
 	try {
 	// Setup navigation buttons
 	this.setupNavButtons();
-
+	
 	// Current discipline and competition type info
 	if (storage.selectedDiscipline) {
 	const infoCard = this.createInfoCard();
@@ -83,7 +83,7 @@ setupNavButtons() {
 	const navButtons = document.getElementById('navButtons');
 	if (navButtons) {
 	navButtons.innerHTML = '';
-
+	
 	// Filter Button
 	const filterBtn = document.createElement('button');
 	filterBtn.className = 'nav-btn';
@@ -91,7 +91,7 @@ setupNavButtons() {
 	filterBtn.title = 'Filter';
 	filterBtn.addEventListener('click', () => this.showFilterModal());
 	navButtons.appendChild(filterBtn);
-
+	
 	// PDF Export Button
 	const pdfBtn = document.createElement('button');
 	pdfBtn.className = 'nav-btn';
@@ -128,12 +128,12 @@ createTeamOverviewCard(team) {
 createTeamOverviewCardStandard(team) {
 	const card = document.createElement('div');
 	card.className = 'card';
-
+	
 	// Prepare shooter data
 	const shooterData = this.prepareShooterData(team);
 	const worstShooterId = this.getWorstShooterId(team);
 	const teamTotal = storage.calculateBestThreeSum(team);
-
+	
 	// Header
 	const header = document.createElement('div');
 	header.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;';
@@ -209,11 +209,11 @@ return card;
 createTeamOverviewCardAnnex(team) {
 	const card = document.createElement('div');
 	card.className = 'card';
-
+	
 	// Prepare shooter data for Annex
 	const shooterData = this.prepareShooterDataAnnex(team);
 	const worstShooterId = this.getWorstShooterIdAnnex(team);
-
+	
 	// Header
 	const header = document.createElement('div');
 	header.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;';
@@ -315,16 +315,16 @@ createSoloShootersCard() {
 createSoloShootersCardStandard() {
 	const card = document.createElement('div');
 	card.className = 'card';
-
+	
 	// Header
 	const header = document.createElement('div');
 	header.innerHTML = '<h3 style="margin: 0 0 16px 0;">Einzelschützen</h3>';
 	card.appendChild(header);
-
+	
 	// Table
 	const table = document.createElement('div');
 	table.style.cssText = 'border: 1px solid #f0f0f0; border-radius: 8px; overflow: hidden;';
-
+	
 	// Table header
 	const tableHeader = document.createElement('div');
 	tableHeader.style.cssText = 'background: #f8f9fa; padding: 8px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 4px; font-weight: 600; font-size: 12px;';
@@ -335,7 +335,7 @@ createSoloShootersCardStandard() {
 	<div style="text-align: right;">Gesamt</div>
 	`;
 	table.appendChild(tableHeader);
-
+	
 	// Sort shooters by name
 	const sortedShooters = [...storage.standaloneShooters].sort((a, b) => 
 a.name.localeCompare(b.name, 'de', { sensitivity: 'base' })
@@ -377,19 +377,19 @@ return card;
 createSoloShootersCardAnnex() {
 	const card = document.createElement('div');
 	card.className = 'card';
-
+	
 	// Header
 	const header = document.createElement('div');
 	header.innerHTML = '<h3 style="margin: 0 0 16px 0;">Einzelschützen</h3>';
 	card.appendChild(header);
-
+	
 	// Scrollable table container
 	const tableContainer = document.createElement('div');
 	tableContainer.style.cssText = 'overflow-x: auto; border: 1px solid #f0f0f0; border-radius: 8px;';
-
+	
 	const table = document.createElement('div');
 	table.style.cssText = 'min-width: 340px;';
-
+	
 	// Table header - narrower columns for series, wider for Gesamt
 	const tableHeader = document.createElement('div');
 	tableHeader.style.cssText = 'background: #f8f9fa; padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 28px) 35px; gap: 4px; font-weight: 600; font-size: 12px;';
@@ -403,7 +403,7 @@ createSoloShootersCardAnnex() {
 	<div style="text-align: right;">Ges.</div>
 	`;
 	table.appendChild(tableHeader);
-
+	
 	// Sort shooters by name
 	const sortedShooters = [...storage.standaloneShooters].sort((a, b) => 
 a.name.localeCompare(b.name, 'de', { sensitivity: 'base' })
@@ -540,7 +540,7 @@ showFilterModal() {
 	<div id="teamCheckboxes"></div>
 	</div>
 	`;
-
+	
 	const modal = new ModalComponent('Filter', content);
 	modal.addAction('Fertig', () => {
 	this.saveFilter();
@@ -557,7 +557,7 @@ setTimeout(() => {
 setupFilterModal() {
 	const showAllCheckbox = document.getElementById('showAllTeams');
 	const checkboxesContainer = document.getElementById('teamCheckboxes');
-
+	
 	if (showAllCheckbox && checkboxesContainer) {
 	// Show all teams checkbox handler
 	showAllCheckbox.addEventListener('change', (e) => {
@@ -671,91 +671,7 @@ Die Mannschaftsführer bestätigen, dass alle Mannschaftschützen gemäß Runden
 </div>
 
 <style>
-h2 { 
-	margin: 20px 0 8px 0; 
-	font-size: 14px;
-	font-weight: bold;
-	color: #333;
-	width: 100%;
-	border-bottom: 1px solid #666;
-	padding-bottom: 3px;
-}
 
-table { 
-	width: 100%; 
-	border-radius: 8px;
-	border: 1px solid #e9ecef;
-	border-collapse: collapse; 
-	margin-bottom: 15px;
-	font-size: 9px;
-}
-
-td {  
-	padding: 4px 3px; 
-	text-align: left; 
-	font-size: 12px;
-	vertical-align: middle;
-	border: 0;
-}
-
-th { 
-	background-color: #f0f0f0; 
-	font-weight: bold;
-	text-align: center;
-	font-size: 12px;
-	padding: 6px 3px;
-	border: 0;
-}
-
-/* Radius nur für Header-Ecken */
-th:first-child {
-	border-top-left-radius: 6px;
-}
-
-th:last-child {
-	border-top-right-radius: 6px;
-}
-
-/* KORREKTUR: Team-total Schriftgröße auf 12px wie normale td */
-.team-total td:first-child {
-	background-color: #e9ecef;
-	text-align: right;
-	font-weight: normal;
-	font-size: 12px;
-	border-bottom-left-radius: 6px;
-}
-
-.team-total td:last-child {
-	background-color: #e9ecef;
-	text-align: right !important;
-	font-weight: bold;
-	font-size: 12px;
-	padding: 4px 3px;
-	border-bottom-right-radius: 6px;
-}
-
-.zebra { 
-	background-color: #f8f9fa; 
-	border-left: 1px solid #e9ecef;
-}
-
-.worst-shooter { 
-	color: #dc3545; 
-	text-decoration: underline; 
-}
-
-.standard-table th:nth-child(1), .standard-table td:nth-child(1) { width: 40%; text-align: left; }
-.standard-table th:nth-child(2), .standard-table td:nth-child(2) { width: 20%; text-align: center; }
-.standard-table th:nth-child(3), .standard-table td:nth-child(3) { width: 20%; text-align: center; }
-.standard-table th:nth-child(4), .standard-table td:nth-child(4) { width: 20%; text-align: right !important; font-weight: bold; }
-
-.annex-table th:nth-child(1), .annex-table td:nth-child(1) { width: 30%; text-align: left; }
-.annex-table th:nth-child(2), .annex-table td:nth-child(2) { width: 10%; text-align: center; }
-.annex-table th:nth-child(3), .annex-table td:nth-child(3) { width: 10%; text-align: center; }
-.annex-table th:nth-child(4), .annex-table td:nth-child(4) { width: 10%; text-align: center; }
-.annex-table th:nth-child(5), .annex-table td:nth-child(5) { width: 10%; text-align: center; }
-.annex-table th:nth-child(6), .annex-table td:nth-child(6) { width: 10%; text-align: center; }
-.annex-table th:nth-child(7), .annex-table td:nth-child(7) { width: 20%; text-align: right !important; font-weight: bold; }
 </style>`;
 
 // PDF-Optionen
@@ -835,41 +751,40 @@ createTeamTableStandardHTML(team) {
 	const shooterData = this.prepareShooterData(team);
 	const worstShooterId = this.getWorstShooterId(team);
 	const teamTotal = storage.calculateBestThreeSum(team);
-
+	
 	let html = `
-	<table class="standard-table">
+	<table style="width: 100%; border-radius: 8px; border: 1px solid #e9ecef; border-collapse: collapse; margin-bottom: 15px;">
 	<thead>
 	<tr>
-	<th>Name</th>
-	<th>Präzision</th>
-	<th>Duell</th>
-	<th>Gesamt</th>
+	<th style="background-color: #f0f0f0; font-weight: bold; text-align: left; font-size: 12px; padding: 6px 3px; border: 0; border-top-left-radius: 6px;">Name</th>
+	<th style="background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 12px; padding: 6px 3px; border: 0;">Präzision</th>
+	<th style="background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 12px; padding: 6px 3px; border: 0;">Duell</th>
+	<th style="background-color: #f0f0f0; font-weight: bold; text-align: right; font-size: 12px; padding: 6px 3px; border: 0; border-top-right-radius: 6px;">Gesamt</th>
 	</tr>
 	</thead>
 	<tbody>
 	`;
-
+	
 	shooterData.forEach((data, index) => {
 	const [shooter, precision, duell, total] = data;
 	const isWorst = shooter.id === worstShooterId && team.shooters.length >= 4;
-	const zebraClass = index % 2 === 1 ? 'zebra' : '';
-	const worstClass = isWorst ? 'worst-shooter' : '';
+	const zebraStyle = index % 2 === 1 ? 'background-color: #f8f9fa;' : '';
+	const worstStyle = isWorst ? 'color: #dc3545; text-decoration: underline;' : '';
 	
 	html += `
-	<tr class="${zebraClass} ${worstClass}">
-<td>${UIUtils.escapeHtml(shooter.name)}</td>
-<td>${precision}</td>
-<td>${duell}</td>
-<td>${total}</td>
+	<tr style="${zebraStyle}">
+<td style="padding: 4px 3px; text-align: left; font-size: 12px; vertical-align: middle; border: 0; width: 40%; ${worstStyle}">${UIUtils.escapeHtml(shooter.name)}</td>
+<td style="padding: 4px 3px; text-align: center; font-size: 12px; vertical-align: middle; border: 0; width: 20%;">${precision}</td>
+<td style="padding: 4px 3px; text-align: center; font-size: 12px; vertical-align: middle; border: 0; width: 20%;">${duell}</td>
+<td style="padding: 4px 3px; text-align: right; font-size: 12px; vertical-align: middle; border: 0; width: 20%; font-weight: bold; ${worstStyle}">${total}</td>
 </tr>
 `;
 });
 
-// INLINE STYLES für mobile Kompatibilität
 html += `
-<tr class="team-total">
-<td colspan="3" style="background-color: #e9ecef !important; text-align: left !important; font-weight: bold !important; font-size: 12px !important; padding: 6px 3px !important; border-bottom-left-radius: 6px;">Mannschaft Gesamt</td>
-<td style="background-color: #e9ecef !important; text-align: right !important; font-weight: bold !important; font-size: 12px !important; padding: 6px 3px !important; border-bottom-right-radius: 6px;">${teamTotal}</td>
+<tr>
+<td colspan="3" style="background-color: #e9ecef; text-align: left; font-weight: bold; font-size: 12px; padding: 6px 3px; border: 0; border-bottom-left-radius: 6px;">Mannschaft Gesamt</td>
+<td style="background-color: #e9ecef; text-align: right; font-weight: bold; font-size: 12px; padding: 6px 3px; border: 0; border-bottom-right-radius: 6px;">${teamTotal}</td>
 </tr>
 </tbody>
 </table>
@@ -877,51 +792,51 @@ html += `
 
 return html;
 }
+
 // HTML für PDF-Export (Annex-Tabelle) - Mobile-optimiert
 createTeamTableAnnexHTML(team) {
 	const shooterData = this.prepareShooterDataAnnex(team);
 	const worstShooterId = this.getWorstShooterIdAnnex(team);
 	const teamTotal = storage.calculateTeamTotal(team, CompetitionType.ANNEX_SCHEIBE);
-
+	
 	let html = `
-	<table class="annex-table">
+	<table style="width: 100%; border-radius: 8px; border: 1px solid #e9ecef; border-collapse: collapse; margin-bottom: 15px;">
 	<thead>
 	<tr>
-	<th>Name</th>
-	<th>S1</th>
-	<th>S2</th>
-	<th>S3</th>
-	<th>S4</th>
-	<th>S5</th>
-	<th>Gesamt</th>
+	<th style="background-color: #f0f0f0; font-weight: bold; text-align: left; font-size: 12px; padding: 6px 3px; border: 0; width: 30%; border-top-left-radius: 6px;">Name</th>
+	<th style="background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 12px; padding: 6px 3px; border: 0; width: 10%;">S1</th>
+	<th style="background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 12px; padding: 6px 3px; border: 0; width: 10%;">S2</th>
+	<th style="background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 12px; padding: 6px 3px; border: 0; width: 10%;">S3</th>
+	<th style="background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 12px; padding: 6px 3px; border: 0; width: 10%;">S4</th>
+	<th style="background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 12px; padding: 6px 3px; border: 0; width: 10%;">S5</th>
+	<th style="background-color: #f0f0f0; font-weight: bold; text-align: right; font-size: 12px; padding: 6px 3px; border: 0; width: 20%; border-top-right-radius: 6px;">Gesamt</th>
 	</tr>
 	</thead>
 	<tbody>
 	`;
-
+	
 	shooterData.forEach((data, index) => {
 	const [shooter, seriesSums, total] = data;
 	const isWorst = shooter.id === worstShooterId && team.shooters.length >= 4;
-	const zebraClass = index % 2 === 1 ? 'zebra' : '';
-	const worstClass = isWorst ? 'worst-shooter' : '';
+	const zebraStyle = index % 2 === 1 ? 'background-color: #f8f9fa;' : '';
+	const worstStyle = isWorst ? 'color: #dc3545; text-decoration: underline;' : '';
 	
-	html += `<tr class="${zebraClass} ${worstClass}">`;
-html += `<td>${UIUtils.escapeHtml(shooter.name)}</td>`;
+	html += `<tr style="${zebraStyle}">`;
+html += `<td style="padding: 4px 3px; text-align: left; font-size: 12px; vertical-align: middle; border: 0; ${worstStyle}">${UIUtils.escapeHtml(shooter.name)}</td>`;
 
 for (let i = 0; i < 5; i++) {
 	const seriesValue = i < seriesSums.length ? seriesSums[i] : 0;
-html += `<td>${seriesValue}</td>`;
+html += `<td style="padding: 4px 3px; text-align: center; font-size: 12px; vertical-align: middle; border: 0;">${seriesValue}</td>`;
 }
 
-html += `<td>${total}</td>`;
+html += `<td style="padding: 4px 3px; text-align: right; font-size: 12px; vertical-align: middle; border: 0; font-weight: bold; ${worstStyle}">${total}</td>`;
 html += `</tr>`;
 });
 
-// INLINE STYLES für mobile Kompatibilität
 html += `
-<tr class="team-total">
-<td colspan="6" style="background-color: #e9ecef !important; text-align: left !important; font-weight: bold !important; font-size: 12px !important; padding: 6px 3px !important; border-bottom-left-radius: 6px;">Mannschaft Gesamt</td>
-<td style="background-color: #e9ecef !important; text-align: right !important; font-weight: bold !important; font-size: 12px !important; padding: 6px 3px !important; border-bottom-right-radius: 6px;">${teamTotal}</td>
+<tr>
+<td colspan="6" style="background-color: #e9ecef; text-align: left; font-weight: bold; font-size: 12px; padding: 6px 3px; border: 0; border-bottom-left-radius: 6px;">Mannschaft Gesamt</td>
+<td style="background-color: #e9ecef; text-align: right; font-weight: bold; font-size: 12px; padding: 6px 3px; border: 0; border-bottom-right-radius: 6px;">${teamTotal}</td>
 </tr>
 </tbody>
 </table>
@@ -936,13 +851,13 @@ a.name.localeCompare(b.name, 'de', { sensitivity: 'base' })
 );
 
 let html = `
-<table class="standard-table">
+<table style="width: 100%; border-radius: 8px; border: 1px solid #e9ecef; border-collapse: collapse; margin-bottom: 15px;">
 <thead>
 <tr>
-<th>Name</th>
-<th>Präzision</th>
-<th>Duell</th>
-<th>Gesamt</th>
+<th style="background-color: #f0f0f0; font-weight: bold; text-align: left; font-size: 12px; padding: 6px 3px; border: 0; width: 40%; border-top-left-radius: 6px;">Name</th>
+<th style="background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 12px; padding: 6px 3px; border: 0; width: 20%;">Präzision</th>
+<th style="background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 12px; padding: 6px 3px; border: 0; width: 20%;">Duell</th>
+<th style="background-color: #f0f0f0; font-weight: bold; text-align: right; font-size: 12px; padding: 6px 3px; border: 0; width: 20%; border-top-right-radius: 6px;">Gesamt</th>
 </tr>
 </thead>
 <tbody>
@@ -957,14 +872,14 @@ sortedShooters.forEach((shooter, index) => {
 	.reduce((sum, r) => sum + r.total(), 0);
 	const total = precision + duell;
 	
-	const zebraClass = index % 2 === 1 ? 'zebra' : '';
+	const zebraStyle = index % 2 === 1 ? 'background-color: #f8f9fa;' : '';
 	
 	html += `
-	<tr class="${zebraClass}">
-<td>${UIUtils.escapeHtml(shooter.name)}</td>
-<td>${precision}</td>
-<td>${duell}</td>
-<td>${total}</td>
+	<tr style="${zebraStyle}">
+<td style="padding: 4px 3px; text-align: left; font-size: 12px; vertical-align: middle; border: 0;">${UIUtils.escapeHtml(shooter.name)}</td>
+<td style="padding: 4px 3px; text-align: center; font-size: 12px; vertical-align: middle; border: 0;">${precision}</td>
+<td style="padding: 4px 3px; text-align: center; font-size: 12px; vertical-align: middle; border: 0;">${duell}</td>
+<td style="padding: 4px 3px; text-align: right; font-size: 12px; vertical-align: middle; border: 0; font-weight: bold;">${total}</td>
 </tr>
 `;
 });
@@ -983,16 +898,16 @@ a.name.localeCompare(b.name, 'de', { sensitivity: 'base' })
 );
 
 let html = `
-<table class="annex-table">
+<table style="width: 100%; border-radius: 8px; border: 1px solid #e9ecef; border-collapse: collapse; margin-bottom: 15px;">
 <thead>
 <tr>
-<th>Name</th>
-<th>S1</th>
-<th>S2</th>
-<th>S3</th>
-<th>S4</th>
-<th>S5</th>
-<th>Gesamt</th>
+<th style="background-color: #f0f0f0; font-weight: bold; text-align: left; font-size: 12px; padding: 6px 3px; border: 0; width: 30%; border-top-left-radius: 6px;">Name</th>
+<th style="background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 12px; padding: 6px 3px; border: 0; width: 10%;">S1</th>
+<th style="background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 12px; padding: 6px 3px; border: 0; width: 10%;">S2</th>
+<th style="background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 12px; padding: 6px 3px; border: 0; width: 10%;">S3</th>
+<th style="background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 12px; padding: 6px 3px; border: 0; width: 10%;">S4</th>
+<th style="background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 12px; padding: 6px 3px; border: 0; width: 10%;">S5</th>
+<th style="background-color: #f0f0f0; font-weight: bold; text-align: right; font-size: 12px; padding: 6px 3px; border: 0; width: 20%; border-top-right-radius: 6px;">Gesamt</th>
 </tr>
 </thead>
 <tbody>
@@ -1013,17 +928,17 @@ sortedShooters.forEach((shooter, index) => {
 	total = result.total();
 }
 
-const zebraClass = index % 2 === 1 ? 'zebra' : '';
+const zebraStyle = index % 2 === 1 ? 'background-color: #f8f9fa;' : '';
 
-html += `<tr class="${zebraClass}">`;
-html += `<td>${UIUtils.escapeHtml(shooter.name)}</td>`;
+html += `<tr style="${zebraStyle}">`;
+html += `<td style="padding: 4px 3px; text-align: left; font-size: 12px; vertical-align: middle; border: 0;">${UIUtils.escapeHtml(shooter.name)}</td>`;
 
 for (let i = 0; i < 5; i++) {
 	const seriesValue = i < seriesSums.length ? seriesSums[i] : 0;
-html += `<td>${seriesValue}</td>`;
+html += `<td style="padding: 4px 3px; text-align: center; font-size: 12px; vertical-align: middle; border: 0;">${seriesValue}</td>`;
 }
 
-html += `<td>${total}</td>`;
+html += `<td style="padding: 4px 3px; text-align: right; font-size: 12px; vertical-align: middle; border: 0; font-weight: bold;">${total}</td>`;
 html += `</tr>`;
 });
 
