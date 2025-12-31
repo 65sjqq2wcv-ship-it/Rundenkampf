@@ -720,7 +720,7 @@ class OverviewView {
 				.team-total td:first-child {
 				background-color: #e9ecef;
 				text-align: right;
-				font-weight: normal;
+				font-weight: bold;
 				font-size: 12px;
 				border-bottom-left-radius: 6px;
 				}
@@ -865,8 +865,8 @@ class OverviewView {
 
 		html += `
 		<tr class="team-total">
-		<td colspan="3" style="font-weight: bold; font-size: 12px;">Mannschaft Gesamt</td>
-		<td style="font-weight: bold; font-size: 12px;">${teamTotal}</td>
+		<td colspan="3">Mannschaft Gesamt</td>
+		<td>${teamTotal}</td>
 		</tr>
 		</tbody>
 		</table>
@@ -916,8 +916,8 @@ class OverviewView {
 
 		html += `
 		<tr class="team-total">
-		<td colspan="6" style="font-weight: bold; font-size: 12px;">Mannschaft Gesamt</td>
-		<td style="font-weight: bold; font-size: 12px;">${teamTotal}</td>
+		<td colspan="6">Mannschaft Gesamt</td>
+		<td>${teamTotal}</td>
 		</tr>
 		</tbody>
 		</table>
