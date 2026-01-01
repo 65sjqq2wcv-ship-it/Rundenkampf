@@ -196,7 +196,7 @@ table.appendChild(row);
 const totalRow = document.createElement('div');
 totalRow.style.cssText = 'background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr 50px; gap: 4px; font-weight: 600; border-top: 1px solid #f0f0f0;';
 totalRow.innerHTML = `
-<div style="text-align: left; font-weight: bold; font-size: 12px;">Mannschaft Gesamt: </div>
+<div style="text-align: left; font-weight: bold; font-size: 8px;">Mannschaft Gesamt: </div>
 <div style="text-align: right; font-weight: bold; font-size: 12px;">${teamTotal}</div>
 `;
 
@@ -291,7 +291,7 @@ const teamTotal = storage.calculateTeamTotal(team, CompetitionType.ANNEX_SCHEIBE
 const totalRow = document.createElement('div');
 totalRow.style.cssText = 'background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr 50px; gap: 4px; font-weight: 600; border-top: 1px solid #f0f0f0;';
 totalRow.innerHTML = `
-<div style="text-align: left; font-weight: bold; font-size: 12px;">Mannschaft Gesamt: </div>
+<div style="text-align: left; font-weight: bold; font-size: 8px;">Mannschaft Gesamt: </div>
 <div style="text-align: right; font-weight: bold; font-size: 12px;">${teamTotal}</div>
 `;
 
