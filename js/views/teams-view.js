@@ -58,12 +58,12 @@ class TeamsView {
 			if (navButtons) {
 				navButtons.innerHTML = '';
 				// Import Button (NEU)
-            const importBtn = document.createElement('button');
-            importBtn.className = 'nav-btn';
-            importBtn.textContent = '📥';
-            importBtn.title = 'CSV Import';
-            importBtn.addEventListener('click', () => this.showImportModal());
-            navButtons.appendChild(importBtn);
+				const importBtn = document.createElement('button');
+				importBtn.className = 'nav-btn';
+				importBtn.textContent = '📥';
+				importBtn.title = 'CSV Import';
+				importBtn.addEventListener('click', () => this.showImportModal());
+				navButtons.appendChild(importBtn);
 
 				// Einzelschütze Button
 				const shooterBtn = document.createElement('button');
@@ -427,181 +427,181 @@ class TeamsView {
 		card.innerHTML = `<p style="color: red;">${UIUtils.escapeHtml(message)}</p>`;
 		return card;
 	}
-showImportModal() {
-    const content = document.createElement('div');
-    content.innerHTML = `
-    <div class="form-section">
-        <div class="form-section-header">CSV-Datei importieren</div>
-        <div class="form-row">
-            <p style="margin-bottom: 12px; font-size: 14px; color: #666;">
-                Format: Name; Verein; Einzelschütze;<br>
-                Bei "E" in Einzelschütze → Einzelschütze anlegen<br>
-                Sonst → Team mit Mitglied anlegen
-            </p>
-            <input type="file" id="csvFileInput" accept=".csv,.txt" class="form-input" style="padding: 8px;">
-        </div>
-    </div>
-    
-    <div class="form-section">
-        <div class="form-section-header">Vorschau</div>
-        <div id="importPreview" style="max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; background: #f8f9fa; padding: 8px; border-radius: 4px;">
-            Keine Datei ausgewählt
-        </div>
-    </div>
-    `;
+	showImportModal() {
+		const content = document.createElement('div');
+		content.innerHTML = `
+		<div class="form-section">
+		<div class="form-section-header">CSV-Datei importieren</div>
+		<div class="form-row">
+		<p style="margin-bottom: 12px; font-size: 14px; color: #666;">
+		Format: Name; Verein; Einzelschütze;<br>
+		Bei "E" in Einzelschütze → Einzelschütze anlegen<br>
+		Sonst → Team mit Mitglied anlegen
+		</p>
+		<input type="file" id="csvFileInput" accept=".csv,.txt" class="form-input" style="padding: 8px;">
+		</div>
+		</div>
+		
+		<div class="form-section">
+		<div class="form-section-header">Vorschau</div>
+		<div id="importPreview" style="max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; background: #f8f9fa; padding: 8px; border-radius: 4px;">
+		Keine Datei ausgewählt
+		</div>
+		</div>
+		`;
 
-    const modal = new ModalComponent('CSV Import', content);
-    
-    modal.addAction('Abbrechen', null, false, false);
-    modal.addAction('Importieren', () => {
-        this.processImport();
-    }, true, false);
+		const modal = new ModalComponent('CSV Import', content);
+		
+		modal.addAction('Abbrechen', null, false, false);
+		modal.addAction('Importieren', () => {
+			this.processImport();
+		}, true, false);
 
-    modal.show();
-    
-    // Setup file input handler
-    setTimeout(() => {
-        const fileInput = document.getElementById('csvFileInput');
-        if (fileInput) {
-            fileInput.addEventListener('change', (e) => {
-                this.previewCSV(e.target.files[0]);
-            });
-        }
-    }, 100);
-}
+		modal.show();
+		
+		// Setup file input handler
+		setTimeout(() => {
+			const fileInput = document.getElementById('csvFileInput');
+			if (fileInput) {
+				fileInput.addEventListener('change', (e) => {
+					this.previewCSV(e.target.files[0]);
+				});
+			}
+		}, 100);
+	}
 
-previewCSV(file) {
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const content = e.target.result;
-        const lines = content.split('\n').filter(line => line.trim());
-        
-        let preview = '<strong>Gefundene Einträge:</strong><br><br>';
-        
-        lines.forEach((line, index) => {
-            if (index === 0) return; // Skip header if exists
-            
-            const parts = line.split(';').map(p => p.trim());
-            if (parts.length >= 3) {
-                const [name, verein, einzelschuetze] = parts;
-                
-                if (einzelschuetze.toUpperCase() === 'E') {
-                    preview += `📍 Einzelschütze: <strong>${name}-${verein}</strong><br>`;
-                } else {
-                    preview += `👥 Team: <strong>${verein}</strong> → Mitglied: <strong>${name}</strong><br>`;
-                }
-            }
-        });
-        
-        const previewDiv = document.getElementById('importPreview');
-        if (previewDiv) {
-            previewDiv.innerHTML = preview;
-        }
-    };
-    
-    reader.readAsText(file, 'UTF-8');
-}
+	previewCSV(file) {
+		if (!file) return;
+		
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			const content = e.target.result;
+			const lines = content.split('\n').filter(line => line.trim());
+			
+			let preview = '<strong>Gefundene Einträge:</strong><br><br>';
+			
+			lines.forEach((line, index) => {
+				if (index === 0) return; // Skip header if exists
+				
+				const parts = line.split(';').map(p => p.trim());
+				if (parts.length >= 3) {
+					const [name, verein, einzelschuetze] = parts;
+					
+					if (einzelschuetze.toUpperCase() === 'E') {
+						preview += `📍 Einzelschütze: <strong>${name} - ${verein}</strong><br>`;
+					} else {
+						preview += `👥 Team: <strong>${verein}</strong> → Mitglied: <strong>${name}</strong><br>`;
+					}
+				}
+			});
+			
+			const previewDiv = document.getElementById('importPreview');
+			if (previewDiv) {
+				previewDiv.innerHTML = preview;
+			}
+		};
+		
+		reader.readAsText(file, 'UTF-8');
+	}
 
-processImport() {
-    const fileInput = document.getElementById('csvFileInput');
-    const file = fileInput?.files[0];
-    
-    if (!file) {
-        alert('Bitte wählen Sie eine CSV-Datei aus.');
-        return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            const content = e.target.result;
-            const lines = content.split('\n').filter(line => line.trim());
-            
-            let teamsCreated = 0;
-            let shootersCreated = 0;
-            let errors = [];
-            
-            // Process each line
-            lines.forEach((line, index) => {
-                if (index === 0 && line.toLowerCase().includes('name')) return; // Skip header
-                
-                const parts = line.split(';').map(p => p.trim());
-                if (parts.length < 3) {
-                    errors.push(`Zeile ${index + 1}: Unvollständige Daten`);
-                    return;
-                }
-                
-                const [name, verein, einzelschuetze] = parts;
-                
-                if (!name || !verein) {
-                    errors.push(`Zeile ${index + 1}: Name oder Verein fehlt`);
-                    return;
-                }
-                
-                try {
-                    if (einzelschuetze.toUpperCase() === 'E') {
-                        // Create standalone shooter
-                        const shooterName = `${name}-${verein}`;
-                        
-                        // Check if shooter already exists
-                        const existingShooter = storage.standaloneShooters.find(s => s.name === shooterName);
-                        if (!existingShooter) {
-                            const newShooter = new Shooter(shooterName);
-                            storage.addStandaloneShooter(newShooter);
-                            shootersCreated++;
-                        }
-                        
-                    } else {
-                        // Create/update team
-                        let team = storage.teams.find(t => t.name === verein);
-                        
-                        if (!team) {
-                            // Create new team
-                            team = new Team(verein, []);
-                            storage.addTeam(team);
-                            teamsCreated++;
-                        }
-                        
-                        // Check if shooter already exists in team
-                        const existingShooter = team.shooters.find(s => s.name === name);
-                        if (!existingShooter) {
-                            const newShooter = new Shooter(name);
-                            team.shooters.push(newShooter);
-                            storage.updateTeam(team);
-                        }
-                    }
-                } catch (error) {
-                    errors.push(`Zeile ${index + 1}: ${error.message}`);
-                }
-            });
-            
-            // Show results
-            let message = `Import abgeschlossen!\n\n`;
-            message += `• ${teamsCreated} Teams erstellt\n`;
-            message += `• ${shootersCreated} Einzelschützen erstellt\n`;
-            
-            if (errors.length > 0) {
-                message += `\nFehler (${errors.length}):\n`;
-                message += errors.slice(0, 5).join('\n'); // Show first 5 errors
-                if (errors.length > 5) {
-                    message += `\n... und ${errors.length - 5} weitere`;
-                }
-            }
-            
-            alert(message);
-            
-            // Refresh the view
-            app.showView('teams');
-            
-        } catch (error) {
-            console.error('Import error:', error);
-            alert('Fehler beim Importieren: ' + error.message);
-        }
-    };
-    
-    reader.readAsText(file, 'UTF-8');
-}
+	processImport() {
+		const fileInput = document.getElementById('csvFileInput');
+		const file = fileInput?.files[0];
+		
+		if (!file) {
+			alert('Bitte wählen Sie eine CSV-Datei aus.');
+			return;
+		}
+		
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			try {
+				const content = e.target.result;
+				const lines = content.split('\n').filter(line => line.trim());
+				
+				let teamsCreated = 0;
+				let shootersCreated = 0;
+				let errors = [];
+				
+				// Process each line
+				lines.forEach((line, index) => {
+					if (index === 0 && line.toLowerCase().includes('name')) return; // Skip header
+					
+					const parts = line.split(';').map(p => p.trim());
+					if (parts.length < 3) {
+						errors.push(`Zeile ${index + 1}: Unvollständige Daten`);
+						return;
+					}
+					
+					const [name, verein, einzelschuetze] = parts;
+					
+					if (!name || !verein) {
+						errors.push(`Zeile ${index + 1}: Name oder Verein fehlt`);
+						return;
+					}
+					
+					try {
+						if (einzelschuetze.toUpperCase() === 'E') {
+							// Create standalone shooter
+							const shooterName = `${name} - ${verein}`;
+							
+							// Check if shooter already exists
+							const existingShooter = storage.standaloneShooters.find(s => s.name === shooterName);
+							if (!existingShooter) {
+								const newShooter = new Shooter(shooterName);
+								storage.addStandaloneShooter(newShooter);
+								shootersCreated++;
+							}
+							
+						} else {
+							// Create/update team
+							let team = storage.teams.find(t => t.name === verein);
+							
+							if (!team) {
+								// Create new team
+								team = new Team(verein, []);
+								storage.addTeam(team);
+								teamsCreated++;
+							}
+							
+							// Check if shooter already exists in team
+							const existingShooter = team.shooters.find(s => s.name === name);
+							if (!existingShooter) {
+								const newShooter = new Shooter(name);
+								team.shooters.push(newShooter);
+								storage.updateTeam(team);
+							}
+						}
+					} catch (error) {
+						errors.push(`Zeile ${index + 1}: ${error.message}`);
+					}
+				});
+				
+				// Show results
+				let message = `Import abgeschlossen!\n\n`;
+				message += `• ${teamsCreated} Teams erstellt\n`;
+				message += `• ${shootersCreated} Einzelschützen erstellt\n`;
+				
+				if (errors.length > 0) {
+					message += `\nFehler (${errors.length}):\n`;
+					message += errors.slice(0, 5).join('\n'); // Show first 5 errors
+					if (errors.length > 5) {
+						message += `\n... und ${errors.length - 5} weitere`;
+					}
+				}
+				
+				alert(message);
+				
+				// Refresh the view
+				app.showView('teams');
+				
+			} catch (error) {
+				console.error('Import error:', error);
+				alert('Fehler beim Importieren: ' + error.message);
+			}
+		};
+		
+		reader.readAsText(file, 'UTF-8');
+	}
 	
 }
