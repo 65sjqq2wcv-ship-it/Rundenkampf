@@ -209,98 +209,99 @@ class PDFExporter {
     }
 
     createStandardTable(shooterData, worstShooterId, teamTotal) {
-        let rows = '';
+    let rows = '';
+    
+    // ALLE Schützen anzeigen (sortiert nach Leistung, beste zuerst)
+    const sortedShooterData = shooterData.sort((a, b) => b[3] - a[3]); // Nach Gesamtpunkten sortieren
+    
+    sortedShooterData.forEach((data, index) => {
+        const [shooter, precision, duell, total] = data;
+        const isWorst = shooter.id === worstShooterId;
+        const zebraClass = index % 2 === 1 ? 'zebra' : '';
+        const worstClass = isWorst ? 'worst-shooter' : '';
         
-        // Nur beste 3 Schützen anzeigen
-        const bestThreeData = shooterData.slice(0, 3);
-        
-        bestThreeData.forEach((data, index) => {
-            const [shooter, precision, duell, total] = data;
-            const isWorst = shooter.id === worstShooterId;
-            const zebraClass = index % 2 === 1 ? 'zebra' : '';
-            const worstClass = isWorst ? 'worst-shooter' : '';
-            
-            rows += `
-            <tr class="table-row ${zebraClass} ${worstClass}">
-                <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
-                <td class="score-cell">${precision}</td>
-                <td class="score-cell">${duell}</td>
-                <td class="total-cell">${total}</td>
-            </tr>
-            `;
-        });
-        
-        return `
-        <table class="results-table">
-            <thead>
-                <tr class="header-row">
-                    <th class="name-header">Name</th>
-                    <th class="score-header">Präzision</th>
-                    <th class="score-header">Duell</th>
-                    <th class="total-header">Gesamt</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${rows}
-                <tr class="total-row">
-                    <td colspan="3" class="total-label">Mannschaft Gesamt</td>
-                    <td class="total-value">${teamTotal}</td>
-                </tr>
-            </tbody>
-        </table>
+        rows += `
+        <tr class="table-row ${zebraClass} ${worstClass}">
+            <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
+            <td class="score-cell">${precision}</td>
+            <td class="score-cell">${duell}</td>
+            <td class="total-cell">${total}</td>
+        </tr>
         `;
-    }
+    });
+    
+    return `
+    <table class="results-table">
+        <thead>
+            <tr class="header-row">
+                <th class="name-header">Name</th>
+                <th class="score-header">Präzision</th>
+                <th class="score-header">Duell</th>
+                <th class="total-header">Gesamt</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${rows}
+            <tr class="total-row">
+                <td colspan="3" class="total-label">Mannschaft Gesamt (beste 3)</td>
+                <td class="total-value">${teamTotal}</td>
+            </tr>
+        </tbody>
+    </table>
+    `;
+}
+
 
     createAnnexTable(shooterData, worstShooterId, teamTotal) {
-        let rows = '';
+    let rows = '';
+    
+    // ALLE Schützen anzeigen (sortiert nach Leistung, beste zuerst)
+    const sortedShooterData = shooterData.sort((a, b) => b[2] - a[2]); // Nach Gesamtpunkten sortieren
+    
+    sortedShooterData.forEach((data, index) => {
+        const [shooter, seriesSums, total] = data;
+        const isWorst = shooter.id === worstShooterId;
+        const zebraClass = index % 2 === 1 ? 'zebra' : '';
+        const worstClass = isWorst ? 'worst-shooter' : '';
         
-        // Nur beste 3 Schützen anzeigen
-        const bestThreeData = shooterData.slice(0, 3);
+        let seriesCells = '';
+        for (let i = 0; i < 5; i++) {
+            const value = i < seriesSums.length ? seriesSums[i] : 0;
+            seriesCells += `<td class="series-cell">${value}</td>`;
+        }
         
-        bestThreeData.forEach((data, index) => {
-            const [shooter, seriesSums, total] = data;
-            const isWorst = shooter.id === worstShooterId;
-            const zebraClass = index % 2 === 1 ? 'zebra' : '';
-            const worstClass = isWorst ? 'worst-shooter' : '';
-            
-            let seriesCells = '';
-            for (let i = 0; i < 5; i++) {
-                const value = i < seriesSums.length ? seriesSums[i] : 0;
-                seriesCells += `<td class="series-cell">${value}</td>`;
-            }
-            
-            rows += `
-            <tr class="table-row ${zebraClass} ${worstClass}">
-                <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
-                ${seriesCells}
-                <td class="total-cell">${total}</td>
-            </tr>
-            `;
-        });
-        
-        return `
-        <table class="results-table annex-table">
-            <thead>
-                <tr class="header-row">
-                    <th class="name-header">Name</th>
-                    <th class="series-header">S1</th>
-                    <th class="series-header">S2</th>
-                    <th class="series-header">S3</th>
-                    <th class="series-header">S4</th>
-                    <th class="series-header">S5</th>
-                    <th class="total-header">Gesamt</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${rows}
-                <tr class="total-row">
-                    <td colspan="6" class="total-label">Mannschaft Gesamt</td>
-                    <td class="total-value">${teamTotal}</td>
-                </tr>
-            </tbody>
-        </table>
+        rows += `
+        <tr class="table-row ${zebraClass} ${worstClass}">
+            <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
+            ${seriesCells}
+            <td class="total-cell">${total}</td>
+        </tr>
         `;
-    }
+    });
+    
+    return `
+    <table class="results-table annex-table">
+        <thead>
+            <tr class="header-row">
+                <th class="name-header">Name</th>
+                <th class="series-header">S1</th>
+                <th class="series-header">S2</th>
+                <th class="series-header">S3</th>
+                <th class="series-header">S4</th>
+                <th class="series-header">S5</th>
+                <th class="total-header">Gesamt</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${rows}
+            <tr class="total-row">
+                <td colspan="6" class="total-label">Mannschaft Gesamt (beste 3)</td>
+                <td class="total-value">${teamTotal}</td>
+            </tr>
+        </tbody>
+    </table>
+    `;
+}
 
     // =================================================================
     // EINZELSCHÜTZEN-SEKTION
@@ -459,7 +460,7 @@ class PDFExporter {
         .total-row td:first-child { border-bottom-left-radius: 12px; }
         .total-row td:last-child { border-bottom-right-radius: 12px; }
         .total-label { text-align: left; font-size: 11px; font-weight: bold; }
-        .total-value { text-align: right; font-weight: bold; font-size: 13px; }
+        .total-value { text-align: center; font-weight: bold; font-size: 13px; }
         .pdf-footer { margin-top: 30px; page-break-inside: avoid; }
         .footer-line { height: 2px; background-color: #666; margin-bottom: 12px; }
         .footer-text { font-size: 9px; line-height: 1.4; color: #666; text-align: justify; max-width: 100%; }

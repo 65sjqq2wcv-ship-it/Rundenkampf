@@ -224,7 +224,7 @@ body {
 }
 
 .total-value {
-    text-align: right;
+    text-align: center;
     font-weight: bold;
     font-size: 13px;
 }
@@ -288,4 +288,122 @@ body {
     .logo-container {
         align-self: center;
     }
+}
+
+/* =================================================================
+   iOS/MOBILE OPTIMIZATIONS
+   ================================================================= */
+
+/* iOS Safari spezifische Fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 2) {
+    .header-content {
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 15px !important;
+    }
+    
+    .logo-container {
+        align-self: center !important;
+        margin: 0 auto !important;
+    }
+    
+    .title-container {
+        text-align: center !important;
+    }
+}
+
+/* Mobile Geräte - kleinere Schriftgrößen und bessere Positionierung */
+@media (max-width: 768px) {
+    body {
+        font-size: 10px !important;
+    }
+    
+    .main-title {
+        font-size: 20px !important;
+    }
+    
+    .team-title {
+        font-size: 14px !important;
+    }
+    
+    .total-label {
+        font-size: 10px !important;
+        text-align: left !important;
+    }
+    
+    .total-value {
+        font-size: 12px !important;
+        text-align: center !important;
+    }
+    
+    .name-header,
+    .name-cell {
+        text-align: left !important;
+        font-size: 10px !important;
+    }
+    
+    .results-table th,
+    .results-table td {
+        padding: 6px 4px !important;
+        font-size: 10px !important;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .logo-container {
+        align-self: center;
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* iPhone spezifische Anpassungen */
+@supports (-webkit-touch-callout: none) {
+    .pdf-container {
+        padding: 15px !important;
+    }
+    
+    .header-content {
+        flex-direction: column !important;
+        text-align: center !important;
+    }
+    
+    .logo-container {
+        align-self: center !important;
+    }
+    
+    .total-row {
+        font-size: 10px !important;
+    }
+    
+    .total-label {
+        text-align: left !important;
+        font-size: 9px !important;
+    }
+    
+    .total-value {
+        text-align: center !important;
+        font-size: 11px !important;
+    }
+}
+
+/* Erzwinge linksbündige Ausrichtung für Namen */
+.name-header {
+    text-align: left !important;
+}
+
+.name-cell {
+    text-align: left !important;
+}
+
+.total-label {
+    text-align: left !important;
+}
+
+.total-value {
+    text-align: center !important;
 }
