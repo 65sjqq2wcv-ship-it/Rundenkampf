@@ -67,7 +67,7 @@ body {
 }
 
 .title-container {
-    flex: 1;
+    flex: 0;
 }
 
 .main-title {
@@ -75,10 +75,12 @@ body {
     font-weight: bold;
     color: #333;
     margin-bottom: 12px;
+    text-align: left;
 }
 
 .subtitle-info {
     font-size: 13px;
+    text-align: left;
     color: #555;
 }
 
