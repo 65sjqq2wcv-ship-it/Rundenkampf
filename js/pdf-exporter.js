@@ -243,7 +243,7 @@ class PDFExporter {
         <tbody>
             ${rows}
             <tr class="total-row">
-                <td colspan="3" class="total-label">Mannschaft Gesamt (beste 3)</td>
+                <td colspan="3" class="total-label">Mannschaft Gesamt</td>
                 <td class="total-value">${teamTotal}</td>
             </tr>
         </tbody>
@@ -295,7 +295,7 @@ class PDFExporter {
         <tbody>
             ${rows}
             <tr class="total-row">
-                <td colspan="6" class="total-label">Mannschaft Gesamt (beste 3)</td>
+                <td colspan="6" class="total-label">Mannschaft Gesamt</td>
                 <td class="total-value">${teamTotal}</td>
             </tr>
         </tbody>
@@ -459,8 +459,8 @@ class PDFExporter {
         .total-row { background-color: #e9ecef !important; font-weight: bold; border-top: 2px solid #dee2e6; }
         .total-row td:first-child { border-bottom-left-radius: 12px; }
         .total-row td:last-child { border-bottom-right-radius: 12px; }
-        .total-label { text-align: left; font-size: 11px; font-weight: bold; }
-        .total-value { text-align: center; font-weight: bold; font-size: 13px; }
+        .total-label { text-align: left; font-size: 10px !important; font-weight: bold; }
+        .total-value { text-align: center; font-weight: bold; font-size: 12px !important; }
         .pdf-footer { margin-top: 30px; page-break-inside: avoid; }
         .footer-line { height: 2px; background-color: #666; margin-bottom: 12px; }
         .footer-text { font-size: 9px; line-height: 1.4; color: #666; text-align: justify; max-width: 100%; }

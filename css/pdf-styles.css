@@ -219,14 +219,14 @@ body {
 
 .total-label {
     text-align: left;
-    font-size: 11px;
+    font-size: 10px !important;
     font-weight: bold;
 }
 
 .total-value {
     text-align: center;
     font-weight: bold;
-    font-size: 13px;
+    font-size: 12px !important;
 }
 
 /* =================================================================
