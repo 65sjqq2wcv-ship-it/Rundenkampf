@@ -1,0 +1,291 @@
+/* =================================================================
+   PDF EXPORT STYLES - Rundenkampfbericht
+   Optimierte Styles für PDF-Export
+   ================================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #333;
+    background: white;
+}
+
+.pdf-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* =================================================================
+   HEADER STYLES
+   ================================================================= */
+
+.pdf-header {
+    margin-bottom: 30px;
+}
+
+.header-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.logo-container {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+}
+
+.logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.logo-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #4CAF50;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 9px;
+    text-align: center;
+    line-height: 1.1;
+}
+
+.title-container {
+    flex: 1;
+}
+
+.main-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.subtitle-info {
+    font-size: 13px;
+    color: #555;
+}
+
+.info-row {
+    margin-bottom: 6px;
+}
+
+/* =================================================================
+   MAIN CONTENT STYLES
+   ================================================================= */
+
+.pdf-main {
+    margin-bottom: 40px;
+}
+
+.team-section,
+.solo-section {
+    margin-bottom: 25px;
+    break-inside: avoid;
+}
+
+.team-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.team-count {
+    font-size: 12px;
+    font-weight: normal;
+    color: #666;
+}
+
+/* =================================================================
+   TABLE STYLES
+   ================================================================= */
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    break-inside: avoid;
+}
+
+.results-table th,
+.results-table td {
+    padding: 8px 6px;
+    text-align: center;
+    border: none;
+}
+
+.results-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    font-size: 12px;
+    color: #495057;
+}
+
+.header-row th:first-child {
+    border-top-left-radius: 12px;
+}
+
+.header-row th:last-child {
+    border-top-right-radius: 12px;
+}
+
+/* =================================================================
+   COLUMN ALIGNMENTS
+   ================================================================= */
+
+.name-header {
+    text-align: left;
+    width: 40%;
+}
+
+.name-cell {
+    text-align: left;
+    width: 40%;
+}
+
+.score-header,
+.score-cell {
+    width: 20%;
+    text-align: center;
+}
+
+.series-header,
+.series-cell {
+    width: 12%;
+    text-align: center;
+}
+
+.total-header,
+.total-cell {
+    text-align: right;
+    width: 20%;
+    font-weight: bold;
+}
+
+/* =================================================================
+   ROW STYLES
+   ================================================================= */
+
+.table-row.zebra {
+    background-color: #f8f9fa;
+}
+
+.table-row.worst-shooter {
+    background-color: #ffebee !important;
+    color: #d32f2f !important;
+}
+
+.worst-shooter .name-cell,
+.worst-shooter .total-cell {
+    font-weight: bold;
+}
+
+.total-row {
+    background-color: #e9ecef !important;
+    font-weight: bold;
+    border-top: 2px solid #dee2e6;
+}
+
+.total-row td:first-child {
+    border-bottom-left-radius: 12px;
+}
+
+.total-row td:last-child {
+    border-bottom-right-radius: 12px;
+}
+
+.total-label {
+    text-align: left;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.total-value {
+    text-align: right;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+/* =================================================================
+   FOOTER STYLES
+   ================================================================= */
+
+.pdf-footer {
+    margin-top: 30px;
+    page-break-inside: avoid;
+}
+
+.footer-line {
+    height: 2px;
+    background-color: #666;
+    margin-bottom: 12px;
+}
+
+.footer-text {
+    font-size: 9px;
+    line-height: 1.4;
+    color: #666;
+    text-align: justify;
+    max-width: 100%;
+}
+
+/* =================================================================
+   PRINT OPTIMIZATIONS
+   ================================================================= */
+
+@media print {
+    .team-section {
+        page-break-inside: avoid;
+    }
+    
+    .results-table {
+        page-break-inside: avoid;
+    }
+    
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+/* =================================================================
+   RESPONSIVE OPTIMIZATIONS
+   ================================================================= */
+
+@media (max-width: 600px) {
+    .pdf-container {
+        padding: 10px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .logo-container {
+        align-self: center;
+    }
+}
