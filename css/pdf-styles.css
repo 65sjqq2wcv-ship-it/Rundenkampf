@@ -1,6 +1,6 @@
 /* =================================================================
    PDF EXPORT STYLES - Rundenkampfbericht
-   Optimierte Styles für PDF-Export
+   Korrigierte Version ohne verwirrende Tabellen-Formatierung
    ================================================================= */
 
 * {
@@ -74,7 +74,7 @@ body {
 }
 
 .main-title {
-	font-family: Arial, sans-serif;
+    font-family: Arial, sans-serif;
     font-size: 24px;
     font-weight: bold;
     color: #333;
@@ -83,7 +83,7 @@ body {
 }
 
 .subtitle-info {
-	font-family: Arial, sans-serif;
+    font-family: Arial, sans-serif;
     font-size: 11px;
     text-align: left;
     color: #555;
@@ -124,7 +124,7 @@ body {
 }
 
 /* =================================================================
-   TABLE STYLES
+   VERBESSERTE TABELLEN-STYLES
    ================================================================= */
 
 .results-table {
@@ -160,65 +160,88 @@ body {
 }
 
 /* =================================================================
-   COLUMN ALIGNMENTS
+   KLARE SPALTEN-AUSRICHTUNG
    ================================================================= */
 
 .name-header {
-    text-align: left;
+    text-align: left !important;
     width: 40%;
 }
 
 .name-cell {
-    text-align: left;
+    text-align: left !important;
     width: 40%;
 }
 
 .score-header,
 .score-cell {
     width: 20%;
-    text-align: center;
+    text-align: center !important;
 }
 
 .series-header,
 .series-cell {
     width: 12%;
-    text-align: center;
+    text-align: center !important;
 }
 
 .total-header,
 .total-cell {
-    text-align: right;
+    text-align: right !important;
     width: 20%;
     font-weight: bold;
 }
 
 /* =================================================================
-   ROW STYLES
+   VERBESSERTE ZEILEN-FORMATIERUNG
    ================================================================= */
 
+/* Standard Zeilen - weiß */
+.results-table tr {
+    background-color: white;
+    border: none;
+}
+
+.results-table td {
+    border: none;
+    padding: 8px 6px;
+}
+
+/* Zebra-Streifen - nur für gerade Zeilen */
 .table-row.zebra {
     background-color: #f8f9fa !important;
 }
 
+/* Schlechtester Schütze - hat immer Vorrang */
 .table-row.worst-shooter {
     background-color: #ffebee !important;
-    font-style: italic !important;
-    font-weight: normal !important;
     color: #d32f2f !important;
 }
 
 .worst-shooter .name-cell {
     font-style: italic !important;
+    color: #d32f2f !important;
 }
 
 .worst-shooter .total-cell {
     font-weight: bold !important;
+    color: #d32f2f !important;
 }
+
+/* Verhindere Klassen-Überschneidungen */
+.table-row.zebra.worst-shooter {
+    background-color: #ffebee !important; /* Worst Shooter hat Vorrang */
+    color: #d32f2f !important;
+}
+
+/* =================================================================
+   MANNSCHAFTS-SUMMEN ZEILE
+   ================================================================= */
 
 .total-row {
     background-color: #e9ecef !important;
-    font-size: 11px !important;
     font-weight: bold !important;
+    border-top: 2px solid #dee2e6 !important;
 }
 
 .total-row td:first-child {
@@ -236,8 +259,8 @@ body {
 }
 
 .total-value {
-    text-align: center;
-    font-weight: bold;
+    text-align: right !important;
+    font-weight: bold !important;
     font-size: 11px !important;
 }
 
@@ -281,6 +304,23 @@ body {
     body {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+    }
+    
+    /* Erzwinge korrekte Farben im Druck */
+    .table-row.zebra {
+        background-color: #f8f9fa !important;
+        -webkit-print-color-adjust: exact;
+    }
+    
+    .table-row.worst-shooter {
+        background-color: #ffebee !important;
+        color: #d32f2f !important;
+        -webkit-print-color-adjust: exact;
+    }
+    
+    .total-row {
+        background-color: #e9ecef !important;
+        -webkit-print-color-adjust: exact;
     }
 }
 
@@ -357,7 +397,7 @@ body {
     
     .total-value {
         font-size: 11px !important;
-        text-align: center !important;
+        text-align: right !important;
     }
     
     .name-header,
@@ -370,23 +410,6 @@ body {
     .results-table td {
         padding: 6px 4px !important;
         font-size: 10px !important;
-    }
-    
-    .header-content {
-        display: flex !important;
-        align-items: flex-start !important;
-        gap: 15px !important;
-    }
-    
-    .logo-container {
-        flex-shrink: 0 !important;
-        width: 90px !important;
-        height: 90px !important;
-    }
-    
-    .title-container {
-        flex: 1 !important;
-        text-align: left !important;
     }
 }
 
@@ -431,18 +454,27 @@ body {
     }
     
     .total-value {
-        text-align: center !important;
+        text-align: right !important;
         font-size: 11px !important;
     }
 }
 
-/* Erzwinge linksbündige Ausrichtung für Namen */
-.name-header {
+/* =================================================================
+   FINALE SICHERHEITSREGELN
+   ================================================================= */
+
+/* Erzwinge korrekte Ausrichtungen */
+.name-header, .name-cell {
     text-align: left !important;
 }
 
-.name-cell {
-    text-align: left !important;
+.total-header, .total-cell {
+    text-align: right !important;
+}
+
+.score-header, .score-cell, 
+.series-header, .series-cell {
+    text-align: center !important;
 }
 
 .total-label {
@@ -451,6 +483,6 @@ body {
 }
 
 .total-value {
-    text-align: center !important;
+    text-align: right !important;
     font-size: 11px !important;
 }

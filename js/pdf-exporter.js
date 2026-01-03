@@ -208,24 +208,38 @@ class PDFExporter {
         `;
     }
 
-    createStandardTable(shooterData, worstShooterId, teamTotal) {
+    // Verbesserte Tabellen-Erstellung ohne verwirrende Formatierung
+
+createStandardTable(shooterData, worstShooterId, teamTotal) {
     let rows = '';
     
-    // ALLE Schützen anzeigen (sortiert nach Leistung, beste zuerst)
-    const sortedShooterData = shooterData.sort((a, b) => b[3] - a[3]); // Nach Gesamtpunkten sortieren
+    // ALLE Schützen anzeigen (sortiert nach Name)
+    const sortedShooterData = shooterData.sort((a, b) => 
+        a[0].name.localeCompare(b[0].name, 'de', { sensitivity: 'base' })
+    );
     
     sortedShooterData.forEach((data, index) => {
         const [shooter, precision, duell, total] = data;
         const isWorst = shooter.id === worstShooterId;
-        const zebraClass = index % 2 === 1 ? 'zebra' : '';
-        const worstClass = isWorst ? 'worst-shooter' : '';
+        
+        // Einfache Logik: Worst Shooter rot, sonst abwechselnd weiß/grau
+        let rowClass = '';
+        let backgroundColor = '';
+        
+        if (isWorst) {
+            rowClass = 'worst-shooter';
+            backgroundColor = 'background-color: #ffebee;';
+        } else if (index % 2 === 1) {
+            rowClass = 'zebra';
+            backgroundColor = 'background-color: #f8f9fa;';
+        }
         
         rows += `
-        <tr class="table-row ${zebraClass} ${worstClass}">
-            <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
+        <tr class="table-row ${rowClass}" style="${backgroundColor}">
+            <td class="name-cell" style="${isWorst ? 'font-style: italic; color: #d32f2f;' : ''}">${UIUtils.escapeHtml(shooter.name)}</td>
             <td class="score-cell">${precision}</td>
             <td class="score-cell">${duell}</td>
-            <td class="total-cell">${total}</td>
+            <td class="total-cell" style="${isWorst ? 'font-weight: bold; color: #d32f2f;' : ''}">${total}</td>
         </tr>
         `;
     });
@@ -242,7 +256,7 @@ class PDFExporter {
         </thead>
         <tbody>
             ${rows}
-            <tr class="total-row">
+            <tr class="total-row" style="background-color: #e9ecef; font-weight: bold;">
                 <td colspan="3" class="total-label">Mannschaft Gesamt</td>
                 <td class="total-value">${teamTotal}</td>
             </tr>
@@ -251,18 +265,29 @@ class PDFExporter {
     `;
 }
 
-
-    createAnnexTable(shooterData, worstShooterId, teamTotal) {
+createAnnexTable(shooterData, worstShooterId, teamTotal) {
     let rows = '';
     
-    // ALLE Schützen anzeigen (sortiert nach Leistung, beste zuerst)
-    const sortedShooterData = shooterData.sort((a, b) => b[2] - a[2]); // Nach Gesamtpunkten sortieren
+    // ALLE Schützen anzeigen (sortiert nach Name)
+    const sortedShooterData = shooterData.sort((a, b) => 
+        a[0].name.localeCompare(b[0].name, 'de', { sensitivity: 'base' })
+    );
     
     sortedShooterData.forEach((data, index) => {
         const [shooter, seriesSums, total] = data;
         const isWorst = shooter.id === worstShooterId;
-        const zebraClass = index % 2 === 1 ? 'zebra' : '';
-        const worstClass = isWorst ? 'worst-shooter' : '';
+        
+        // Einfache Logik: Worst Shooter rot, sonst abwechselnd weiß/grau
+        let rowClass = '';
+        let backgroundColor = '';
+        
+        if (isWorst) {
+            rowClass = 'worst-shooter';
+            backgroundColor = 'background-color: #ffebee;';
+        } else if (index % 2 === 1) {
+            rowClass = 'zebra';
+            backgroundColor = 'background-color: #f8f9fa;';
+        }
         
         let seriesCells = '';
         for (let i = 0; i < 5; i++) {
@@ -271,10 +296,10 @@ class PDFExporter {
         }
         
         rows += `
-        <tr class="table-row ${zebraClass} ${worstClass}">
-            <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
+        <tr class="table-row ${rowClass}" style="${backgroundColor}">
+            <td class="name-cell" style="${isWorst ? 'font-style: italic; color: #d32f2f;' : ''}">${UIUtils.escapeHtml(shooter.name)}</td>
             ${seriesCells}
-            <td class="total-cell">${total}</td>
+            <td class="total-cell" style="${isWorst ? 'font-weight: bold; color: #d32f2f;' : ''}">${total}</td>
         </tr>
         `;
     });
@@ -294,7 +319,7 @@ class PDFExporter {
         </thead>
         <tbody>
             ${rows}
-            <tr class="total-row">
+            <tr class="total-row" style="background-color: #e9ecef; font-weight: bold;">
                 <td colspan="6" class="total-label">Mannschaft Gesamt</td>
                 <td class="total-value">${teamTotal}</td>
             </tr>
@@ -455,12 +480,12 @@ class PDFExporter {
         .total-header, .total-cell { text-align: right; width: 20%; font-weight: bold; }
         .table-row.zebra { background-color: #f8f9fa; }
         .table-row.worst-shooter { background-color: #ffebee !important; color: #d32f2f !important; }
-        .worst-shooter .name-cell, .worst-shooter .total-cell { font-weight: bold; }
+        .worst-shooter .name-cell, .worst-shooter .total-cell { font-weight: italic; }
         .total-row { background-color: #e9ecef !important; font-weight: bold; border-top: 2px solid #dee2e6; }
         .total-row td:first-child { border-bottom-left-radius: 12px; }
         .total-row td:last-child { border-bottom-right-radius: 12px; }
         .total-label { text-align: left; font-size: 10px !important; font-weight: bold; }
-        .total-value { text-align: center; font-weight: bold; font-size: 12px !important; }
+        .total-value { text-align: left; font-weight: bold; font-size: 12px !important; }
         .pdf-footer { margin-top: 30px; page-break-inside: avoid; }
         .footer-line { height: 2px; background-color: #666; margin-bottom: 12px; }
         .footer-text { font-size: 9px; line-height: 1.4; color: #666; text-align: justify; max-width: 100%; }
