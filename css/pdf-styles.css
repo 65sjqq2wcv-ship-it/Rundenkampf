@@ -197,7 +197,7 @@ body {
    ================================================================= */
 
 .table-row.zebra {
-    background-color: #f8f9fa;
+    background-color: #f8f9fa !important;
 }
 
 .table-row.worst-shooter {
@@ -222,17 +222,17 @@ body {
 }
 
 .total-row td:first-child {
-    border-bottom-left-radius: 12px;
+    border-bottom-left-radius: 12px !important;
 }
 
 .total-row td:last-child {
-    border-bottom-right-radius: 12px;
+    border-bottom-right-radius: 12px !important;
 }
 
 .total-label {
-    text-align: left;
+    text-align: left !important;
     font-size: 11px !important;
-    font-weight: bold;
+    font-weight: bold !important;
 }
 
 .total-value {
