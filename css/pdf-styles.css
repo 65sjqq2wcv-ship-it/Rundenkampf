@@ -462,6 +462,25 @@ body {
 /* =================================================================
    FINALE SICHERHEITSREGELN
    ================================================================= */
+.main-title {
+    font-family: Arial, sans-serif !important;
+    font-size: 24px !important;
+    font-weight: bold !important;
+    color: #333 !important;
+    margin-bottom: 12px !important;
+    text-align: left !important;
+}
+
+.subtitle-info {
+    font-family: Arial, sans-serif !important;
+    font-size: 11px !important;
+    text-align: left !important;
+    color: #555 !important;
+}
+
+.info-row {
+    margin-bottom: 3px;
+}
 
 /* Erzwinge korrekte Ausrichtungen */
 .name-header, .name-cell {
