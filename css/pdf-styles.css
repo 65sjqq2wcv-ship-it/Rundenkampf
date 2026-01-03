@@ -67,7 +67,7 @@ body {
 }
 
 .title-container {
-    flex: 0;
+    flex: 1;
 }
 
 .main-title {
@@ -283,34 +283,44 @@ body {
     }
     
     .header-content {
-        flex-direction: column;
-        text-align: center;
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: 15px !important;
     }
     
     .logo-container {
-        align-self: center;
+        flex-shrink: 0 !important;
+        width: 60px !important;
+        height: 60px !important;
+    }
+    
+    .title-container {
+        flex: 1 !important;
+        text-align: left !important;
     }
 }
 
 /* =================================================================
-   iOS/MOBILE OPTIMIZATIONS
+   iOS/MOBILE OPTIMIZATIONS - KORRIGIERTE VERSION
    ================================================================= */
 
 /* iOS Safari spezifische Fixes */
 @media screen and (-webkit-min-device-pixel-ratio: 2) {
     .header-content {
-        flex-direction: column !important;
-        text-align: center !important;
+        display: flex !important;
+        align-items: flex-start !important;
         gap: 15px !important;
     }
     
     .logo-container {
-        align-self: center !important;
-        margin: 0 auto !important;
+        flex-shrink: 0 !important;
+        width: 80px !important;
+        height: 80px !important;
     }
     
     .title-container {
-        text-align: center !important;
+        flex: 1 !important;
+        text-align: left !important;
     }
 }
 
@@ -322,6 +332,7 @@ body {
     
     .main-title {
         font-size: 20px !important;
+        text-align: left !important;
     }
     
     .team-title {
@@ -351,31 +362,52 @@ body {
     }
     
     .header-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 15px;
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: 15px !important;
     }
     
     .logo-container {
-        align-self: center;
-        width: 60px;
-        height: 60px;
+        flex-shrink: 0 !important;
+        width: 60px !important;
+        height: 60px !important;
+    }
+    
+    .title-container {
+        flex: 1 !important;
+        text-align: left !important;
     }
 }
 
-/* iPhone spezifische Anpassungen */
+/* iPhone spezifische Anpassungen - KORRIGIERTE VERSION */
 @supports (-webkit-touch-callout: none) {
     .pdf-container {
         padding: 15px !important;
     }
     
     .header-content {
-        flex-direction: column !important;
-        text-align: center !important;
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: 20px !important;
     }
     
     .logo-container {
-        align-self: center !important;
+        flex-shrink: 0 !important;
+        width: 80px !important;
+        height: 80px !important;
+    }
+    
+    .title-container {
+        flex: 1 !important;
+        text-align: left !important;
+    }
+    
+    .main-title {
+        text-align: left !important;
+    }
+    
+    .subtitle-info {
+        text-align: left !important;
     }
     
     .total-row {
