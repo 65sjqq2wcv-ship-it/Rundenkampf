@@ -597,9 +597,9 @@ class PDFExporter {
                 quality: 0.95 
             },
             html2canvas: { 
-                scale: 2,
+                scale: 1,
                 useCORS: true,
-                letterRendering: true,
+                letterRendering: false,
                 allowTaint: false,
                 backgroundColor: '#ffffff',
                 removeContainer: true,

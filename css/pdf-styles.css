@@ -202,17 +202,24 @@ body {
 
 .table-row.worst-shooter {
     background-color: #ffebee !important;
+    font-style: italic !important;
+    font-weight: normal !important;
     color: #d32f2f !important;
 }
 
-.worst-shooter .name-cell,
+.worst-shooter .name-cell {
+    font-style: italic !important;
+}
+
 .worst-shooter .total-cell {
-    font-weight: bold;
+    font-weight: bold !important;
 }
 
 .total-row {
     background-color: #e9ecef !important;
-    font-weight: bold;
+    font-size: 11px !important;
+    font-weight: bold !important;
+    
     border-top: 2px solid #dee2e6;
 }
 
