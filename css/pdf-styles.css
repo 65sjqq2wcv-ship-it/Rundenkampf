@@ -219,8 +219,6 @@ body {
     background-color: #e9ecef !important;
     font-size: 11px !important;
     font-weight: bold !important;
-    
-    border-top: 2px solid #dee2e6;
 }
 
 .total-row td:first-child {
