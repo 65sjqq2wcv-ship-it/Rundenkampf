@@ -510,7 +510,7 @@ class EntryView {
 		}
 	}
 
-	addTextOverlay(ctx, canvas, shooterInfo) {
+addTextOverlay(ctx, canvas, shooterInfo) {
 	// Text-Stil setzen
 	ctx.font = 'bold 24px Arial';
 	ctx.textAlign = 'left';
@@ -520,34 +520,57 @@ class EntryView {
 		`Name: ${shooterInfo.name}`,
 		`Verein: ${shooterInfo.team}`,
 		`Disziplin: ${shooterInfo.discipline}`,
-		`Datum: ${shooterInfo.date}`,
+		`Wettkampfdatum: ${shooterInfo.date}`,
 		//`Wettkampf: ${shooterInfo.competitionType}`
 	];
 
 	const lineHeight = 30;
 	const padding = 15;
+	const cornerRadius = 12; // Radius für abgerundete Ecken
 	const textHeight = textLines.length * lineHeight + padding * 2;
 	
 	// Maximale Textbreite ermitteln
 	const maxTextWidth = Math.max(...textLines.map(line => ctx.measureText(line).width));
 	const textWidth = maxTextWidth + padding * 2;
 
-	// Weißen Hintergrund zeichnen
-	ctx.fillStyle = 'rgba(255, 255, 255, 0.95)'; // Leicht transparenter weißer Hintergrund
-	ctx.fillRect(10, canvas.height - textHeight - 10, textWidth, textHeight);
+	// Position links oben (statt links unten)
+	const x = 10;
+	const y = 10;
 
-	// Schwarzen Rand um das Textfeld (optional für bessere Abgrenzung)
+	// Abgerundetes Rechteck für den weißen Hintergrund zeichnen
+	ctx.fillStyle = 'rgba(255, 255, 255, 0.95)'; // Leicht transparenter weißer Hintergrund
+	this.drawRoundedRect(ctx, x, y, textWidth, textHeight, cornerRadius);
+	ctx.fill();
+
+	// Abgerundeten Rand um das Textfeld zeichnen
 	ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
 	ctx.lineWidth = 1;
-	ctx.strokeRect(10, canvas.height - textHeight - 10, textWidth, textHeight);
+	this.drawRoundedRect(ctx, x, y, textWidth, textHeight, cornerRadius);
+	ctx.stroke();
 
 	// Schwarzen Text zeichnen
 	ctx.fillStyle = 'black';
 	textLines.forEach((line, index) => {
-		const y = canvas.height - textHeight - 10 + padding + (index + 1) * lineHeight;
-		ctx.fillText(line, 10 + padding, y);
+		const textY = y + padding + (index + 1) * lineHeight;
+		ctx.fillText(line, x + padding, textY);
 	});
 }
+
+// Hilfsmethode für abgerundete Rechtecke
+drawRoundedRect(ctx, x, y, width, height, radius) {
+	ctx.beginPath();
+	ctx.moveTo(x + radius, y);
+	ctx.lineTo(x + width - radius, y);
+	ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+	ctx.lineTo(x + width, y + height - radius);
+	ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+	ctx.lineTo(x + radius, y + height);
+	ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+	ctx.lineTo(x, y + radius);
+	ctx.quadraticCurveTo(x, y, x + radius, y);
+	ctx.closePath();
+}
+
 	downloadPhoto(canvas, shooterInfo) {
 		try {
 			// Dateiname erstellen
