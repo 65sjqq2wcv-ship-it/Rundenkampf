@@ -1,5 +1,5 @@
 // =================================================================
-// ENTRY VIEW - Sichere und wartbare Version
+// ENTRY VIEW - Erweitert mit Scheibendokumentation
 // =================================================================
 
 class EntryView {
@@ -10,6 +10,9 @@ class EntryView {
 		this.shots = new Array(40).fill(null);
 		this.eventRegistry = new EventRegistry();
 		this.isDestroyed = false;
+		// Neu für Scheibendokumentation
+		this.cameraStream = null;
+		this.isCapturing = false;
 	}
 
 	// =================================================================
@@ -191,7 +194,7 @@ class EntryView {
 	}
 
 	// =================================================================
-	// CONTROLS SECTION
+	// CONTROLS SECTION - Erweitert mit Kamera-Button
 	// =================================================================
 
 	createControlsSection() {
@@ -229,6 +232,14 @@ class EntryView {
 		clearBtn.style.cssText = 'padding: 10px 14px; font-size: 14px;';
 		clearBtn.textContent = 'Leeren';
 		buttonsContainer.appendChild(clearBtn);
+
+		// NEU: Scheibe Dokumentieren Button
+		const cameraBtn = document.createElement('button');
+		cameraBtn.className = 'btn btn-secondary';
+		cameraBtn.id = 'cameraBtn';
+		cameraBtn.style.cssText = 'padding: 10px 14px; font-size: 14px; background-color: #34c759; color: white;';
+		cameraBtn.textContent = '📷 Scheibe';
+		buttonsContainer.appendChild(cameraBtn);
 
 		flexContainer.appendChild(buttonsContainer);
 		card.appendChild(flexContainer);
@@ -290,6 +301,290 @@ class EntryView {
 		this.updateTeamSelect();
 		this.updateShooterSelect();
 	}
+	
+	// =================================================================
+	// NEU: SCHEIBENDOKUMENTATION
+	// =================================================================
+
+	async documentTarget() {
+		try {
+			// Validierung
+			if (!this.selectedShooterId) {
+				UIUtils.showError('Bitte wählen Sie zuerst einen Schützen aus.');
+				return;
+			}
+
+			// Schützen-Informationen ermitteln
+			const shooterInfo = this.getShooterInfo();
+			if (!shooterInfo) {
+				UIUtils.showError('Schützeninformationen nicht verfügbar.');
+				return;
+			}
+
+			// Kamera-Modal anzeigen
+			this.showCameraModal(shooterInfo);
+
+		} catch (error) {
+			console.error('Error starting target documentation:', error);
+			UIUtils.showError('Fehler beim Starten der Kamera: ' + error.message);
+		}
+	}
+
+	getShooterInfo() {
+		try {
+			let shooter = null;
+			let teamName = 'Einzelschütze';
+
+			// Schützen finden
+			if (this.selectedTeamId) {
+				const team = storage.teams.find(t => t.id === this.selectedTeamId);
+				if (team) {
+					shooter = team.shooters.find(s => s.id === this.selectedShooterId);
+					teamName = team.name;
+				}
+			} else {
+				shooter = storage.standaloneShooters.find(s => s.id === this.selectedShooterId);
+			}
+
+			if (!shooter) return null;
+
+			return {
+				name: shooter.name,
+				team: teamName,
+				discipline: this.selectedDiscipline,
+				date: new Date().toLocaleDateString('de-DE'),
+				competitionType: storage.selectedCompetitionType || 'Rundenkampf'
+			};
+
+		} catch (error) {
+			console.error('Error getting shooter info:', error);
+			return null;
+		}
+	}
+
+	showCameraModal(shooterInfo) {
+		// Modal Container
+		const modalContent = document.createElement('div');
+		modalContent.style.cssText = 'width: 100%; max-width: 500px;';
+
+		// Kamera-Bereich
+		const cameraContainer = document.createElement('div');
+		cameraContainer.style.cssText = 'position: relative; margin-bottom: 16px;';
+		
+		// Video Element für Kamera-Preview
+		const video = document.createElement('video');
+		video.style.cssText = 'width: 100%; height: 300px; background: #000; border-radius: 8px;';
+		video.autoplay = true;
+		video.muted = true;
+		video.playsInline = true;
+		cameraContainer.appendChild(video);
+
+		// Canvas für Foto (versteckt)
+		const canvas = document.createElement('canvas');
+		canvas.style.display = 'none';
+		cameraContainer.appendChild(canvas);
+
+		// Info-Overlay
+		const infoOverlay = document.createElement('div');
+		infoOverlay.style.cssText = `
+			position: absolute;
+			top: 10px;
+			left: 10px;
+			background: rgba(0,0,0,0.7);
+			color: white;
+			padding: 8px;
+			border-radius: 4px;
+			font-size: 12px;
+			line-height: 1.3;
+		`;
+		infoOverlay.innerHTML = `
+			<strong>${UIUtils.escapeHtml(shooterInfo.name)}</strong><br>
+			${UIUtils.escapeHtml(shooterInfo.team)}<br>
+			${UIUtils.escapeHtml(shooterInfo.discipline)}<br>
+			${shooterInfo.date}
+		`;
+		cameraContainer.appendChild(infoOverlay);
+
+		modalContent.appendChild(cameraContainer);
+
+		// Status-Anzeige
+		const statusDiv = document.createElement('div');
+		statusDiv.id = 'cameraStatus';
+		statusDiv.style.cssText = 'text-align: center; margin-bottom: 16px; font-size: 14px; color: #666;';
+		statusDiv.textContent = 'Kamera wird gestartet...';
+		modalContent.appendChild(statusDiv);
+
+		// Modal erstellen und anzeigen
+		const modal = new ModalComponent('Scheibe dokumentieren', modalContent);
+		
+		modal.addAction('Abbrechen', () => {
+			this.stopCamera();
+		}, false, false);
+
+		modal.addAction('Foto aufnehmen', () => {
+			this.capturePhoto(video, canvas, shooterInfo);
+		}, true, false);
+
+		modal.onCloseHandler(() => {
+			this.stopCamera();
+		});
+
+		modal.show();
+
+		// Kamera starten
+		setTimeout(() => {
+			this.startCamera(video, statusDiv);
+		}, 200);
+	}
+
+	async startCamera(video, statusDiv) {
+		try {
+			// Kamera-Zugriff anfordern
+			const stream = await navigator.mediaDevices.getUserMedia({
+				video: { 
+					facingMode: 'environment', // Rückkamera bevorzugen
+					width: { ideal: 1920 },
+					height: { ideal: 1080 }
+				},
+				audio: false
+			});
+
+			video.srcObject = stream;
+			this.cameraStream = stream;
+			statusDiv.textContent = 'Kamera bereit - Positionieren Sie die Scheibe im Bild';
+			statusDiv.style.color = '#34c759';
+
+		} catch (error) {
+			console.error('Camera access error:', error);
+			statusDiv.textContent = 'Kamera-Zugriff fehlgeschlagen. Überprüfen Sie die Berechtigungen.';
+			statusDiv.style.color = '#ff3b30';
+			
+			UIUtils.showError('Kamera-Zugriff nicht möglich. Stellen Sie sicher, dass die Kamera-Berechtigung erteilt wurde.');
+		}
+	}
+
+	stopCamera() {
+		if (this.cameraStream) {
+			this.cameraStream.getTracks().forEach(track => track.stop());
+			this.cameraStream = null;
+		}
+		this.isCapturing = false;
+	}
+
+	capturePhoto(video, canvas, shooterInfo) {
+		try {
+			if (this.isCapturing) return;
+			this.isCapturing = true;
+
+			// Canvas Größe setzen
+			canvas.width = video.videoWidth || 640;
+			canvas.height = video.videoHeight || 480;
+			
+			const ctx = canvas.getContext('2d');
+			
+			// Video-Frame auf Canvas zeichnen
+			ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+			
+			// Text-Overlay hinzufügen
+			this.addTextOverlay(ctx, canvas, shooterInfo);
+			
+			// Foto als Download anbieten
+			this.downloadPhoto(canvas, shooterInfo);
+			
+			UIUtils.showSuccessMessage('Foto wurde aufgenommen!');
+			
+			// Modal schließen
+			setTimeout(() => {
+				this.stopCamera();
+				// Modal schließen (falls noch offen)
+				const modalOverlay = document.querySelector('.modal-overlay');
+				if (modalOverlay) {
+					modalOverlay.remove();
+				}
+			}, 1000);
+
+		} catch (error) {
+			console.error('Error capturing photo:', error);
+			UIUtils.showError('Fehler beim Aufnehmen des Fotos: ' + error.message);
+			this.isCapturing = false;
+		}
+	}
+
+	addTextOverlay(ctx, canvas, shooterInfo) {
+	// Text-Stil setzen
+	ctx.font = 'bold 24px Arial';
+	ctx.textAlign = 'left';
+
+	// Text-Inhalt
+	const textLines = [
+		`Name: ${shooterInfo.name}`,
+		`Verein: ${shooterInfo.team}`,
+		`Disziplin: ${shooterInfo.discipline}`,
+		`Datum: ${shooterInfo.date}`,
+		//`Wettkampf: ${shooterInfo.competitionType}`
+	];
+
+	const lineHeight = 30;
+	const padding = 15;
+	const textHeight = textLines.length * lineHeight + padding * 2;
+	
+	// Maximale Textbreite ermitteln
+	const maxTextWidth = Math.max(...textLines.map(line => ctx.measureText(line).width));
+	const textWidth = maxTextWidth + padding * 2;
+
+	// Weißen Hintergrund zeichnen
+	ctx.fillStyle = 'rgba(255, 255, 255, 0.95)'; // Leicht transparenter weißer Hintergrund
+	ctx.fillRect(10, canvas.height - textHeight - 10, textWidth, textHeight);
+
+	// Schwarzen Rand um das Textfeld (optional für bessere Abgrenzung)
+	ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+	ctx.lineWidth = 1;
+	ctx.strokeRect(10, canvas.height - textHeight - 10, textWidth, textHeight);
+
+	// Schwarzen Text zeichnen
+	ctx.fillStyle = 'black';
+	textLines.forEach((line, index) => {
+		const y = canvas.height - textHeight - 10 + padding + (index + 1) * lineHeight;
+		ctx.fillText(line, 10 + padding, y);
+	});
+}
+	downloadPhoto(canvas, shooterInfo) {
+		try {
+			// Dateiname erstellen
+			const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+			const fileName = `Scheibe_${shooterInfo.name.replace(/[^a-zA-Z0-9]/g, '_')}_${shooterInfo.discipline.replace(/[^a-zA-Z0-9]/g, '_')}_${timestamp}.jpg`;
+
+			// Canvas zu Blob konvertieren
+			canvas.toBlob((blob) => {
+				if (!blob) {
+					throw new Error('Fehler beim Erstellen des Bildes');
+				}
+
+				// Download-Link erstellen
+				const url = URL.createObjectURL(blob);
+				const link = document.createElement('a');
+				link.href = url;
+				link.download = fileName;
+				link.style.display = 'none';
+				
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				
+				// URL freigeben
+				setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+			}, 'image/jpeg', 0.95);
+
+		} catch (error) {
+			console.error('Error downloading photo:', error);
+			UIUtils.showError('Fehler beim Speichern des Fotos: ' + error.message);
+		}
+	}
+
+	// =================================================================
+	// ERWEITERTE CONTROLS SETUP
+	// =================================================================
 
 	setupControls() {
 		if (this.isDestroyed) return;
@@ -298,6 +593,7 @@ class EntryView {
 
 		const saveBtn = document.getElementById('saveBtn');
 		const clearBtn = document.getElementById('clearBtn');
+		const cameraBtn = document.getElementById('cameraBtn'); // NEU
 
 		if (saveBtn) {
 			this.eventRegistry.register(saveBtn, 'click', () => this.saveEntry());
@@ -305,6 +601,11 @@ class EntryView {
 
 		if (clearBtn) {
 			this.eventRegistry.register(clearBtn, 'click', () => this.clear());
+		}
+
+		// NEU: Kamera Button Event Listener
+		if (cameraBtn) {
+			this.eventRegistry.register(cameraBtn, 'click', () => this.documentTarget());
 		}
 	}
 
@@ -753,11 +1054,12 @@ class EntryView {
 	}
 
 	// =================================================================
-	// CLEANUP
+	// ERWEITERTE CLEANUP-METHODE
 	// =================================================================
 
 	destroy() {
 		this.isDestroyed = true;
+		this.stopCamera(); // NEU: Kamera stoppen
 		this.eventRegistry.cleanupAll();
 		this.selectedTeamId = null;
 		this.selectedShooterId = null;
