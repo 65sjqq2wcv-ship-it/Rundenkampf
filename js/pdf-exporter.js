@@ -256,8 +256,10 @@ createStandardTable(shooterData, worstShooterId, teamTotal) {
         </thead>
         <tbody>
             ${rows}
-            <tr class="total-row" style="background-color: #e9ecef; font-weight: bold;">
-                <td colspan="3" class="total-label">Mannschaft Gesamt</td>
+            <tr class="total-row" style="background-color: #e9ecef !important; font-weight: bold !important;">
+                <td class="total-label">Mannschaft Gesamt</td>
+                <td class="total-label"></td>
+                <td class="total-label"></td>
                 <td class="total-value">${teamTotal}</td>
             </tr>
         </tbody>
@@ -320,7 +322,12 @@ createAnnexTable(shooterData, worstShooterId, teamTotal) {
         <tbody>
             ${rows}
             <tr class="total-row" style="background-color: #e9ecef; font-weight: bold;">
-                <td colspan="6" class="total-label">Mannschaft Gesamt</td>
+                <td class="total-label">Mannschaft Gesamt</td>
+                <td class="total-value"></td>
+                <td class="total-value"></td>
+                <td class="total-value"></td>
+                <td class="total-value"></td>
+                <td class="total-value"></td>
                 <td class="total-value">${teamTotal}</td>
             </tr>
         </tbody>
