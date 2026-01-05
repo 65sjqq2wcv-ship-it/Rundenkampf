@@ -371,78 +371,78 @@ getShooterInfo() {
 }
 
 showCameraModal(shooterInfo) {
-	// Modal Container
-	const modalContent = document.createElement('div');
-	modalContent.style.cssText = 'width: 100%; max-width: 500px;';
+    // Modal Container
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = 'width: 100%; max-width: 500px;';
 
-	// Kamera-Bereich
-	const cameraContainer = document.createElement('div');
-	cameraContainer.style.cssText = 'position: relative; margin-bottom: 16px;';
-	
-	// Video Element für Kamera-Preview
-	const video = document.createElement('video');
-	video.style.cssText = 'width: 100%; height: 300px; background: #000; border-radius: 8px; object-fit: cover; aspect-ratio: 1/1;'; // Quadratisch
-	video.autoplay = true;
-	video.muted = true;
-	video.playsInline = true;
-	cameraContainer.appendChild(video);
+    // Kamera-Bereich
+    const cameraContainer = document.createElement('div');
+    cameraContainer.style.cssText = 'position: relative; margin-bottom: 16px;';
+    
+    // Video Element für Kamera-Preview
+    const video = document.createElement('video');
+    video.style.cssText = 'width: 100%; height: 300px; background: #000; border-radius: 8px; object-fit: cover; aspect-ratio: 1/1;'; // Quadratisch
+    video.autoplay = true;
+    video.muted = true;
+    video.playsInline = true;
+    cameraContainer.appendChild(video);
 
-	// Canvas für Foto (versteckt)
-	const canvas = document.createElement('canvas');
-	canvas.style.display = 'none';
-	cameraContainer.appendChild(canvas);
+    // Canvas für Foto (versteckt)
+    const canvas = document.createElement('canvas');
+    canvas.style.display = 'none';
+    cameraContainer.appendChild(canvas);
 
-	// Info-Overlay
-	const infoOverlay = document.createElement('div');
-	infoOverlay.style.cssText = `
-	position: absolute;
-	top: 10px;
-	left: 10px;
-	background: rgba(0,0,0,0.7);
-	color: white;
-	padding: 8px;
-	border-radius: 4px;
-	font-size: 12px;
-	line-height: 1.3;
-	`;
-	infoOverlay.innerHTML = `
-<strong>${UIUtils.escapeHtml(shooterInfo.name)}</strong><br>
-${UIUtils.escapeHtml(shooterInfo.team)}<br>
-${UIUtils.escapeHtml(shooterInfo.discipline)}<br>
-${shooterInfo.date}
+    // Info-Overlay - ANGEPASST
+    const infoOverlay = document.createElement('div');
+    infoOverlay.style.cssText = `
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.3;
+    `;
+    infoOverlay.innerHTML = `
+<strong>Name: ${UIUtils.escapeHtml(shooterInfo.name)}</strong><br>
+Disziplin: ${UIUtils.escapeHtml(shooterInfo.currentDiscipline)}<br>
+Scheibe: ${UIUtils.escapeHtml(shooterInfo.discipline)}<br>
+Wettkampfdatum: ${shooterInfo.date}
 `;
-cameraContainer.appendChild(infoOverlay);
+    cameraContainer.appendChild(infoOverlay);
 
-modalContent.appendChild(cameraContainer);
+    modalContent.appendChild(cameraContainer);
 
-// Status-Anzeige
-const statusDiv = document.createElement('div');
-statusDiv.id = 'cameraStatus';
-statusDiv.style.cssText = 'text-align: center; margin-bottom: 16px; font-size: 14px; color: #666;';
-statusDiv.textContent = 'Kamera wird gestartet...';
-modalContent.appendChild(statusDiv);
+    // Status-Anzeige
+    const statusDiv = document.createElement('div');
+    statusDiv.id = 'cameraStatus';
+    statusDiv.style.cssText = 'text-align: center; margin-bottom: 16px; font-size: 14px; color: #666;';
+    statusDiv.textContent = 'Kamera wird gestartet...';
+    modalContent.appendChild(statusDiv);
 
-// Modal erstellen und anzeigen
-const modal = new ModalComponent('Scheibe dokumentieren', modalContent);
+    // Modal erstellen und anzeigen
+    const modal = new ModalComponent('Scheibe dokumentieren', modalContent);
 
-modal.addAction('Abbrechen', () => {
-	this.stopCamera();
-}, false, false);
+    modal.addAction('Abbrechen', () => {
+        this.stopCamera();
+    }, false, false);
 
-modal.addAction('Foto aufnehmen', () => {
-	this.capturePhoto(video, canvas, shooterInfo);
-}, true, false);
+    modal.addAction('Foto aufnehmen', () => {
+        this.capturePhoto(video, canvas, shooterInfo);
+    }, true, false);
 
-modal.onCloseHandler(() => {
-	this.stopCamera();
-});
+    modal.onCloseHandler(() => {
+        this.stopCamera();
+    });
 
-modal.show();
+    modal.show();
 
-// Kamera starten
-setTimeout(() => {
-	this.startCamera(video, statusDiv);
-}, 200);
+    // Kamera starten
+    setTimeout(() => {
+        this.startCamera(video, statusDiv);
+    }, 200);
 }
 
 async startCamera(video, statusDiv) {
@@ -529,7 +529,7 @@ addTextOverlay(ctx, canvas, shooterInfo) {
     // Text-Inhalt - angepasst nach Anforderungen
     const textLines = [
         `Name: ${shooterInfo.name}`,
-        `Aktuelle Disziplin: ${shooterInfo.currentDiscipline}`, // Ersetzt "Verein"
+        `Disziplin: ${shooterInfo.currentDiscipline}`, // Ersetzt "Verein"
         `Scheibe: ${shooterInfo.discipline}`, // "Disziplin" zu "Scheibe" geändert
         `Wettkampfdatum: ${shooterInfo.date}`
     ];

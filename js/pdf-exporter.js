@@ -236,7 +236,7 @@ createStandardTable(shooterData, worstShooterId, teamTotal) {
         
         rows += `
         <tr class="table-row ${rowClass}" style="${backgroundColor}">
-            <td class="name-cell" style="${isWorst ? 'font-style: italic; color: #d32f2f;' : ''}">${UIUtils.escapeHtml(shooter.name)}</td>
+            <td class="name-cell" style="${isWorst ? 'color: #d32f2f;' : ''}">${UIUtils.escapeHtml(shooter.name)}</td>
             <td class="score-cell">${precision}</td>
             <td class="score-cell">${duell}</td>
             <td class="total-cell" style="${isWorst ? 'font-weight: bold; color: #d32f2f;' : ''}">${total}</td>
@@ -299,7 +299,7 @@ createAnnexTable(shooterData, worstShooterId, teamTotal) {
         
         rows += `
         <tr class="table-row ${rowClass}" style="${backgroundColor}">
-            <td class="name-cell" style="${isWorst ? 'font-style: italic; color: #d32f2f;' : ''}">${UIUtils.escapeHtml(shooter.name)}</td>
+            <td class="name-cell" style="${isWorst ? 'color: #d32f2f;' : ''}">${UIUtils.escapeHtml(shooter.name)}</td>
             ${seriesCells}
             <td class="total-cell" style="${isWorst ? 'font-weight: bold; color: #d32f2f;' : ''}">${total}</td>
         </tr>
