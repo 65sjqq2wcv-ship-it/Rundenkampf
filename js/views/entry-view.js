@@ -406,7 +406,7 @@ showCameraModal(shooterInfo) {
     line-height: 1.3;
     `;
     infoOverlay.innerHTML = `
-<strong>Name: ${UIUtils.escapeHtml(shooterInfo.name)}</strong><br>
+Name: ${UIUtils.escapeHtml(shooterInfo.name)}<br>
 Disziplin: ${UIUtils.escapeHtml(shooterInfo.currentDiscipline)}<br>
 Scheibe: ${UIUtils.escapeHtml(shooterInfo.discipline)}<br>
 Wettkampfdatum: ${shooterInfo.date}
