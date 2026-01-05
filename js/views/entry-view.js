@@ -392,7 +392,7 @@ showCameraModal(shooterInfo) {
 	canvas.style.display = 'none';
 	cameraContainer.appendChild(canvas);
 
-	// === NEU: POSITIONSHILFEN-OVERLAY ===
+	// === POSITIONSHILFEN-OVERLAY ===
 	const guidesOverlay = document.createElement('div');
 	guidesOverlay.className = 'guides-overlay';
 	guidesOverlay.style.cssText = `
@@ -484,7 +484,6 @@ transform: translateX(-50%);
 guidesOverlay.appendChild(centerLineV);
 
 cameraContainer.appendChild(guidesOverlay);
-// === ENDE: POSITIONSHILFEN-OVERLAY ===
 
 // Info-Overlay
 const infoOverlay = document.createElement('div');
@@ -528,15 +527,6 @@ const modal = new ModalComponent('Scheibe dokumentieren', modalContent);
 
 modal.addAction('Abbrechen', () => {
 	this.stopCamera();
-}, false, false);
-
-// === NEU: HILFEN TOGGLE BUTTON ===
-modal.addAction('🎯 Hilfen ein/aus', () => {
-	const overlay = cameraContainer.querySelector('.guides-overlay');
-	if (overlay) {
-	const isVisible = overlay.style.display !== 'none';
-	overlay.style.display = isVisible ? 'none' : 'block';
-}
 }, false, false);
 
 modal.addAction('Foto aufnehmen', () => {
