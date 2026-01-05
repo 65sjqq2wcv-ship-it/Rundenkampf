@@ -331,35 +331,43 @@ this.showCameraModal(shooterInfo);
 }
 
 getShooterInfo() {
-	try {
-	let shooter = null;
-	let teamName = 'Einzelschütze';
+    try {
+        let shooter = null;
+        let teamName = null;
+        let displayName = '';
 
-	// Schützen finden
-	if (this.selectedTeamId) {
-	const team = storage.teams.find(t => t.id === this.selectedTeamId);
-	if (team) {
-	shooter = team.shooters.find(s => s.id === this.selectedShooterId);
-	teamName = team.name;
-}
-} else {
-	shooter = storage.standaloneShooters.find(s => s.id === this.selectedShooterId);
-}
+        // Schützen finden
+        if (this.selectedTeamId) {
+            const team = storage.teams.find(t => t.id === this.selectedTeamId);
+            if (team) {
+                shooter = team.shooters.find(s => s.id === this.selectedShooterId);
+                teamName = team.name;
+                // Mannschaftsschütze: Name - Verein
+                displayName = shooter ? `${shooter.name} - ${teamName}` : '';
+            }
+        } else {
+            shooter = storage.standaloneShooters.find(s => s.id === this.selectedShooterId);
+            // Einzelschütze: nur Name
+            displayName = shooter ? shooter.name : '';
+        }
 
-if (!shooter) return null;
+        if (!shooter) return null;
 
-return {
-	name: shooter.name,
-	team: teamName,
-	discipline: this.selectedDiscipline,
-	date: new Date().toLocaleDateString('de-DE'),
-	competitionType: storage.selectedCompetitionType || 'Rundenkampf'
-};
+        return {
+            name: displayName,
+            shooterName: shooter.name,
+            team: teamName,
+            isTeamShooter: !!teamName,
+            discipline: this.selectedDiscipline,
+            currentDiscipline: storage.selectedDiscipline || 'Keine ausgewählt', // Aus Settings
+            date: new Date().toLocaleDateString('de-DE'),
+            competitionType: storage.selectedCompetitionType || 'Rundenkampf'
+        };
 
-} catch (error) {
-	console.error('Error getting shooter info:', error);
-	return null;
-}
+    } catch (error) {
+        console.error('Error getting shooter info:', error);
+        return null;
+    }
 }
 
 showCameraModal(shooterInfo) {
@@ -513,52 +521,49 @@ capturePhoto(video, canvas, shooterInfo) {
 }
 }
 
-
 addTextOverlay(ctx, canvas, shooterInfo) {
-	// Text-Stil setzen
-	ctx.font = 'bold 24px Arial';
-	ctx.textAlign = 'left';
+    // Text-Stil setzen
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'left';
 
-	// Text-Inhalt
-	const textLines = [
-`Name: ${shooterInfo.name}`,
-`Verein: ${shooterInfo.team}`,
-`Disziplin: ${shooterInfo.discipline}`,
-`Wettkampfdatum: ${shooterInfo.date}`,
-//`Wettkampf: ${shooterInfo.competitionType}`
-];
+    // Text-Inhalt - angepasst nach Anforderungen
+    const textLines = [
+        `Name: ${shooterInfo.name}`,
+        `Aktuelle Disziplin: ${shooterInfo.currentDiscipline}`, // Ersetzt "Verein"
+        `Scheibe: ${shooterInfo.discipline}`, // "Disziplin" zu "Scheibe" geändert
+        `Wettkampfdatum: ${shooterInfo.date}`
+    ];
 
-const lineHeight = 30;
-const padding = 15;
-const cornerRadius = 12; // Radius für abgerundete Ecken
-const textHeight = textLines.length * lineHeight + padding * 2;
+    const lineHeight = 30;
+    const padding = 15;
+    const cornerRadius = 12;
+    const textHeight = textLines.length * lineHeight + padding * 2;
 
-// Maximale Textbreite ermitteln
-const maxTextWidth = Math.max(...textLines.map(line => ctx.measureText(line).width));
-const textWidth = maxTextWidth + padding * 2;
+    // Maximale Textbreite ermitteln
+    const maxTextWidth = Math.max(...textLines.map(line => ctx.measureText(line).width));
+    const textWidth = maxTextWidth + padding * 2;
 
-// Position links oben - GEÄNDERT: Mehr Abstand zum Rand (20px statt 10px)
-const x = 20;
-const y = 20;
+    // Position links oben
+    const x = 20;
+    const y = 20;
 
-// Abgerundetes Rechteck für den weißen Hintergrund zeichnen
-// GEÄNDERT: Mehr Transparenz (0.8 statt 0.95)
-ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'; // Transparenter weißer Hintergrund
-this.drawRoundedRect(ctx, x, y, textWidth, textHeight, cornerRadius);
-ctx.fill();
+    // Abgerundetes Rechteck für den weißen Hintergrund zeichnen
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    this.drawRoundedRect(ctx, x, y, textWidth, textHeight, cornerRadius);
+    ctx.fill();
 
-// Abgerundeten Rand um das Textfeld zeichnen
-ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-ctx.lineWidth = 1;
-this.drawRoundedRect(ctx, x, y, textWidth, textHeight, cornerRadius);
-ctx.stroke();
+    // Abgerundeten Rand um das Textfeld zeichnen
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.lineWidth = 1;
+    this.drawRoundedRect(ctx, x, y, textWidth, textHeight, cornerRadius);
+    ctx.stroke();
 
-// Schwarzen Text zeichnen
-ctx.fillStyle = 'black';
-textLines.forEach((line, index) => {
-	const textY = y + padding + (index + 1) * lineHeight;
-	ctx.fillText(line, x + padding, textY);
-});
+    // Schwarzen Text zeichnen
+    ctx.fillStyle = 'black';
+    textLines.forEach((line, index) => {
+        const textY = y + padding + (index + 1) * lineHeight;
+        ctx.fillText(line, x + padding, textY);
+    });
 }
 
 // Hilfsmethode für abgerundete Rechtecke
@@ -577,41 +582,44 @@ drawRoundedRect(ctx, x, y, width, height, radius) {
 }
 
 downloadPhoto(canvas, shooterInfo) {
-	try {
-	// Dateiname erstellen im Format: Datum_Verein_Name_Disziplin
-	const date = new Date().toLocaleDateString('de-DE').replace(/\./g, '-'); // DD-MM-YYYY
-	const verein = shooterInfo.team.replace(/[^a-zA-Z0-9]/g, '_');
-	const name = shooterInfo.name.replace(/[^a-zA-Z0-9]/g, '_');
-	const disziplin = shooterInfo.discipline.replace(/[^a-zA-Z0-9]/g, '_');
-	
-const fileName = `${date}_${verein}_${name}_${disziplin}.jpg`;
+    try {
+        // Dateiname erstellen im Format: <Datum>-<Name>-<Scheibe>
+        const date = new Date().toLocaleDateString('de-DE').replace(/\./g, '-'); // DD-MM-YYYY
+        
+        // Name normalisieren (bereits mit Verein kombiniert falls Mannschaftsschütze)
+        const normalizedName = this.normalizeFileName(shooterInfo.name);
+        
+        // Scheibe/Disziplin normalisieren
+        const normalizedDiscipline = this.normalizeFileName(shooterInfo.discipline);
+        
+        const fileName = `${date}-${normalizedName}-${normalizedDiscipline}.jpg`;
 
-// Canvas zu Blob konvertieren
-canvas.toBlob((blob) => {
-	if (!blob) {
-	throw new Error('Fehler beim Erstellen des Bildes');
-}
+        // Canvas zu Blob konvertieren
+        canvas.toBlob((blob) => {
+            if (!blob) {
+                throw new Error('Fehler beim Erstellen des Bildes');
+            }
 
-// Download-Link erstellen
-const url = URL.createObjectURL(blob);
-const link = document.createElement('a');
-link.href = url;
-link.download = fileName;
-link.style.display = 'none';
+            // Download-Link erstellen
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            link.style.display = 'none';
 
-document.body.appendChild(link);
-link.click();
-document.body.removeChild(link);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
 
-// URL freigeben
-setTimeout(() => URL.revokeObjectURL(url), 1000);
+            // URL freigeben
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-}, 'image/jpeg', 0.95);
+        }, 'image/jpeg', 0.95);
 
-} catch (error) {
-	console.error('Error downloading photo:', error);
-	UIUtils.showError('Fehler beim Speichern des Fotos: ' + error.message);
-}
+    } catch (error) {
+        console.error('Error downloading photo:', error);
+        UIUtils.showError('Fehler beim Speichern des Fotos: ' + error.message);
+    }
 }
 
 // =================================================================
@@ -787,6 +795,18 @@ updateKeypad() {
 } else {
 	this.createStandardKeypad(keypadContainer);
 }
+}
+
+normalizeFileName(text) {
+    return text
+        .replace(/ä/g, 'ae')
+        .replace(/ö/g, 'oe')
+        .replace(/ü/g, 'ue')
+        .replace(/Ä/g, 'Ae')
+        .replace(/Ö/g, 'Oe')
+        .replace(/Ü/g, 'Ue')
+        .replace(/ß/g, 'ss')
+        .replace(/[^a-zA-Z0-9]/g, '_');
 }
 
 createStandardKeypad(container) {

@@ -181,13 +181,13 @@ class OverviewView {
 				font-size: 12px;
 				border-top: 1px solid #f0f0f0;
 				${index % 2 === 1 ? 'background: #f8f9fa;' : ''}
-				${isWorst ? 'color: #ff3b30;' : ''}
+				${isWorst ? 'color: #ff3b30; background-color: #ffebee;' : ''}
 			`;
 			row.innerHTML = `
-				<div style="overflow: hidden; text-overflow: ellipsis; ${isWorst ? 'text-decoration: underline;' : ''}">${UIUtils.escapeHtml(shooter.name)}</div>
+				<div style="overflow: hidden; text-overflow: ellipsis; ${isWorst ? 'text-decoration: normal;' : ''}">${UIUtils.escapeHtml(shooter.name)}</div>
 				<div style="text-align: center;">${precision}</div>
 				<div style="text-align: center;">${duell}</div>
-				<div style="text-align: right; font-weight: 500; ${isWorst ? 'text-decoration: underline;' : ''}">${total}</div>
+				<div style="text-align: right; font-weight: 500; ${isWorst ? 'text-decoration: normal;' : ''}">${total}</div>
 			`;
 			table.appendChild(row);
 		});
@@ -267,10 +267,10 @@ class OverviewView {
 				font-size: 12px;
 				border-top: 1px solid #f0f0f0;
 				${index % 2 === 1 ? 'background: #f8f9fa;' : ''}
-				${isWorst ? 'color: #ff3b30;' : ''}
+				${isWorst ? 'color: #ff3b30; background-color: #ffebee;' : ''}
 			`;
 			
-			let rowHTML = `<div style="overflow: hidden; text-overflow: ellipsis; ${isWorst ? 'text-decoration: underline;' : ''}">${UIUtils.escapeHtml(shooter.name)}</div>`;
+			let rowHTML = `<div style="overflow: hidden; text-overflow: ellipsis; ${isWorst ? 'text-decoration: normal;' : ''}">${UIUtils.escapeHtml(shooter.name)}</div>`;
 
 			// Series sums
 			for (let i = 0; i < 5; i++) {
@@ -278,7 +278,7 @@ class OverviewView {
 				rowHTML += `<div style="text-align: center;">${seriesValue}</div>`;
 			}
 
-			rowHTML += `<div style="text-align: right; font-weight: 500; ${isWorst ? 'text-decoration: underline;' : ''}">${total}</div>`;
+			rowHTML += `<div style="text-align: right; font-weight: 500; ${isWorst ? 'text-decoration: normal;' : ''}">${total}</div>`;
 
 			row.innerHTML = rowHTML;
 			table.appendChild(row);
