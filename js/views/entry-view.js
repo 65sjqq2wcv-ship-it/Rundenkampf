@@ -331,118 +331,228 @@ this.showCameraModal(shooterInfo);
 }
 
 getShooterInfo() {
-    try {
-        let shooter = null;
-        let teamName = null;
-        let displayName = '';
+	try {
+	let shooter = null;
+	let teamName = null;
+	let displayName = '';
 
-        // Schützen finden
-        if (this.selectedTeamId) {
-            const team = storage.teams.find(t => t.id === this.selectedTeamId);
-            if (team) {
-                shooter = team.shooters.find(s => s.id === this.selectedShooterId);
-                teamName = team.name;
-                // Mannschaftsschütze: Name - Verein
-                displayName = shooter ? `${shooter.name} - ${teamName}` : '';
-            }
-        } else {
-            shooter = storage.standaloneShooters.find(s => s.id === this.selectedShooterId);
-            // Einzelschütze: nur Name
-            displayName = shooter ? shooter.name : '';
-        }
+	// Schützen finden
+	if (this.selectedTeamId) {
+	const team = storage.teams.find(t => t.id === this.selectedTeamId);
+	if (team) {
+	shooter = team.shooters.find(s => s.id === this.selectedShooterId);
+	teamName = team.name;
+	// Mannschaftsschütze: Name - Verein
+displayName = shooter ? `${shooter.name} - ${teamName}` : '';
+}
+} else {
+	shooter = storage.standaloneShooters.find(s => s.id === this.selectedShooterId);
+	// Einzelschütze: nur Name
+	displayName = shooter ? shooter.name : '';
+}
 
-        if (!shooter) return null;
+if (!shooter) return null;
 
-        return {
-            name: displayName,
-            shooterName: shooter.name,
-            team: teamName,
-            isTeamShooter: !!teamName,
-            discipline: this.selectedDiscipline,
-            currentDiscipline: storage.selectedDiscipline || 'Keine ausgewählt', // Aus Settings
-            date: new Date().toLocaleDateString('de-DE'),
-            competitionType: storage.selectedCompetitionType || 'Rundenkampf'
-        };
+return {
+	name: displayName,
+	shooterName: shooter.name,
+	team: teamName,
+	isTeamShooter: !!teamName,
+	discipline: this.selectedDiscipline,
+	currentDiscipline: storage.selectedDiscipline || 'Keine ausgewählt', // Aus Settings
+	date: new Date().toLocaleDateString('de-DE'),
+	competitionType: storage.selectedCompetitionType || 'Rundenkampf'
+};
 
-    } catch (error) {
-        console.error('Error getting shooter info:', error);
-        return null;
-    }
+} catch (error) {
+	console.error('Error getting shooter info:', error);
+	return null;
+}
 }
 
 showCameraModal(shooterInfo) {
-    // Modal Container
-    const modalContent = document.createElement('div');
-    modalContent.style.cssText = 'width: 100%; max-width: 500px;';
+	// Modal Container
+	const modalContent = document.createElement('div');
+	modalContent.style.cssText = 'width: 100%; max-width: 500px;';
 
-    // Kamera-Bereich
-    const cameraContainer = document.createElement('div');
-    cameraContainer.style.cssText = 'position: relative; margin-bottom: 16px;';
-    
-    // Video Element für Kamera-Preview
-    const video = document.createElement('video');
-    video.style.cssText = 'width: 100%; height: 300px; background: #000; border-radius: 8px; object-fit: cover; aspect-ratio: 1/1;'; // Quadratisch
-    video.autoplay = true;
-    video.muted = true;
-    video.playsInline = true;
-    cameraContainer.appendChild(video);
+	// Kamera-Bereich
+	const cameraContainer = document.createElement('div');
+	cameraContainer.style.cssText = 'position: relative; margin-bottom: 16px;';
+	
+	// Video Element für Kamera-Preview
+	const video = document.createElement('video');
+	video.style.cssText = 'width: 100%; height: 300px; background: #000; border-radius: 8px; object-fit: cover; aspect-ratio: 1/1;';
+	video.autoplay = true;
+	video.muted = true;
+	video.playsInline = true;
+	cameraContainer.appendChild(video);
 
-    // Canvas für Foto (versteckt)
-    const canvas = document.createElement('canvas');
-    canvas.style.display = 'none';
-    cameraContainer.appendChild(canvas);
+	// Canvas für Foto (versteckt)
+	const canvas = document.createElement('canvas');
+	canvas.style.display = 'none';
+	cameraContainer.appendChild(canvas);
 
-    // Info-Overlay - ANGEPASST
-    const infoOverlay = document.createElement('div');
-    infoOverlay.style.cssText = `
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: rgba(0,0,0,0.7);
-    color: white;
-    padding: 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    line-height: 1.3;
-    `;
-    infoOverlay.innerHTML = `
+	// === NEU: POSITIONSHILFEN-OVERLAY ===
+	const guidesOverlay = document.createElement('div');
+	guidesOverlay.className = 'guides-overlay';
+	guidesOverlay.style.cssText = `
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	pointer-events: none;
+	border: 2px dashed rgba(255, 255, 255, 0.8);
+	border-radius: 8px;
+	display: block;
+	`;
+
+	// Zielkreis für Scheibenmitte
+	const targetCircle = document.createElement('div');
+	targetCircle.style.cssText = `
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 80px;
+	height: 80px;
+	border: 3px solid rgba(255, 255, 255, 0.9);
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+	box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4);
+	`;
+	guidesOverlay.appendChild(targetCircle);
+
+	// Innerer Zielkreis
+	const innerCircle = document.createElement('div');
+	innerCircle.style.cssText = `
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 40px;
+	height: 40px;
+	border: 2px solid rgba(255, 255, 255, 0.7);
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+	`;
+	guidesOverlay.appendChild(innerCircle);
+
+	// Ecken-Markierungen
+	const corners = [
+{ position: 'top: 20px; left: 20px;', borders: 'border-top: 3px solid rgba(255, 255, 255, 0.9); border-left: 3px solid rgba(255, 255, 255, 0.9);' },
+{ position: 'top: 20px; right: 20px;', borders: 'border-top: 3px solid rgba(255, 255, 255, 0.9); border-right: 3px solid rgba(255, 255, 255, 0.9);' },
+{ position: 'bottom: 20px; left: 20px;', borders: 'border-bottom: 3px solid rgba(255, 255, 255, 0.9); border-left: 3px solid rgba(255, 255, 255, 0.9);' },
+{ position: 'bottom: 20px; right: 20px;', borders: 'border-bottom: 3px solid rgba(255, 255, 255, 0.9); border-right: 3px solid rgba(255, 255, 255, 0.9);' }
+];
+
+corners.forEach(corner => {
+	const cornerMark = document.createElement('div');
+	cornerMark.style.cssText = `
+	position: absolute;
+${corner.position}
+width: 25px;
+height: 25px;
+${corner.borders}
+box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+`;
+guidesOverlay.appendChild(cornerMark);
+});
+
+// Mittellinie (horizontal)
+const centerLineH = document.createElement('div');
+centerLineH.style.cssText = `
+position: absolute;
+top: 50%;
+left: 25%;
+right: 25%;
+height: 1px;
+background: rgba(255, 255, 255, 0.6);
+transform: translateY(-50%);
+`;
+guidesOverlay.appendChild(centerLineH);
+
+// Mittellinie (vertikal)
+const centerLineV = document.createElement('div');
+centerLineV.style.cssText = `
+position: absolute;
+left: 50%;
+top: 25%;
+bottom: 25%;
+width: 1px;
+background: rgba(255, 255, 255, 0.6);
+transform: translateX(-50%);
+`;
+guidesOverlay.appendChild(centerLineV);
+
+cameraContainer.appendChild(guidesOverlay);
+// === ENDE: POSITIONSHILFEN-OVERLAY ===
+
+// Info-Overlay
+const infoOverlay = document.createElement('div');
+infoOverlay.style.cssText = `
+position: absolute;
+top: 10px;
+left: 10px;
+background: rgba(0,0,0,0.7);
+color: white;
+padding: 8px;
+border-radius: 4px;
+font-size: 12px;
+line-height: 1.3;
+z-index: 10;
+`;
+infoOverlay.innerHTML = `
 Name: ${UIUtils.escapeHtml(shooterInfo.name)}<br>
 Disziplin: ${UIUtils.escapeHtml(shooterInfo.currentDiscipline)}<br>
 Scheibe: ${UIUtils.escapeHtml(shooterInfo.discipline)}<br>
 Wettkampfdatum: ${shooterInfo.date}
 `;
-    cameraContainer.appendChild(infoOverlay);
+cameraContainer.appendChild(infoOverlay);
 
-    modalContent.appendChild(cameraContainer);
+modalContent.appendChild(cameraContainer);
 
-    // Status-Anzeige
-    const statusDiv = document.createElement('div');
-    statusDiv.id = 'cameraStatus';
-    statusDiv.style.cssText = 'text-align: center; margin-bottom: 16px; font-size: 14px; color: #666;';
-    statusDiv.textContent = 'Kamera wird gestartet...';
-    modalContent.appendChild(statusDiv);
+// Status-Anzeige - erweitert
+const statusDiv = document.createElement('div');
+statusDiv.id = 'cameraStatus';
+statusDiv.style.cssText = 'text-align: center; margin-bottom: 16px; font-size: 14px; color: #666;';
+statusDiv.innerHTML = `
+<div>Kamera wird gestartet...</div>
+<div style="font-size: 12px; margin-top: 4px; color: #999;">
+🎯 Scheibe in den Zielkreis zentrieren<br>
+📏 Scheibe sollte 80% des Bildbereichs ausfüllen
+</div>
+`;
+modalContent.appendChild(statusDiv);
 
-    // Modal erstellen und anzeigen
-    const modal = new ModalComponent('Scheibe dokumentieren', modalContent);
+// Modal erstellen und anzeigen
+const modal = new ModalComponent('Scheibe dokumentieren', modalContent);
 
-    modal.addAction('Abbrechen', () => {
-        this.stopCamera();
-    }, false, false);
+modal.addAction('Abbrechen', () => {
+	this.stopCamera();
+}, false, false);
 
-    modal.addAction('Foto aufnehmen', () => {
-        this.capturePhoto(video, canvas, shooterInfo);
-    }, true, false);
+// === NEU: HILFEN TOGGLE BUTTON ===
+modal.addAction('🎯 Hilfen ein/aus', () => {
+	const overlay = cameraContainer.querySelector('.guides-overlay');
+	if (overlay) {
+	const isVisible = overlay.style.display !== 'none';
+	overlay.style.display = isVisible ? 'none' : 'block';
+}
+}, false, false);
 
-    modal.onCloseHandler(() => {
-        this.stopCamera();
-    });
+modal.addAction('Foto aufnehmen', () => {
+	this.capturePhoto(video, canvas, shooterInfo);
+}, true, false);
 
-    modal.show();
+modal.onCloseHandler(() => {
+	this.stopCamera();
+});
 
-    // Kamera starten
-    setTimeout(() => {
-        this.startCamera(video, statusDiv);
-    }, 200);
+modal.show();
+
+// Kamera starten
+setTimeout(() => {
+	this.startCamera(video, statusDiv);
+}, 200);
 }
 
 async startCamera(video, statusDiv) {
@@ -451,21 +561,33 @@ async startCamera(video, statusDiv) {
 	const stream = await navigator.mediaDevices.getUserMedia({
 	video: { 
 	facingMode: 'environment', // Rückkamera bevorzugen
-width: { ideal: 1080 },  // Quadratisch: gleiche Breite und Höhe
-height: { ideal: 1080 }  // Quadratisch: gleiche Breite und Höhe
+width: { ideal: 1080 },
+height: { ideal: 1080 }
 },
 audio: false
 });
 
 video.srcObject = stream;
 this.cameraStream = stream;
-statusDiv.textContent = 'Kamera bereit - Positionieren Sie die Scheibe im Bild';
-statusDiv.style.color = '#34c759';
+
+// Erweiterte Status-Anzeige
+statusDiv.innerHTML = `
+<div style="color: #34c759; font-weight: bold;">📷 Kamera bereit</div>
+<div style="font-size: 12px; margin-top: 4px; color: #666;">
+🎯 Scheibe in den Zielkreis zentrieren<br>
+📏 Scheibe sollte 80% des Bildbereichs ausfüllen<br>
+💡 Für beste Qualität gut ausleuchten
+</div>
+`;
 
 } catch (error) {
 	console.error('Camera access error:', error);
-	statusDiv.textContent = 'Kamera-Zugriff fehlgeschlagen. Überprüfen Sie die Berechtigungen.';
-	statusDiv.style.color = '#ff3b30';
+	statusDiv.innerHTML = `
+	<div style="color: #ff3b30;">Kamera-Zugriff fehlgeschlagen</div>
+	<div style="font-size: 12px; margin-top: 4px;">
+	Überprüfen Sie die Kamera-Berechtigungen
+	</div>
+	`;
 	
 	UIUtils.showError('Kamera-Zugriff nicht möglich. Stellen Sie sicher, dass die Kamera-Berechtigung erteilt wurde.');
 }
@@ -522,48 +644,48 @@ capturePhoto(video, canvas, shooterInfo) {
 }
 
 addTextOverlay(ctx, canvas, shooterInfo) {
-    // Text-Stil setzen
-    ctx.font = 'bold 24px Arial';
-    ctx.textAlign = 'left';
+	// Text-Stil setzen
+	ctx.font = 'bold 24px Arial';
+	ctx.textAlign = 'left';
 
-    // Text-Inhalt - angepasst nach Anforderungen
-    const textLines = [
-        `Name: ${shooterInfo.name}`,
-        `Disziplin: ${shooterInfo.currentDiscipline}`, // Ersetzt "Verein"
-        `Scheibe: ${shooterInfo.discipline}`, // "Disziplin" zu "Scheibe" geändert
-        `Wettkampfdatum: ${shooterInfo.date}`
-    ];
+	// Text-Inhalt - angepasst nach Anforderungen
+	const textLines = [
+`Name: ${shooterInfo.name}`,
+`Disziplin: ${shooterInfo.currentDiscipline}`, // Ersetzt "Verein"
+`Scheibe: ${shooterInfo.discipline}`, // "Disziplin" zu "Scheibe" geändert
+`Wettkampfdatum: ${shooterInfo.date}`
+];
 
-    const lineHeight = 30;
-    const padding = 15;
-    const cornerRadius = 12;
-    const textHeight = textLines.length * lineHeight + padding * 2;
+const lineHeight = 30;
+const padding = 15;
+const cornerRadius = 12;
+const textHeight = textLines.length * lineHeight + padding * 2;
 
-    // Maximale Textbreite ermitteln
-    const maxTextWidth = Math.max(...textLines.map(line => ctx.measureText(line).width));
-    const textWidth = maxTextWidth + padding * 2;
+// Maximale Textbreite ermitteln
+const maxTextWidth = Math.max(...textLines.map(line => ctx.measureText(line).width));
+const textWidth = maxTextWidth + padding * 2;
 
-    // Position links oben
-    const x = 20;
-    const y = 20;
+// Position links oben
+const x = 20;
+const y = 20;
 
-    // Abgerundetes Rechteck für den weißen Hintergrund zeichnen
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    this.drawRoundedRect(ctx, x, y, textWidth, textHeight, cornerRadius);
-    ctx.fill();
+// Abgerundetes Rechteck für den weißen Hintergrund zeichnen
+ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+this.drawRoundedRect(ctx, x, y, textWidth, textHeight, cornerRadius);
+ctx.fill();
 
-    // Abgerundeten Rand um das Textfeld zeichnen
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.lineWidth = 1;
-    this.drawRoundedRect(ctx, x, y, textWidth, textHeight, cornerRadius);
-    ctx.stroke();
+// Abgerundeten Rand um das Textfeld zeichnen
+ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+ctx.lineWidth = 1;
+this.drawRoundedRect(ctx, x, y, textWidth, textHeight, cornerRadius);
+ctx.stroke();
 
-    // Schwarzen Text zeichnen
-    ctx.fillStyle = 'black';
-    textLines.forEach((line, index) => {
-        const textY = y + padding + (index + 1) * lineHeight;
-        ctx.fillText(line, x + padding, textY);
-    });
+// Schwarzen Text zeichnen
+ctx.fillStyle = 'black';
+textLines.forEach((line, index) => {
+	const textY = y + padding + (index + 1) * lineHeight;
+	ctx.fillText(line, x + padding, textY);
+});
 }
 
 // Hilfsmethode für abgerundete Rechtecke
@@ -582,44 +704,44 @@ drawRoundedRect(ctx, x, y, width, height, radius) {
 }
 
 downloadPhoto(canvas, shooterInfo) {
-    try {
-        // Dateiname erstellen im Format: <Datum>-<Name>-<Scheibe>
-        const date = new Date().toLocaleDateString('de-DE').replace(/\./g, '-'); // DD-MM-YYYY
-        
-        // Name normalisieren (bereits mit Verein kombiniert falls Mannschaftsschütze)
-        const normalizedName = this.normalizeFileName(shooterInfo.name);
-        
-        // Scheibe/Disziplin normalisieren
-        const normalizedDiscipline = this.normalizeFileName(shooterInfo.discipline);
-        
-        const fileName = `${date}-${normalizedName}-${normalizedDiscipline}.jpg`;
+	try {
+	// Dateiname erstellen im Format: <Datum>-<Name>-<Scheibe>
+	const date = new Date().toLocaleDateString('de-DE').replace(/\./g, '-'); // DD-MM-YYYY
+	
+	// Name normalisieren (bereits mit Verein kombiniert falls Mannschaftsschütze)
+	const normalizedName = this.normalizeFileName(shooterInfo.name);
+	
+	// Scheibe/Disziplin normalisieren
+	const normalizedDiscipline = this.normalizeFileName(shooterInfo.discipline);
+	
+const fileName = `${date}-${normalizedName}-${normalizedDiscipline}.jpg`;
 
-        // Canvas zu Blob konvertieren
-        canvas.toBlob((blob) => {
-            if (!blob) {
-                throw new Error('Fehler beim Erstellen des Bildes');
-            }
+// Canvas zu Blob konvertieren
+canvas.toBlob((blob) => {
+	if (!blob) {
+	throw new Error('Fehler beim Erstellen des Bildes');
+}
 
-            // Download-Link erstellen
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = fileName;
-            link.style.display = 'none';
+// Download-Link erstellen
+const url = URL.createObjectURL(blob);
+const link = document.createElement('a');
+link.href = url;
+link.download = fileName;
+link.style.display = 'none';
 
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
 
-            // URL freigeben
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
+// URL freigeben
+setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-        }, 'image/jpeg', 0.95);
+}, 'image/jpeg', 0.95);
 
-    } catch (error) {
-        console.error('Error downloading photo:', error);
-        UIUtils.showError('Fehler beim Speichern des Fotos: ' + error.message);
-    }
+} catch (error) {
+	console.error('Error downloading photo:', error);
+	UIUtils.showError('Fehler beim Speichern des Fotos: ' + error.message);
+}
 }
 
 // =================================================================
@@ -798,15 +920,15 @@ updateKeypad() {
 }
 
 normalizeFileName(text) {
-    return text
-        .replace(/ä/g, 'ae')
-        .replace(/ö/g, 'oe')
-        .replace(/ü/g, 'ue')
-        .replace(/Ä/g, 'Ae')
-        .replace(/Ö/g, 'Oe')
-        .replace(/Ü/g, 'Ue')
-        .replace(/ß/g, 'ss')
-        .replace(/[^a-zA-Z0-9]/g, '_');
+	return text
+	.replace(/ä/g, 'ae')
+	.replace(/ö/g, 'oe')
+	.replace(/ü/g, 'ue')
+	.replace(/Ä/g, 'Ae')
+	.replace(/Ö/g, 'Oe')
+	.replace(/Ü/g, 'Ue')
+	.replace(/ß/g, 'ss')
+	.replace(/[^a-zA-Z0-9]/g, '_');
 }
 
 createStandardKeypad(container) {
