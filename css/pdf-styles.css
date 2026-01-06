@@ -4,23 +4,23 @@
    ================================================================= */
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: Arial, sans-serif;
-    font-size: 11px;
-    line-height: 1.4;
-    color: #333;
-    background: white;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #333;
+  background: white;
 }
 
 .pdf-container {
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 20px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 /* =================================================================
@@ -28,69 +28,69 @@ body {
    ================================================================= */
 
 .pdf-header {
-    margin-bottom: 30px;
-    font-family: Arial, sans-serif;
+  margin-bottom: 30px;
+  font-family: Arial, sans-serif;
 }
 
 .header-content {
-    display: flex;
-    align-items: flex-start;
-    gap: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
 }
 
 .logo-container {
-    flex-shrink: 0;
-    width: 90px;
-    height: 90px;
+  flex-shrink: 0;
+  width: 90px;
+  height: 90px;
 }
 
 .logo {
-    width: 90%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
+  width: 90%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .logo-placeholder {
-    width: 100%;
-    height: 100%;
-    background: #4CAF50;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 9px;
-    text-align: center;
-    line-height: 1.1;
+  width: 100%;
+  height: 100%;
+  background: #4caf50;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 9px;
+  text-align: center;
+  line-height: 1.1;
 }
 
 .title-container {
-    flex: 1;
-    font-family: Arial, sans-serif;
-    font-size: 11px;
+  flex: 1;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
 }
 
 .main-title {
-    font-family: Arial, sans-serif;
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 12px;
-    text-align: left;
+  font-family: Arial, sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 12px;
+  text-align: left;
 }
 
 .subtitle-info {
-    font-family: Arial, sans-serif;
-    font-size: 11px;
-    text-align: left;
-    color: #555;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  text-align: left;
+  color: #555;
 }
 
 .info-row {
-    margin-bottom: 3px;
+  margin-bottom: 3px;
 }
 
 /* =================================================================
@@ -98,29 +98,29 @@ body {
    ================================================================= */
 
 .pdf-main {
-    margin-bottom: 40px;
+  margin-bottom: 40px;
 }
 
 .team-section,
 .solo-section {
-    margin-bottom: 25px;
-    break-inside: avoid;
+  margin-bottom: 25px;
+  break-inside: avoid;
 }
 
 .team-title {
-    font-size: 16px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
 
 .team-count {
-    font-size: 12px;
-    font-weight: normal;
-    color: #666;
+  font-size: 12px;
+  font-weight: normal;
+  color: #666;
 }
 
 /* =================================================================
@@ -128,35 +128,35 @@ body {
    ================================================================= */
 
 .results-table {
-    width: 100%;
-    border-collapse: collapse;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-    break-inside: avoid;
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  break-inside: avoid;
 }
 
 .results-table th,
 .results-table td {
-    padding: 8px 6px;
-    text-align: center;
-    border: none;
+  padding: 8px 6px;
+  text-align: center;
+  border: none;
 }
 
 .results-table th {
-    background-color: #f8f9fa;
-    font-weight: bold;
-    font-size: 12px;
-    color: #495057;
+  background-color: #f8f9fa;
+  font-weight: bold;
+  font-size: 12px;
+  color: #495057;
 }
 
 .header-row th:first-child {
-    border-top-left-radius: 12px;
+  border-top-left-radius: 12px;
 }
 
 .header-row th:last-child {
-    border-top-right-radius: 12px;
+  border-top-right-radius: 12px;
 }
 
 /* =================================================================
@@ -164,32 +164,32 @@ body {
    ================================================================= */
 
 .name-header {
-    text-align: left !important;
-    width: 40%;
+  text-align: left !important;
+  width: 40%;
 }
 
 .name-cell {
-    text-align: left !important;
-    width: 40%;
+  text-align: left !important;
+  width: 40%;
 }
 
 .score-header,
 .score-cell {
-    width: 20%;
-    text-align: center !important;
+  width: 20%;
+  text-align: center !important;
 }
 
 .series-header,
 .series-cell {
-    width: 12%;
-    text-align: center !important;
+  width: 12%;
+  text-align: center !important;
 }
 
 .total-header,
 .total-cell {
-    text-align: right !important;
-    width: 20%;
-    font-weight: bold;
+  text-align: right !important;
+  width: 20%;
+  font-weight: bold;
 }
 
 /* =================================================================
@@ -198,39 +198,39 @@ body {
 
 /* Standard Zeilen - weiß */
 .results-table tr {
-    background-color: white;
-    border: none;
+  background-color: white;
+  border: none;
 }
 
 .results-table td {
-    border: none;
-    padding: 8px 6px;
+  border: none;
+  padding: 8px 6px;
 }
 
 /* Zebra-Streifen - nur für gerade Zeilen */
 .table-row.zebra {
-    background-color: #f8f9fa !important;
+  background-color: #f8f9fa !important;
 }
 
 /* Schlechtester Schütze - hat immer Vorrang */
 .table-row.worst-shooter {
-    background-color: #ffebee !important;
-    color: #d32f2f !important;
+  background-color: #ffebee !important;
+  color: #d32f2f !important;
 }
 
 .worst-shooter .name-cell {
-    color: #d32f2f !important;
+  color: #d32f2f !important;
 }
 
 .worst-shooter .total-cell {
-    font-weight: bold !important;
-    color: #d32f2f !important;
+  font-weight: bold !important;
+  color: #d32f2f !important;
 }
 
 /* Verhindere Klassen-Überschneidungen */
 .table-row.zebra.worst-shooter {
-    background-color: #ffebee !important; /* Worst Shooter hat Vorrang */
-    color: #d32f2f !important;
+  background-color: #ffebee !important; /* Worst Shooter hat Vorrang */
+  color: #d32f2f !important;
 }
 
 /* =================================================================
@@ -238,29 +238,28 @@ body {
    ================================================================= */
 
 .total-row {
-    background-color: #e9ecef !important;
-    font-weight: bold !important;
-    border-top: 2px solid #dee2e6 !important;
+  background-color: #e9ecef !important;
+  font-weight: bold !important;
 }
 
 .total-row td:first-child {
-    border-bottom-left-radius: 12px !important;
+  border-bottom-left-radius: 12px !important;
 }
 
 .total-row td:last-child {
-    border-bottom-right-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
 }
 
 .total-label {
-    text-align: left !important;
-    font-size: 11px !important;
-    font-weight: bold !important;
+  text-align: left !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
 }
 
 .total-value {
-    text-align: right !important;
-    font-weight: bold !important;
-    font-size: 11px !important;
+  text-align: right !important;
+  font-weight: bold !important;
+  font-size: 11px !important;
 }
 
 /* =================================================================
@@ -268,23 +267,23 @@ body {
    ================================================================= */
 
 .pdf-footer {
-    margin-top: 30px;
-    page-break-inside: avoid;
+  margin-top: 30px;
+  page-break-inside: avoid;
 }
 
 .footer-line {
-    height: 1px;
-    background-color: #666;
-    margin-bottom: 12px;
+  height: 1px;
+  background-color: #666;
+  margin-bottom: 12px;
 }
 
 .footer-text {
-    font-size: 9px;
-    font-style: italic;
-    line-height: 1.4;
-    color: #666;
-    text-align: justify;
-    max-width: 100%;
+  font-size: 9px;
+  font-style: italic;
+  line-height: 1.4;
+  color: #666;
+  text-align: justify;
+  max-width: 100%;
 }
 
 /* =================================================================
@@ -292,35 +291,35 @@ body {
    ================================================================= */
 
 @media print {
-    .team-section {
-        page-break-inside: avoid;
-    }
-    
-    .results-table {
-        page-break-inside: avoid;
-    }
-    
-    body {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-    
-    /* Erzwinge korrekte Farben im Druck */
-    .table-row.zebra {
-        background-color: #f8f9fa !important;
-        -webkit-print-color-adjust: exact;
-    }
-    
-    .table-row.worst-shooter {
-        background-color: #ffebee !important;
-        color: #d32f2f !important;
-        -webkit-print-color-adjust: exact;
-    }
-    
-    .total-row {
-        background-color: #e9ecef !important;
-        -webkit-print-color-adjust: exact;
-    }
+  .team-section {
+    page-break-inside: avoid;
+  }
+
+  .results-table {
+    page-break-inside: avoid;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Erzwinge korrekte Farben im Druck */
+  .table-row.zebra {
+    background-color: #f8f9fa !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .table-row.worst-shooter {
+    background-color: #ffebee !important;
+    color: #d32f2f !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .total-row {
+    background-color: #e9ecef !important;
+    -webkit-print-color-adjust: exact;
+  }
 }
 
 /* =================================================================
@@ -328,26 +327,26 @@ body {
    ================================================================= */
 
 @media (max-width: 600px) {
-    .pdf-container {
-        padding: 10px;
-    }
-    
-    .header-content {
-        display: flex !important;
-        align-items: flex-start !important;
-        gap: 15px !important;
-    }
-    
-    .logo-container {
-        flex-shrink: 0 !important;
-        width: 90px !important;
-        height: 90px !important;
-    }
-    
-    .title-container {
-        flex: 1 !important;
-        text-align: left !important;
-    }
+  .pdf-container {
+    padding: 10px;
+  }
+
+  .header-content {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 15px !important;
+  }
+
+  .logo-container {
+    flex-shrink: 0 !important;
+    width: 90px !important;
+    height: 90px !important;
+  }
+
+  .title-container {
+    flex: 1 !important;
+    text-align: left !important;
+  }
 }
 
 /* =================================================================
@@ -356,106 +355,106 @@ body {
 
 /* iOS Safari spezifische Fixes */
 @media screen and (-webkit-min-device-pixel-ratio: 2) {
-    .header-content {
-        display: flex !important;
-        align-items: flex-start !important;
-        gap: 15px !important;
-    }
-    
-    .logo-container {
-        flex-shrink: 0 !important;
-        width: 90px !important;
-        height: 90px !important;
-    }
-    
-    .title-container {
-        flex: 1 !important;
-        text-align: left !important;
-    }
+  .header-content {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 15px !important;
+  }
+
+  .logo-container {
+    flex-shrink: 0 !important;
+    width: 90px !important;
+    height: 90px !important;
+  }
+
+  .title-container {
+    flex: 1 !important;
+    text-align: left !important;
+  }
 }
 
 /* Mobile Geräte - kleinere Schriftgrößen und bessere Positionierung */
 @media (max-width: 768px) {
-    body {
-        font-size: 10px !important;
-    }
-    
-    .main-title {
-        font-size: 20px !important;
-        text-align: left !important;
-    }
-    
-    .team-title {
-        font-size: 14px !important;
-    }
-    
-    .total-label {
-        font-size: 11px !important;
-        text-align: left !important;
-    }
-    
-    .total-value {
-        font-size: 11px !important;
-        text-align: right !important;
-    }
-    
-    .name-header,
-    .name-cell {
-        text-align: left !important;
-        font-size: 10px !important;
-    }
-    
-    .results-table th,
-    .results-table td {
-        padding: 6px 4px !important;
-        font-size: 10px !important;
-    }
+  body {
+    font-size: 10px !important;
+  }
+
+  .main-title {
+    font-size: 20px !important;
+    text-align: left !important;
+  }
+
+  .team-title {
+    font-size: 14px !important;
+  }
+
+  .total-label {
+    font-size: 11px !important;
+    text-align: left !important;
+  }
+
+  .total-value {
+    font-size: 11px !important;
+    text-align: right !important;
+  }
+
+  .name-header,
+  .name-cell {
+    text-align: left !important;
+    font-size: 10px !important;
+  }
+
+  .results-table th,
+  .results-table td {
+    padding: 6px 4px !important;
+    font-size: 10px !important;
+  }
 }
 
 /* iPhone spezifische Anpassungen - KORRIGIERTE VERSION */
 @supports (-webkit-touch-callout: none) {
-    .pdf-container {
-        padding: 15px !important;
-    }
-    
-    .header-content {
-        display: flex !important;
-        align-items: flex-start !important;
-        gap: 20px !important;
-    }
-    
-    .logo-container {
-        flex-shrink: 0 !important;
-        width: 90px !important;
-        height: 90px !important;
-    }
-    
-    .title-container {
-        flex: 1 !important;
-        text-align: left !important;
-    }
-    
-    .main-title {
-        text-align: left !important;
-    }
-    
-    .subtitle-info {
-        text-align: left !important;
-    }
-    
-    .total-row {
-        font-size: 10px !important;
-    }
-    
-    .total-label {
-        text-align: left !important;
-        font-size: 11px !important;
-    }
-    
-    .total-value {
-        text-align: right !important;
-        font-size: 11px !important;
-    }
+  .pdf-container {
+    padding: 15px !important;
+  }
+
+  .header-content {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 20px !important;
+  }
+
+  .logo-container {
+    flex-shrink: 0 !important;
+    width: 90px !important;
+    height: 90px !important;
+  }
+
+  .title-container {
+    flex: 1 !important;
+    text-align: left !important;
+  }
+
+  .main-title {
+    text-align: left !important;
+  }
+
+  .subtitle-info {
+    text-align: left !important;
+  }
+
+  .total-row {
+    font-size: 10px !important;
+  }
+
+  .total-label {
+    text-align: left !important;
+    font-size: 11px !important;
+  }
+
+  .total-value {
+    text-align: right !important;
+    font-size: 11px !important;
+  }
 }
 
 /* =================================================================
@@ -463,25 +462,29 @@ body {
    ================================================================= */
 
 /* Erzwinge korrekte Ausrichtungen */
-.name-header, .name-cell {
-    text-align: left !important;
+.name-header,
+.name-cell {
+  text-align: left !important;
 }
 
-.total-header, .total-cell {
-    text-align: right !important;
+.total-header,
+.total-cell {
+  text-align: right !important;
 }
 
-.score-header, .score-cell, 
-.series-header, .series-cell {
-    text-align: center !important;
+.score-header,
+.score-cell,
+.series-header,
+.series-cell {
+  text-align: center !important;
 }
 
 .total-label {
-    text-align: left !important;
-    font-size: 11px !important;
+  text-align: left !important;
+  font-size: 11px !important;
 }
 
 .total-value {
-    text-align: right !important;
-    font-size: 11px !important;
+  text-align: right !important;
+  font-size: 11px !important;
 }

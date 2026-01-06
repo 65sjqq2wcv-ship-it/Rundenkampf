@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
-    <meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-	<!-- Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <!-- Content Security Policy -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
     default-src 'self';
     script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
     style-src 'self' 'unsafe-inline';
@@ -17,53 +22,59 @@
     frame-ancestors 'none';
     upgrade-insecure-requests;
     block-all-mixed-content;
-">    <title>Rundenkampfbericht</title>
-    <meta name="theme-color" content="#007AFF">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Rundenkampf">
-    
+"
+    />
+    <title>Rundenkampfbericht</title>
+    <meta name="theme-color" content="#007AFF" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Rundenkampf" />
+
     <!-- iOS Icons -->
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png">
-    
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png" />
+    <link
+      rel="apple-touch-icon"
+      sizes="192x192"
+      href="icons/icon-192x192.png"
+    />
+
     <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-    
-    <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
+    <link rel="manifest" href="manifest.json" />
+
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
     <div id="app">
-        <nav class="navbar">
-            <h1 class="nav-title">Rundenkampfbericht</h1>
-            <div class="nav-buttons" id="navButtons"></div>
-        </nav>
+      <nav class="navbar">
+        <h1 class="nav-title">Rundenkampfbericht</h1>
+        <div class="nav-buttons" id="navButtons"></div>
+      </nav>
 
-        <main class="main-content" id="mainContent">
-            <div class="card" style="text-align: center;">
-                <div class="spinner"></div>
-                <p>Lade Anwendung...</p>
-            </div>
-        </main>
-
-        <div class="tab-bar">
-            <button class="tab-item active" data-tab="overview">
-                <span class="tab-icon">📊</span>
-                <span class="tab-label">Übersicht</span>
-            </button>
-            <button class="tab-item" data-tab="entry">
-                <span class="tab-icon">✏️</span>
-                <span class="tab-label">Erfassen</span>
-            </button>
-            <button class="tab-item" data-tab="teams">
-                <span class="tab-icon">👥</span>
-                <span class="tab-label">Teams</span>
-            </button>
-            <button class="tab-item" data-tab="settings">
-                <span class="tab-icon">⚙️</span>
-                <span class="tab-label">Einstellungen</span>
-            </button>
+      <main class="main-content" id="mainContent">
+        <div class="card" style="text-align: center">
+          <div class="spinner"></div>
+          <p>Lade Anwendung...</p>
         </div>
+      </main>
+
+      <div class="tab-bar">
+        <button class="tab-item active" data-tab="overview">
+          <span class="tab-icon">📊</span>
+          <span class="tab-label">Übersicht</span>
+        </button>
+        <button class="tab-item" data-tab="entry">
+          <span class="tab-icon">✏️</span>
+          <span class="tab-label">Erfassen</span>
+        </button>
+        <button class="tab-item" data-tab="teams">
+          <span class="tab-icon">👥</span>
+          <span class="tab-label">Teams</span>
+        </button>
+        <button class="tab-item" data-tab="settings">
+          <span class="tab-icon">⚙️</span>
+          <span class="tab-label">Einstellungen</span>
+        </button>
+      </div>
     </div>
 
     <!-- Scripts in der richtigen Reihenfolge -->
@@ -77,5 +88,5 @@
     <script src="js/views/settings-view.js"></script>
     <script src="js/pdf-exporter.js"></script>
     <script src="js/app.js"></script>
-</body>
+  </body>
 </html>
