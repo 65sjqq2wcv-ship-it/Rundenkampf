@@ -11,7 +11,7 @@
 
 body {
   font-family: Arial, sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.4;
   color: #333;
   background: white;
@@ -70,7 +70,7 @@ body {
 .title-container {
   flex: 1;
   font-family: Arial, sans-serif;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .main-title {
@@ -84,7 +84,7 @@ body {
 
 .subtitle-info {
   font-family: Arial, sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   text-align: left;
   color: #555;
 }
@@ -118,7 +118,7 @@ body {
 }
 
 .team-count {
-  font-size: 12px;
+  font-size: 14x;
   font-weight: normal;
   color: #666;
 }
@@ -147,7 +147,7 @@ body {
 .results-table th {
   background-color: #f8f9fa;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 14px;
   color: #495057;
 }
 
@@ -252,14 +252,14 @@ body {
 
 .total-label {
   text-align: left !important;
-  font-size: 11px !important;
+  font-size: 14px !important;
   font-weight: bold !important;
 }
 
 .total-value {
   text-align: right !important;
   font-weight: bold !important;
-  font-size: 11px !important;
+  font-size: 14px !important;
 }
 
 /* =================================================================
@@ -278,7 +278,7 @@ body {
 }
 
 .footer-text {
-  font-size: 9px;
+  font-size: 10px;
   font-style: italic;
   line-height: 1.4;
   color: #666;
@@ -401,13 +401,13 @@ body {
   .name-header,
   .name-cell {
     text-align: left !important;
-    font-size: 10px !important;
+    font-size: 12px !important;
   }
 
   .results-table th,
   .results-table td {
     padding: 6px 4px !important;
-    font-size: 10px !important;
+    font-size: 12px !important;
   }
 }
 
@@ -443,17 +443,17 @@ body {
   }
 
   .total-row {
-    font-size: 10px !important;
+    font-size: 14px !important;
   }
 
   .total-label {
     text-align: left !important;
-    font-size: 11px !important;
+    font-size: 14px !important;
   }
 
   .total-value {
     text-align: right !important;
-    font-size: 11px !important;
+    font-size: 14px !important;
   }
 }
 
@@ -481,10 +481,10 @@ body {
 
 .total-label {
   text-align: left !important;
-  font-size: 11px !important;
+  font-size: 14px !important;
 }
 
 .total-value {
   text-align: right !important;
-  font-size: 11px !important;
+  font-size: 14px !important;
 }

@@ -169,7 +169,7 @@ class OverviewView {
     // Table header
     const tableHeader = document.createElement("div");
     tableHeader.style.cssText =
-      "background: #f8f9fa; padding: 8px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 8px; font-weight: 600; font-size: 12px;";
+      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 8px; font-weight: 600; font-size: 12px;";
     tableHeader.innerHTML = `
 			<div>Name</div>
 			<div style="text-align: center;">Präz.</div>
@@ -266,7 +266,7 @@ class OverviewView {
     // Table header - narrower columns for series, wider for Gesamt
     const tableHeader = document.createElement("div");
     tableHeader.style.cssText =
-      "background: #f8f9fa; padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 28px) 35px; gap: 4px; font-weight: 600; font-size: 12px;";
+      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 28px) 35px; gap: 4px; font-weight: 600; font-size: 12px;";
     tableHeader.innerHTML = `
 			<div>Name</div>
 			<div style="text-align: center;">S1</div>
@@ -363,7 +363,7 @@ class OverviewView {
     // Table header
     const tableHeader = document.createElement("div");
     tableHeader.style.cssText =
-      "background: #f8f9fa; padding: 8px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 4px; font-weight: 600; font-size: 12px;";
+      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 4px; font-weight: 600; font-size: 12px;";
     tableHeader.innerHTML = `
 			<div>Name</div>
 			<div style="text-align: center;">Präz.</div>
@@ -443,7 +443,7 @@ class OverviewView {
     // Table header
     const tableHeader = document.createElement("div");
     tableHeader.style.cssText =
-      "background: #f8f9fa; padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 28px) 35px; gap: 4px; font-weight: 600; font-size: 12px;";
+      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 28px) 35px; gap: 4px; font-weight: 600; font-size: 12px;";
     tableHeader.innerHTML = `
 			<div>Name</div>
 			<div style="text-align: center;">S1</div>

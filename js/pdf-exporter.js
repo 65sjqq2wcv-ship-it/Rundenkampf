@@ -493,7 +493,7 @@ class PDFExporter {
   getFallbackCSS() {
     return `
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; font-size: 11px; line-height: 1.4; color: #333; background: white; }
+        body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; color: #333; background: white; }
         .pdf-container { max-width: 100%; margin: 0 auto; padding: 20px; }
         .pdf-header { margin-bottom: 30px; }
         .header-content { display: flex; align-items: flex-start; gap: 20px; }
@@ -502,7 +502,7 @@ class PDFExporter {
         .logo-placeholder { width: 100%; height: 100%; background: #4CAF50; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 9px; text-align: center; line-height: 1.1; }
         .title-container { flex: 1; }
         .main-title { font-size: 24px; font-weight: bold; color: #333; margin-bottom: 12px; }
-        .subtitle-info { font-size: 13px; color: #555; }
+        .subtitle-info { font-size: 14px; color: #555; }
         .info-row { margin-bottom: 6px; }
         .pdf-main { margin-bottom: 40px; }
         .team-section, .solo-section { margin-bottom: 25px; break-inside: avoid; }
@@ -510,9 +510,9 @@ class PDFExporter {
         .team-count { font-size: 12px; font-weight: normal; color: #666; }
         .results-table { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; break-inside: avoid; }
         .results-table th, .results-table td { padding: 8px 6px; text-align: center; border: none; }
-        .results-table th { background-color: #f8f9fa; font-weight: bold; font-size: 12px; color: #495057; }
-        .header-row th:first-child { border-top-left-radius: 12px; }
-        .header-row th:last-child { border-top-right-radius: 12px; }
+        .results-table th { background-color: #e9ecef; font-weight: bold; font-size: 14px; color: #495057; }
+        .header-row th:first-child { border-top-left-radius: 14px; }
+        .header-row th:last-child { border-top-right-radius: 14px; }
         .name-header, .name-cell { text-align: left; width: 40%; }
         .score-header, .score-cell { width: 20%; text-align: center; }
         .series-header, .series-cell { width: 12%; text-align: center; }
@@ -524,11 +524,11 @@ class PDFExporter {
         .total-row { background-color: #e9ecef !important; font-weight: bold;}
         .total-row td:first-child { border-bottom-left-radius: 12px; }
         .total-row td:last-child { border-bottom-right-radius: 12px; }
-        .total-label { text-align: left; font-size: 12px !important; font-weight: bold; }
-        .total-value { text-align: left; font-weight: bold; font-size: 12px !important; }
+        .total-label { text-align: left; font-size: 14px !important; font-weight: bold; }
+        .total-value { text-align: left; font-weight: bold; font-size: 14px !important; }
         .pdf-footer { margin-top: 30px; page-break-inside: avoid; }
         .footer-line { height: 1px; background-color: #666; margin-bottom: 12px; }
-        .footer-text { font-size: 9px; line-height: 1.4; color: #666; text-align: justify; max-width: 100%; font-style: italic; }
+        .footer-text { font-size: 10px; line-height: 1.4; color: #666; text-align: justify; max-width: 100%; font-style: italic; }
         @media print { .team-section, .results-table { page-break-inside: avoid; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
         `;
   }
