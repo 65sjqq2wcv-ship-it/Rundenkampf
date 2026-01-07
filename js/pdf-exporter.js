@@ -264,7 +264,7 @@ class PDFExporter {
     return `
     <table class="results-table">
         <thead>
-            <tr class="header-row">
+            <tr class="header-row" style="background-color: #e9ecef; font-weight: bold;">
                 <th class="name-header">Name</th>
                 <th class="score-header">Präzision</th>
                 <th class="score-header">Duell</th>
@@ -330,7 +330,7 @@ class PDFExporter {
     return `
     <table class="results-table annex-table">
         <thead>
-            <tr class="header-row">
+            <tr class="header-row" style="background-color: #e9ecef; font-weight: bold;">
                 <th class="name-header">Name</th>
                 <th class="series-header">S1</th>
                 <th class="series-header">S2</th>
@@ -417,7 +417,7 @@ class PDFExporter {
     return `
         <table class="results-table">
             <thead>
-                <tr class="header-row">
+                <tr class="header-row" style="background-color: #e9ecef; font-weight: bold;">
                     <th class="name-header">Name</th>
                     <th class="score-header">Präzision</th>
                     <th class="score-header">Duell</th>
@@ -469,7 +469,7 @@ class PDFExporter {
     return `
         <table class="results-table annex-table">
             <thead>
-                <tr class="header-row">
+                <tr class="header-row" style="background-color: #e9ecef; font-weight: bold;">
                     <th class="name-header">Name</th>
                     <th class="series-header">S1</th>
                     <th class="series-header">S2</th>
