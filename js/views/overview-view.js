@@ -171,8 +171,8 @@ class OverviewView {
     tableHeader.style.cssText =
       "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 8px; font-weight: 600; font-size: 12px;";
     tableHeader.innerHTML = `
-			<div>Name</div>
-			<div style="text-align: center;">Präz.</div>
+			<div style="text-align: left;">Name</div>
+			<div style="text-align: right;">Präz.</div>
 			<div style="text-align: center;">Duell</div>
 			<div style="text-align: right;">Gesamt</div>
 		`;
