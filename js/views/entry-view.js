@@ -903,59 +903,77 @@ class EntryView {
   // =================================================================
 
   updateTeamSelect() {
-    const select = document.getElementById("teamSelect");
-    if (!select) return;
+  const select = document.getElementById("teamSelect");
+  if (!select) return;
 
-    // Clear existing options except first
-    const firstOption = select.firstChild;
-    select.innerHTML = "";
-    select.appendChild(firstOption);
+  // Clear existing options except default
+  select.innerHTML = "";
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = "— Einzelschütze —";
+  select.appendChild(defaultOption);
 
-    // Add team options securely
-    storage.teams.forEach((team) => {
-      const option = document.createElement("option");
-      option.value = team.id;
-      option.textContent = UIUtils.escapeHtml(team.name);
-      select.appendChild(option);
-    });
+  // Sortieren der Teams nach Name
+  const sortedTeams = [...storage.teams].sort((a, b) => 
+    a.name.localeCompare(b.name, 'de', { numeric: true, sensitivity: 'base' })
+  );
 
-    if (this.selectedTeamId) {
-      select.value = this.selectedTeamId;
-    }
+  sortedTeams.forEach((team) => {
+    const option = document.createElement("option");
+    option.value = team.id;
+    option.textContent = UIUtils.escapeHtml(team.name);
+    select.appendChild(option);
+  });
+
+  if (this.selectedTeamId) {
+    select.value = this.selectedTeamId;
   }
+}
 
   updateShooterSelect() {
-    const select = document.getElementById("shooterSelect");
-    if (!select) return;
+  const select = document.getElementById("shooterSelect");
+  if (!select) return;
 
-    // Clear existing options except first
-    const firstOption = select.firstChild;
-    select.innerHTML = "";
-    select.appendChild(firstOption);
+  // Clear existing options except default
+  select.innerHTML = "";
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = "— keine —";
+  select.appendChild(defaultOption);
 
-    if (this.selectedTeamId) {
-      const team = storage.teams.find((t) => t.id === this.selectedTeamId);
-      if (team && team.shooters) {
-        team.shooters.forEach((shooter) => {
-          const option = document.createElement("option");
-          option.value = shooter.id;
-          option.textContent = UIUtils.escapeHtml(shooter.name);
-          select.appendChild(option);
-        });
-      }
-    } else {
-      storage.standaloneShooters.forEach((shooter) => {
+  if (this.selectedTeamId) {
+    const team = storage.teams.find((t) => t.id === this.selectedTeamId);
+    if (team && team.shooters) {
+      // Sortieren nach Name
+      const sortedShooters = [...team.shooters].sort((a, b) => 
+        a.name.localeCompare(b.name, 'de', { numeric: true, sensitivity: 'base' })
+      );
+      
+      sortedShooters.forEach((shooter) => {
         const option = document.createElement("option");
         option.value = shooter.id;
         option.textContent = UIUtils.escapeHtml(shooter.name);
         select.appendChild(option);
       });
     }
-
-    if (this.selectedShooterId) {
-      select.value = this.selectedShooterId;
-    }
+  } else {
+    // Sortieren der Einzelschützen nach Name
+    const sortedStandaloneShooters = [...storage.standaloneShooters].sort((a, b) => 
+      a.name.localeCompare(b.name, 'de', { numeric: true, sensitivity: 'base' })
+    );
+    
+    sortedStandaloneShooters.forEach((shooter) => {
+      const option = document.createElement("option");
+      option.value = shooter.id;
+      option.textContent = UIUtils.escapeHtml(shooter.name);
+      select.appendChild(option);
+    });
   }
+
+  if (this.selectedShooterId) {
+    select.value = this.selectedShooterId;
+  }
+}
 
   initializeSelection() {
     if (!this.selectedTeamId && !this.selectedShooterId) {
