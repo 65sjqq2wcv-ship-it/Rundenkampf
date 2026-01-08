@@ -701,10 +701,10 @@ class PDFExporter {
         .replace(/\./g, "_")}.pdf`,
       image: {
         type: "jpeg",
-        quality: 0.98,
+        quality: 1.0,
       },
       html2canvas: {
-        scale: 2,
+        scale: 2.5,
         dpi: 300,
         useCORS: true,
         letterRendering: true,

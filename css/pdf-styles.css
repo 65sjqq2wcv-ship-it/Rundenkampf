@@ -15,6 +15,10 @@ body {
   line-height: 1.4;
   color: #333;
   background: white;
+  /* Für bessere Schrift-Darstellung */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .pdf-container {
@@ -142,6 +146,10 @@ body {
   padding: 8px 6px;
   text-align: center;
   border: none;
+  /* Zusätzliche Schrift-Optimierung für Tabellen */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .results-table th {
