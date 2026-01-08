@@ -141,11 +141,11 @@ class SettingsView {
 		<div style="margin-top: 12px;">
 		<div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
 		<span>App Version</span>
-		<span style="color: #8e8e93;">1.42</span>
+		<span style="color: #8e8e93;">1.43</span>
 		</div>
 		<div style="display: flex; justify-content: space-between; padding: 8px 0;">
 		<span>Rundenkampfbericht</span>
-		<span style="color: #8e8e93;">© 2025</span>
+		<span style="color: #8e8e93;">© 2026</span>
 		</div>
 		</div>
 		<div style="margin-top: 16px;">

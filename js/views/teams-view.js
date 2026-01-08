@@ -177,6 +177,7 @@ class TeamsView {
     this.showTeamEditModal(team, false);
   }
 
+  // Auch die showTeamEditModal erweitern um einen Hinweis zu zeigen:
   showTeamEditModal(team, isNew = false) {
     const content = document.createElement("div");
     content.innerHTML = `
@@ -190,7 +191,7 @@ class TeamsView {
 		</div>
 		
 		<div class="form-section">
-		<div class="form-section-header">Schützen</div>
+		<div class="form-section-header">Schützen (maximal 4)</div>
 		<div id="shootersList"></div>
 		<div class="form-row">
 		<div class="add-shooter-row">
@@ -198,6 +199,11 @@ class TeamsView {
 		<button class="btn btn-secondary" id="addShooterBtn">Hinzufügen</button>
 		</div>
 		</div>
+		${
+      team.shooters.length >= 4
+        ? '<p style="color: #666; font-size: 12px; margin-top: 8px;">ℹ️ Eine Mannschaft darf maximal 4 Schützen haben. Für die Wertung zählen die besten 3 Ergebnisse.</p>'
+        : '<p style="color: #666; font-size: 12px; margin-top: 8px;">💡 Tipp: Für die Mannschaftswertung werden die besten 3 von 4 Schützen gewertet.</p>'
+    }
 		</div>
 		
 		${
@@ -239,6 +245,7 @@ class TeamsView {
     }, 100);
   }
 
+  // updateShootersList Methode erweitern:
   updateShootersList(team) {
     const shootersList = document.getElementById("shootersList");
     if (!shootersList) return;
@@ -270,8 +277,31 @@ class TeamsView {
       shooterDiv.appendChild(removeBtn);
       shootersList.appendChild(shooterDiv);
     });
+
+    // Update Add-Button Status basierend auf Anzahl Schützen
+    setTimeout(() => {
+      const addShooterBtn = document.getElementById("addShooterBtn");
+      const newShooterName = document.getElementById("newShooterName");
+
+      if (addShooterBtn && newShooterName) {
+        if (team.shooters.length >= 4) {
+          addShooterBtn.disabled = true;
+          addShooterBtn.textContent = "Maximum erreicht";
+          addShooterBtn.style.opacity = "0.5";
+          newShooterName.disabled = true;
+          newShooterName.placeholder = "Maximal 4 Schützen erlaubt";
+        } else {
+          addShooterBtn.disabled = false;
+          addShooterBtn.textContent = "Hinzufügen";
+          addShooterBtn.style.opacity = "1";
+          newShooterName.disabled = false;
+          newShooterName.placeholder = "Neuer Schütze";
+        }
+      }
+    }, 10);
   }
 
+  // In der setupTeamModalHandlers Methode - den addShooter Teil ersetzen:
   setupTeamModalHandlers(team, isNew) {
     const addShooterBtn = document.getElementById("addShooterBtn");
     const newShooterName = document.getElementById("newShooterName");
@@ -281,9 +311,23 @@ class TeamsView {
       const addShooter = () => {
         const name = newShooterName.value.trim();
         if (name) {
+          // Prüfung: Maximal 4 Schützen pro Mannschaft
+          if (team.shooters.length >= 4) {
+            UIUtils.showError("Eine Mannschaft darf maximal 4 Schützen haben.");
+            return;
+          }
+
           team.shooters.push(new Shooter(name));
           newShooterName.value = "";
           this.updateShootersList(team);
+
+          // Button deaktivieren wenn Maximum erreicht
+          if (team.shooters.length >= 4) {
+            addShooterBtn.disabled = true;
+            addShooterBtn.textContent = "Maximum erreicht";
+            addShooterBtn.style.opacity = "0.5";
+            newShooterName.disabled = true;
+          }
         }
       };
 
@@ -313,6 +357,7 @@ class TeamsView {
     }
   }
 
+  // removeShooter Methode erweitern um Button-Status zu aktualisieren:
   removeShooter(teamId, shooterIndex) {
     const team = storage.teams.find((t) => t.id === teamId);
     if (team && team.shooters[shooterIndex]) {
@@ -329,7 +374,7 @@ class TeamsView {
         // Remove from team
         team.shooters.splice(shooterIndex, 1);
 
-        // Update the list immediately
+        // Update the list immediately (dies aktualisiert auch den Button-Status)
         this.updateShootersList(team);
 
         UIUtils.showSuccessMessage("Schütze entfernt");
@@ -553,6 +598,7 @@ class TeamsView {
     reader.readAsText(file, "UTF-8");
   }
 
+  // processImport Methode erweitern:
   processImport() {
     const fileInput = document.getElementById("csvFileInput");
     const file = fileInput?.files[0];
@@ -570,6 +616,7 @@ class TeamsView {
 
         let teamsCreated = 0;
         let shootersCreated = 0;
+        let skippedShooters = 0;
         let errors = [];
 
         // Process each line
@@ -614,6 +661,17 @@ class TeamsView {
                 teamsCreated++;
               }
 
+              // Prüfung: Maximal 4 Schützen pro Mannschaft
+              if (team.shooters.length >= 4) {
+                errors.push(
+                  `Zeile ${
+                    index + 1
+                  }: Mannschaft "${verein}" hat bereits 4 Schützen (Maximum erreicht)`
+                );
+                skippedShooters++;
+                return;
+              }
+
               // Check if shooter already exists in team
               const existingShooter = team.shooters.find(
                 (s) => s.name === name
@@ -633,6 +691,10 @@ class TeamsView {
         let message = `Import abgeschlossen!\n\n`;
         message += `• ${teamsCreated} Teams erstellt\n`;
         message += `• ${shootersCreated} Einzelschützen erstellt\n`;
+
+        if (skippedShooters > 0) {
+          message += `• ${skippedShooters} Schützen übersprungen (Team-Maximum erreicht)\n`;
+        }
 
         if (errors.length > 0) {
           message += `\nFehler (${errors.length}):\n`;
