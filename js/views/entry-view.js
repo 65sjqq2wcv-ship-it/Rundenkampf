@@ -459,7 +459,7 @@ class EntryView {
     saveBtn.id = "saveBtn";
     saveBtn.className = "btn btn-primary";
     saveBtn.style.cssText = "height: 50px; font-weight: 600;";
-    saveBtn.textContent = "💾 Speichern";
+    saveBtn.textContent = "Speichern";
     buttonsContainer.appendChild(saveBtn);
 
     // Clear Button
@@ -467,7 +467,7 @@ class EntryView {
     clearBtn.id = "clearBtn";
     clearBtn.className = "btn btn-secondary";
     clearBtn.style.cssText = "height: 50px;";
-    clearBtn.textContent = "🗑️ Leeren";
+    clearBtn.textContent = "Leeren";
     buttonsContainer.appendChild(clearBtn);
 
     // NEU: Kamera Button für Scheibendokumentation
@@ -1232,6 +1232,7 @@ class EntryView {
     infoDiv.innerHTML = `
     <div style="font-weight: 600; margin-bottom: 4px;">${shooterInfo.name}</div>
     <div style="font-size: 14px; color: #666;">
+      Disziplin: ${shooterInfo.currentDiscipline}<br>
       Scheibe: ${shooterInfo.discipline}<br>
       Datum: ${shooterInfo.date}
     </div>
@@ -1325,17 +1326,17 @@ class EntryView {
 
   addOverlayToCanvas(ctx, width, height, shooterInfo) {
     // Position links oben, 20px vom Rand
-    const boxHeight = 80; // Reduziert, da weniger Informationen
-    const boxWidth = Math.min(width * 0.6, 350);
+    const boxHeight = 110; // Reduziert, da weniger Informationen
+    const boxWidth = Math.min(width * 0.6, 400);
     const x = 20; // Links, 20px vom Rand
     const y = 20; // Oben, 20px vom Rand
 
     // Box zeichnen
-    ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
     ctx.fillRect(x, y, boxWidth, boxHeight);
 
     // Text-Stil
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "black";
     ctx.font = "bold 16px Arial";
     ctx.textAlign = "left";
 
@@ -1358,8 +1359,9 @@ class EntryView {
 
     // Angepasste Informationen (ohne Uhrzeit)
     const info = [
-      `Disziplin: ${shooterInfo.discipline}`,
-      `Scheibe: ${scheibenTyp}`,
+      `Name: ${shooterInfo.name}`,
+      `Disziplin: ${shooterInfo.currentDiscipline}`,
+      `Scheibe: ${shooterInfo.discipline}`,
       `Datum: ${shooterInfo.date}`,
     ];
 
