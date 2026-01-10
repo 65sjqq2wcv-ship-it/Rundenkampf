@@ -1267,7 +1267,7 @@ class EntryView {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          ffacingMode: { ideal: "environment" }, // Rückkamera bevorzugen
+          facingMode: { exact: "environment" }, // Rückkamera bevorzugen
           width: { ideal: 1080 }, // ← Geändert: quadratisch 1080x1080
           height: { ideal: 1080 }, // ← Geändert: quadratisch 1080x1080
           aspectRatio: 1.0, // ← Neu: explizit 1:1 Verhältnis
