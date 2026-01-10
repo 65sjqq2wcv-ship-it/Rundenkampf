@@ -1100,126 +1100,151 @@ class EntryView {
     cameraContainer.appendChild(canvas);
 
     // === ERWEITERTE POSITIONSHILFEN-OVERLAY ===
-    const guidesOverlay = document.createElement("div");
-    guidesOverlay.className = "guides-overlay";
-    guidesOverlay.style.cssText = `
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    border: 2px dashed rgba(255, 255, 255, 0.8);
-    border-radius: 8px;
-    display: block;
-  `;
+    // === ÜBERARBEITETE POSITIONSHILFEN-OVERLAY ===
+const guidesOverlay = document.createElement("div");
+guidesOverlay.className = "guides-overlay";
+guidesOverlay.style.cssText = `
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  border: 2px dashed rgba(0, 255, 0, 0.8);
+  border-radius: 8px;
+  display: block;
+`;
 
-    // Mittlere Kreuzlinien (horizontal und vertikal durch die Mitte)
-    const centerLineV = document.createElement("div");
-    centerLineV.style.cssText = `
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 1px;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.5);
-  `;
-    guidesOverlay.appendChild(centerLineV);
+// Mittlere Kreuzlinien (horizontal und vertikal durch die Mitte)
+const centerLineV = document.createElement("div");
+centerLineV.style.cssText = `
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 80%;
+  background: linear-gradient(to bottom, transparent, rgba(0, 255, 0, 0.8) 20%, rgba(0, 255, 0, 0.8) 80%, transparent);
+`;
+guidesOverlay.appendChild(centerLineV);
 
-    const centerLineH = document.createElement("div");
-    centerLineH.style.cssText = `
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background-color: rgba(255, 255, 255, 0.5);
-  `;
-    guidesOverlay.appendChild(centerLineH);
+const centerLineH = document.createElement("div");
+centerLineH.style.cssText = `
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  transform: translateY(-50%);
+  width: 80%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(0, 255, 0, 0.8) 20%, rgba(0, 255, 0, 0.8) 80%, transparent);
+`;
+guidesOverlay.appendChild(centerLineH);
 
-    // Drittel-Linien (Rule of thirds)
-    const thirdLineV1 = document.createElement("div");
-    thirdLineV1.style.cssText = `
-    position: absolute;
-    top: 0;
-    left: 33.33%;
-    width: 1px;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.3);
-  `;
-    guidesOverlay.appendChild(thirdLineV1);
+// Drittel-Linien (Rule of thirds) - kompakter und grün
+const thirdLineV1 = document.createElement("div");
+thirdLineV1.style.cssText = `
+  position: absolute;
+  top: 20%;
+  left: 33.33%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 60%;
+  background-color: rgba(0, 200, 0, 0.4);
+`;
+guidesOverlay.appendChild(thirdLineV1);
 
-    const thirdLineV2 = document.createElement("div");
-    thirdLineV2.style.cssText = `
-    position: absolute;
-    top: 0;
-    left: 66.67%;
-    width: 1px;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.3);
-  `;
-    guidesOverlay.appendChild(thirdLineV2);
+const thirdLineV2 = document.createElement("div");
+thirdLineV2.style.cssText = `
+  position: absolute;
+  top: 20%;
+  left: 66.67%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 60%;
+  background-color: rgba(0, 200, 0, 0.4);
+`;
+guidesOverlay.appendChild(thirdLineV2);
 
-    const thirdLineH1 = document.createElement("div");
-    thirdLineH1.style.cssText = `
-    position: absolute;
-    top: 33.33%;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background-color: rgba(255, 255, 255, 0.3);
-  `;
-    guidesOverlay.appendChild(thirdLineH1);
+const thirdLineH1 = document.createElement("div");
+thirdLineH1.style.cssText = `
+  position: absolute;
+  top: 33.33%;
+  left: 20%;
+  transform: translateY(-50%);
+  width: 60%;
+  height: 1px;
+  background-color: rgba(0, 200, 0, 0.4);
+`;
+guidesOverlay.appendChild(thirdLineH1);
 
-    const thirdLineH2 = document.createElement("div");
-    thirdLineH2.style.cssText = `
-    position: absolute;
-    top: 66.67%;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background-color: rgba(255, 255, 255, 0.3);
-  `;
-    guidesOverlay.appendChild(thirdLineH2);
+const thirdLineH2 = document.createElement("div");
+thirdLineH2.style.cssText = `
+  position: absolute;
+  top: 66.67%;
+  left: 20%;
+  transform: translateY(-50%);
+  width: 60%;
+  height: 1px;
+  background-color: rgba(0, 200, 0, 0.4);
+`;
+guidesOverlay.appendChild(thirdLineH2);
 
-    // Mittleres Fadenkreuz
-    const crosshair = document.createElement("div");
-    crosshair.style.cssText = `
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 40px;
-    height: 40px;
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    border-radius: 50%;
-  `;
+// Verbessertes mittleres Fadenkreuz - grün
+const crosshair = document.createElement("div");
+crosshair.style.cssText = `
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  border: 2px solid rgba(0, 255, 0, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+`;
 
-    const crosshairV = document.createElement("div");
-    crosshairV.style.cssText = `
-    position: absolute;
-    top: -20px;
-    left: 18px;
-    width: 2px;
-    height: 80px;
-    background-color: rgba(255, 255, 255, 0.9);
-  `;
+const crosshairV = document.createElement("div");
+crosshairV.style.cssText = `
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 80px;
+  background: linear-gradient(to bottom, transparent, rgba(0, 255, 0, 1) 30%, rgba(0, 255, 0, 1) 70%, transparent);
+`;
 
-    const crosshairH = document.createElement("div");
-    crosshairH.style.cssText = `
-    position: absolute;
-    top: 18px;
-    left: -20px;
-    width: 80px;
-    height: 2px;
-    background-color: rgba(255, 255, 255, 0.9);
-  `;
+const crosshairH = document.createElement("div");
+crosshairH.style.cssText = `
+  position: absolute;
+  top: 50%;
+  left: -15px;
+  transform: translateY(-50%);
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(0, 255, 0, 1) 30%, rgba(0, 255, 0, 1) 70%, transparent);
+`;
 
-    crosshair.appendChild(crosshairV);
-    crosshair.appendChild(crosshairH);
-    guidesOverlay.appendChild(crosshair);
+crosshair.appendChild(crosshairV);
+crosshair.appendChild(crosshairH);
+guidesOverlay.appendChild(crosshair);
 
-    cameraContainer.appendChild(guidesOverlay);
+// Zusätzlicher Zielkreis für Scheibenzentrierung
+const targetCircle = document.createElement("div");
+targetCircle.style.cssText = `
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  border: 1px solid rgba(0, 200, 0, 0.6);
+  border-radius: 50%;
+  border-style: dashed;
+`;
+guidesOverlay.appendChild(targetCircle);
+
+cameraContainer.appendChild(guidesOverlay);
 
     // Info-Bereich (Text "Disziplin" durch "Scheibe" ersetzt)
     const infoDiv = document.createElement("div");
