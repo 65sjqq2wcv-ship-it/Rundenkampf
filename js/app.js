@@ -203,3 +203,86 @@ window.addEventListener("error", (event) => {
 window.addEventListener("unhandledrejection", (event) => {
   console.error("Unhandled promise rejection:", event.reason);
 });
+
+// Service Worker Registration mit Update-Handling
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    registerServiceWorker();
+  });
+}
+
+async function registerServiceWorker() {
+  try {
+    const registration = await navigator.serviceWorker.register('./sw.js');
+
+    console.log('Service Worker registered successfully:', registration);
+
+    // Update-Handling
+    registration.addEventListener('updatefound', () => {
+      const newWorker = registration.installing;
+
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          // Neuer Service Worker ist verfügbar
+          showUpdateAvailable(newWorker);
+        }
+      });
+    });
+
+    // Message-Listener für Service Worker
+    navigator.serviceWorker.addEventListener('message', event => {
+      if (event.data && event.data.type === 'SW_UPDATED') {
+        UIUtils.showSuccessMessage(event.data.message);
+      }
+    });
+
+  } catch (error) {
+    console.error('Service Worker registration failed:', error);
+  }
+}
+
+function showUpdateAvailable(newWorker) {
+  const updateButton = document.createElement('div');
+  updateButton.innerHTML = `
+    <div style="
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #007AFF;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      z-index: 1000;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    ">
+      📱 App-Update verfügbar - Klicken zum Aktualisieren
+    </div>
+  `;
+
+  updateButton.addEventListener('click', () => {
+    newWorker.postMessage({ type: 'SKIP_WAITING' });
+    window.location.reload();
+  });
+
+  document.body.appendChild(updateButton);
+
+  // Automatisch nach 10 Sekunden entfernen
+  setTimeout(() => {
+    if (document.body.contains(updateButton)) {
+      document.body.removeChild(updateButton);
+    }
+  }, 10000);
+}
+
+// Offline/Online Status anzeigen
+window.addEventListener('online', () => {
+  UIUtils.showSuccessMessage('🌐 Verbindung wiederhergestellt');
+});
+
+window.addEventListener('offline', () => {
+  UIUtils.showSuccessMessage('📵 Offline-Modus aktiviert');
+});
