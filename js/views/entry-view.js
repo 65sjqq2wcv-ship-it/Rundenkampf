@@ -496,7 +496,7 @@ photoEditBtn.id = "photoEditBtn";
 photoEditBtn.className = "btn btn-secondary";
 photoEditBtn.style.cssText =
   "height: 50px; background-color: #ff9500; color: white;";
-photoEditBtn.textContent = "Foto wählen";
+photoEditBtn.textContent = "📷 wählen";
 buttonsContainer.appendChild(photoEditBtn);
 
     flexContainer.appendChild(buttonsContainer);
