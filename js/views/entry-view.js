@@ -490,6 +490,15 @@ class EntryView {
     cameraBtn.textContent = "📷 Scheibe";
     buttonsContainer.appendChild(cameraBtn);
 
+// NEU: Button für Foto-Bearbeitung
+const photoEditBtn = document.createElement("button");
+photoEditBtn.id = "photoEditBtn";
+photoEditBtn.className = "btn btn-secondary";
+photoEditBtn.style.cssText =
+  "height: 50px; background-color: #ff9500; color: white;";
+photoEditBtn.textContent = "Foto wählen";
+buttonsContainer.appendChild(photoEditBtn);
+
     flexContainer.appendChild(buttonsContainer);
     card.appendChild(flexContainer);
     controlsDiv.appendChild(card);
@@ -523,6 +532,14 @@ class EntryView {
         this.documentTarget()
       );
     }
+
+// NEU: Photo Edit Button Event Listener
+const photoEditBtn = document.getElementById("photoEditBtn");
+if (photoEditBtn) {
+  this.eventRegistry.register(photoEditBtn, "click", () =>
+    this.processExistingPhoto()
+  );
+}
   }
 
   // =================================================================
@@ -1691,55 +1708,58 @@ cameraContainer.appendChild(guidesOverlay);
     }
   }
 
-  addOverlayToCanvas(ctx, width, height, shooterInfo) {
-    const competitionType = getCompetitionType(this.selectedDiscipline);
+addOverlayToCanvas(ctx, width, height, shooterInfo, customShots = null) {
+  const competitionType = getCompetitionType(this.selectedDiscipline);
 
-    // Angepasste Box-Größen und Abstände
-    const isAnnex = competitionType === CompetitionType.ANNEX_SCHEIBE;
-    const boxWidth = Math.min(width * 0.8, isAnnex ? 370 : 370);
-    const boxHeight = isAnnex ? 270 : 270; // Beide vergrößert
-    const x = 20;
-    const y = 20;
+  // Angepasste Box-Größen und Abstände
+  const isAnnex = competitionType === CompetitionType.ANNEX_SCHEIBE;
+  const boxWidth = Math.min(width * 0.8, isAnnex ? 370 : 370);
+  const boxHeight = isAnnex ? 270 : 270;
+  const x = 20;
+  const y = 20;
 
-    // Box zeichnen
-    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-    ctx.fillRect(x, y, boxWidth, boxHeight);
+  // Box zeichnen
+  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+  ctx.fillRect(x, y, boxWidth, boxHeight);
 
-    // Rahmen
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x, y, boxWidth, boxHeight);
+  // Rahmen
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x, y, boxWidth, boxHeight);
 
-    // Text-Stil für Header-Infos
-    ctx.fillStyle = "black";
-    ctx.font = "bold 14px Arial";
-    ctx.textAlign = "left";
+  // Text-Stil für Header-Infos
+  ctx.fillStyle = "black";
+  ctx.font = "bold 14px Arial";
+  ctx.textAlign = "left";
 
-    // Header-Informationen
-    const info = [
-      `Name: ${shooterInfo.name}`,
-      `Disziplin: ${shooterInfo.currentDiscipline}`,
-      `Scheibe: ${shooterInfo.discipline}`,
-      `Datum: ${shooterInfo.date}`,
-    ];
+  // Header-Informationen
+  const info = [
+    `Name: ${shooterInfo.name}`,
+    `Disziplin: ${shooterInfo.currentDiscipline}`,
+    `Scheibe: ${shooterInfo.discipline}`,
+    `Datum: ${shooterInfo.date}`,
+  ];
 
-    info.forEach((line, index) => {
-      ctx.fillText(line, x + 10, y + 20 + index * 18);
-    });
+  info.forEach((line, index) => {
+    ctx.fillText(line, x + 10, y + 20 + index * 18);
+  });
 
-    // Schuss-Matrix zeichnen - angepasste Start-Positionen
-    const matrixStartY = isAnnex ? y + 110 : y + 100; // Mehr Abstand für Annex, etwas mehr für Standard
+  // Schuss-Matrix zeichnen - mit optionalen Schuss-Daten
+  const matrixStartY = isAnnex ? y + 110 : y + 100;
 
-    if (isAnnex) {
-      this.drawAnnexMatrix(ctx, x + 10, matrixStartY, boxWidth - 20);
-    } else {
-      this.drawStandardMatrix(ctx, x + 10, matrixStartY, boxWidth - 20);
-    }
+  if (isAnnex) {
+    this.drawAnnexMatrix(ctx, x + 10, matrixStartY, boxWidth - 20, customShots);
+  } else {
+    this.drawStandardMatrix(ctx, x + 10, matrixStartY, boxWidth - 20, customShots);
   }
+}
 
-drawStandardMatrix(ctx, startX, startY, maxWidth) {
+drawStandardMatrix(ctx, startX, startY, maxWidth, customShots = null) {
   const cellSize = Math.min(25, (maxWidth - 40) / 5);
   const gap = 3;
+
+  // Verwende entweder die übergebenen Schuss-Daten oder die aktuellen
+  const shotsToUse = customShots || this.shots;
 
   ctx.font = "bold 12px Arial";
   ctx.textAlign = "center";
@@ -1758,7 +1778,7 @@ drawStandardMatrix(ctx, startX, startY, maxWidth) {
       ctx.strokeRect(cellX, cellY, cellSize, cellSize);
 
       // Schuss-Wert
-      const shotValue = this.shots[shotIndex];
+      const shotValue = shotsToUse[shotIndex];
       if (shotValue !== null) {
         ctx.fillStyle = "black";
         ctx.fillText(
@@ -1774,7 +1794,7 @@ drawStandardMatrix(ctx, startX, startY, maxWidth) {
   }
 
   // Gesamtpunkte unter der Matrix
-  const filledShots = this.shots.slice(0, 20).filter((s) => s !== null);
+  const filledShots = shotsToUse.slice(0, 20).filter((s) => s !== null);
   const total = filledShots.reduce((sum, shot) => sum + shot, 0);
 
   ctx.font = "bold 14px Arial";
@@ -1838,87 +1858,90 @@ calculateShotDistributionLines(shots) {
   return lines;
 }
 
-  drawAnnexMatrix(ctx, startX, startY, maxWidth) {
-    const cellSize = Math.min(20, (maxWidth - 60) / 9);
-    const gap = 2;
+drawAnnexMatrix(ctx, startX, startY, maxWidth, customShots = null) {
+  const cellSize = Math.min(20, (maxWidth - 60) / 9);
+  const gap = 2;
 
-    ctx.font = "10px Arial";
-    ctx.textAlign = "center";
-    ctx.fillStyle = "black";
+  // Verwende entweder die übergebenen Schuss-Daten oder die aktuellen
+  const shotsToUse = customShots || this.shots;
 
-    // Header: Serie | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 - mehr Abstand nach oben
-    const headerY = startY - 20; // Erhöht von -15 auf -20
-    ctx.font = "bold 10px Arial";
-    ctx.fillText("Serie", startX + 20, headerY);
-    for (let i = 1; i <= 8; i++) {
-      ctx.fillText(i.toString(), startX + 40 + i * (cellSize + gap), headerY);
-    }
+  ctx.font = "10px Arial";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "black";
 
-    // 5 Serien × 8 Schüsse = 40 Schüsse
-    ctx.font = "10px Arial";
-    const seriesSums = [];
-
-    for (let series = 0; series < 5; series++) {
-      const rowY = startY + series * (cellSize + gap);
-
-      // Serie-Label (S1, S2, etc.)
-      ctx.font = "bold 10px Arial";
-      ctx.fillText(`S${series + 1}`, startX + 20, rowY + cellSize / 2 + 3);
-
-      ctx.font = "10px Arial";
-      let seriesSum = 0;
-
-      for (let shot = 0; shot < 8; shot++) {
-        const shotIndex = series * 8 + shot;
-        const cellX = startX + 40 + (shot + 1) * (cellSize + gap);
-
-        // Zelle zeichnen
-        ctx.strokeStyle = "#666";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(cellX, rowY, cellSize, cellSize);
-
-        // Schuss-Wert
-        const shotValue = this.shots[shotIndex];
-        if (shotValue !== null) {
-          ctx.fillStyle = "black";
-          ctx.fillText(
-            shotValue.toString(),
-            cellX + cellSize / 2,
-            rowY + cellSize / 2 + 3
-          );
-          seriesSum += shotValue;
-        } else {
-          ctx.fillStyle = "#ccc";
-          ctx.fillText("—", cellX + cellSize / 2, rowY + cellSize / 2 + 3);
-        }
-      }
-
-      seriesSums.push(seriesSum);
-    }
-
-    // Serien-Ergebnisse und Gesamtpunkte
-    const filledShots = this.shots.slice(0, 40).filter((s) => s !== null);
-    const total = filledShots.reduce((sum, shot) => sum + shot, 0);
-
-    const summaryY = startY + 5 * (cellSize + gap) + 15;
-
-    ctx.font = "bold 12px Arial";
-    ctx.fillStyle = "black";
-    ctx.textAlign = "left";
-
-    // Serien-Summen
-    const seriesText = seriesSums
-      .map((sum, i) => `S${i + 1}:${sum}`)
-      .join("  ");
-    ctx.fillText(seriesText, startX, summaryY);
-
-    // Gesamtergebnis
-    ctx.fillText(
-      `Schüsse: ${filledShots.length}/40  |  Gesamt: ${total}`,
-      startX,
-      summaryY + 18
-    );
+  // Header: Serie | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+  const headerY = startY - 20;
+  ctx.font = "bold 10px Arial";
+  ctx.fillText("Serie", startX + 20, headerY);
+  for (let i = 1; i <= 8; i++) {
+    ctx.fillText(i.toString(), startX + 40 + i * (cellSize + gap), headerY);
   }
+
+  // 5 Serien × 8 Schüsse = 40 Schüsse
+  ctx.font = "10px Arial";
+  const seriesSums = [];
+
+  for (let series = 0; series < 5; series++) {
+    const rowY = startY + series * (cellSize + gap);
+
+    // Serie-Label (S1, S2, etc.)
+    ctx.font = "bold 10px Arial";
+    ctx.fillText(`S${series + 1}`, startX + 20, rowY + cellSize / 2 + 3);
+
+    ctx.font = "10px Arial";
+    let seriesSum = 0;
+
+    for (let shot = 0; shot < 8; shot++) {
+      const shotIndex = series * 8 + shot;
+      const cellX = startX + 40 + (shot + 1) * (cellSize + gap);
+
+      // Zelle zeichnen
+      ctx.strokeStyle = "#666";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(cellX, rowY, cellSize, cellSize);
+
+      // Schuss-Wert
+      const shotValue = shotsToUse[shotIndex];
+      if (shotValue !== null) {
+        ctx.fillStyle = "black";
+        ctx.fillText(
+          shotValue.toString(),
+          cellX + cellSize / 2,
+          rowY + cellSize / 2 + 3
+        );
+        seriesSum += shotValue;
+      } else {
+        ctx.fillStyle = "#ccc";
+        ctx.fillText("—", cellX + cellSize / 2, rowY + cellSize / 2 + 3);
+      }
+    }
+
+    seriesSums.push(seriesSum);
+  }
+
+  // Serien-Ergebnisse und Gesamtpunkte
+  const filledShots = shotsToUse.slice(0, 40).filter((s) => s !== null);
+  const total = filledShots.reduce((sum, shot) => sum + shot, 0);
+
+  const summaryY = startY + 5 * (cellSize + gap) + 15;
+
+  ctx.font = "bold 12px Arial";
+  ctx.fillStyle = "black";
+  ctx.textAlign = "left";
+
+  // Serien-Summen
+  const seriesText = seriesSums
+    .map((sum, i) => `S${i + 1}:${sum}`)
+    .join("  ");
+  ctx.fillText(seriesText, startX, summaryY);
+
+  // Gesamtergebnis
+  ctx.fillText(
+    `Schüsse: ${filledShots.length}/40  |  Gesamt: ${total}`,
+    startX,
+    summaryY + 18
+  );
+}
 
   downloadPhoto(canvas, shooterInfo) {
     try {
@@ -1992,6 +2015,217 @@ calculateShotDistributionLines(shots) {
     errorCard.appendChild(errorText);
     container.appendChild(errorCard);
   }
+
+  // =================================================================
+// NEU: EXISTIERENDE FOTO-BEARBEITUNG
+// =================================================================
+
+async processExistingPhoto() {
+  try {
+    // Validierung
+    if (!this.selectedShooterId) {
+      UIUtils.showError("Bitte wählen Sie zuerst einen Schützen aus.");
+      return;
+    }
+
+    // Schützen-Informationen ermitteln
+    const shooterInfo = this.getShooterInfo();
+    if (!shooterInfo) {
+      UIUtils.showError("Schützeninformationen nicht verfügbar.");
+      return;
+    }
+
+    // Foto-Bearbeitungs-Modal anzeigen
+    this.showPhotoEditModal(shooterInfo);
+  } catch (error) {
+    console.error("Error starting photo editing:", error);
+    UIUtils.showError("Fehler beim Starten der Foto-Bearbeitung: " + error.message);
+  }
+}
+
+showPhotoEditModal(shooterInfo) {
+  // Modal Container
+  const modalContent = document.createElement("div");
+  modalContent.style.cssText = "width: 100%; max-width: 500px;";
+
+  // Info-Bereich (gleich wie bei Kamera)
+  const infoDiv = document.createElement("div");
+  infoDiv.style.cssText =
+    "margin-bottom: 16px; padding: 12px; background: #f8f9fa; border-radius: 8px;";
+  infoDiv.innerHTML = `
+    <div style="font-weight: 600; margin-bottom: 4px;">${shooterInfo.name}</div>
+    <div style="font-size: 14px; color: #666;">
+      Disziplin: ${shooterInfo.currentDiscipline}<br>
+      Scheibe: ${shooterInfo.discipline}<br>
+      Datum: <span id="selectedDate">${shooterInfo.date}</span>
+    </div>
+  `;
+
+  // Datums-Auswahl
+  const dateDiv = document.createElement("div");
+  dateDiv.style.cssText = "margin-bottom: 16px;";
+  
+  const dateLabel = document.createElement("label");
+  dateLabel.textContent = "Datum für Overlay:";
+  dateLabel.style.cssText = "display: block; font-weight: 600; margin-bottom: 8px;";
+  
+  const dateInput = document.createElement("input");
+  dateInput.type = "date";
+  dateInput.id = "overlayDate";
+  dateInput.style.cssText = "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;";
+  
+  // Aktuelles Datum als Standard
+  const today = new Date();
+  dateInput.value = today.toISOString().split('T')[0];
+  
+  // Event-Listener für Datums-Änderung
+  dateInput.addEventListener('change', () => {
+    const selectedDate = new Date(dateInput.value);
+    const formattedDate = selectedDate.toLocaleDateString("de-DE");
+    document.getElementById("selectedDate").textContent = formattedDate;
+  });
+
+  dateDiv.appendChild(dateLabel);
+  dateDiv.appendChild(dateInput);
+
+  // Foto-Auswahl
+  const fileDiv = document.createElement("div");
+  fileDiv.style.cssText = "margin-bottom: 16px;";
+  
+  const fileLabel = document.createElement("label");
+  fileLabel.textContent = "Foto auswählen:";
+  fileLabel.style.cssText = "display: block; font-weight: 600; margin-bottom: 8px;";
+  
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.id = "photoFile";
+  fileInput.accept = "image/*";
+  fileInput.style.cssText = "width: 100%; padding: 8px;";
+
+  fileDiv.appendChild(fileLabel);
+  fileDiv.appendChild(fileInput);
+
+  // Vorschau-Container
+  const previewDiv = document.createElement("div");
+  previewDiv.id = "photoPreview";
+  previewDiv.style.cssText = "margin-bottom: 16px; text-align: center;";
+
+  // File-Input Event-Listener für Vorschau
+  fileInput.addEventListener('change', (e) => {
+    this.showPhotoPreview(e.target.files[0], previewDiv);
+  });
+
+  modalContent.appendChild(infoDiv);
+  modalContent.appendChild(dateDiv);
+  modalContent.appendChild(fileDiv);
+  modalContent.appendChild(previewDiv);
+
+  const modal = new ModalComponent("Foto mit Overlay versehen", modalContent);
+
+  modal.addAction(
+    "Abbrechen",
+    () => {},
+    false,
+    false
+  );
+
+  modal.addAction(
+    "Overlay hinzufügen",
+    () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        UIUtils.showError("Bitte wählen Sie ein Foto aus.");
+        return;
+      }
+      
+      // Aktualisiere shooterInfo mit gewähltem Datum
+      const selectedDate = new Date(dateInput.value);
+      const updatedShooterInfo = {
+        ...shooterInfo,
+        date: selectedDate.toLocaleDateString("de-DE")
+      };
+      
+      this.addOverlayToPhoto(file, updatedShooterInfo);
+    },
+    true,
+    false
+  );
+
+  modal.show();
+}
+
+showPhotoPreview(file, previewContainer) {
+  previewContainer.innerHTML = "";
+  
+  if (!file || !file.type.startsWith('image/')) {
+    return;
+  }
+
+  const img = document.createElement("img");
+  img.style.cssText = "max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid #ddd;";
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  
+  previewContainer.appendChild(img);
+}
+
+addOverlayToPhoto(file, shooterInfo) {
+  const reader = new FileReader();
+  
+  reader.onload = (e) => {
+    const img = new Image();
+    
+    img.onload = () => {
+      // Canvas erstellen
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      
+      const ctx = canvas.getContext("2d");
+      
+      // Originalbild zeichnen
+      ctx.drawImage(img, 0, 0);
+      
+      // Overlay hinzufügen - verwende aktuelle Schuss-Daten falls vorhanden
+      // Für Präzision/Duell: Nur wenn Schüsse eingegeben wurden, sonst leeres Overlay
+      const competitionType = getCompetitionType(this.selectedDiscipline);
+      let shotsToUse = null;
+      
+      if (competitionType !== CompetitionType.ANNEX_SCHEIBE) {
+        // Bei Präzision/Duell: Verwende aktuelle Schüsse falls vorhanden
+        const hasShots = this.shots.some((shot) => shot !== null);
+        if (hasShots) {
+          shotsToUse = [...this.shots]; // Kopie der aktuellen Schüsse
+        }
+      } else {
+        // Bei Annex: Verwende aktuelle Schüsse falls vorhanden
+        const hasShots = this.shots.some((shot) => shot !== null);
+        if (hasShots) {
+          shotsToUse = [...this.shots]; // Kopie der aktuellen Schüsse
+        }
+      }
+      
+      this.addOverlayToCanvas(ctx, canvas.width, canvas.height, shooterInfo, shotsToUse);
+      
+      // Download
+      this.downloadPhoto(canvas, shooterInfo);
+      
+      UIUtils.showSuccessMessage("Foto mit Overlay wurde gespeichert!");
+    };
+    
+    img.src = e.target.result;
+  };
+  
+  reader.onerror = () => {
+    UIUtils.showError("Fehler beim Laden des Fotos.");
+  };
+  
+  reader.readAsDataURL(file);
+}
 
   // =================================================================
   // ERWEITERTE CLEANUP-METHODE
