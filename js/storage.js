@@ -1,10 +1,11 @@
-// Storage Class - Vollständige Version
+// Storage Class - Vollständige Version mit Einzelschützen-Filter
 class Storage {
   constructor() {
     this.teams = [];
     this.standaloneShooters = [];
     this.results = [];
     this.visibleTeamIds = null; // null = alle sichtbar
+    this.visibleShooterIds = null; // NEU: null = alle Einzelschützen sichtbar
     this.availableDisciplines = [];
     this.selectedDiscipline = null;
     this.selectedCompetitionType = CompetitionType.PRAEZISION_DUELL;
@@ -32,20 +33,13 @@ class Storage {
       this.standaloneShooters.length === 0
     ) {
       this.teams = [];
-      //this.teams = [
-      //new Team('SV Musterhausen', [
-      //new Shooter('Fritz'),
-      //new Shooter('Fred'),
-      //new Shooter('Ernst'),
-      //new Shooter('Dieter')
-      //]),
-      //];
       this.standaloneShooters = [];
-      //this.standaloneShooters = [new Shooter('Emil')];
       this.availableDisciplines = this.defaultDisciplines();
       this.selectedDiscipline = this.availableDisciplines[0];
       this.selectedCompetitionType = CompetitionType.PRAEZISION_DUELL;
-      this.settings = {}; //Neu
+      this.settings = {};
+      this.visibleTeamIds = null;
+      this.visibleShooterIds = null; // NEU
     }
   }
 
@@ -64,13 +58,16 @@ class Storage {
         this.visibleTeamIds = data.visibleTeamIds
           ? new Set(data.visibleTeamIds)
           : null;
+        this.visibleShooterIds = data.visibleShooterIds // NEU
+          ? new Set(data.visibleShooterIds)
+          : null;
         this.availableDisciplines =
           data.availableDisciplines || this.defaultDisciplines();
         this.selectedDiscipline =
           data.selectedDiscipline || this.availableDisciplines[0];
         this.selectedCompetitionType =
           data.selectedCompetitionType || CompetitionType.PRAEZISION_DUELL;
-        this.settings = data.settings || {}; // NEU: Settings laden
+        this.settings = data.settings || {};
 
         console.log(
           "Data loaded successfully. Logo present:",
@@ -117,62 +114,17 @@ class Storage {
         // Komprimierung mit 70% Qualität
         const compressedLogo = canvas.toDataURL("image/jpeg", 0.7);
 
+        // Nur ersetzen, wenn kleiner
         if (compressedLogo.length < this.settings.clubLogo.length) {
-          console.log(
-            "Logo compressed from",
-            Math.round(this.settings.clubLogo.length / 1024),
-            "KB to",
-            Math.round(compressedLogo.length / 1024),
-            "KB"
-          );
+          console.log("Logo compressed successfully");
           this.settings.clubLogo = compressedLogo;
+          this.save();
         }
       };
+
       img.src = this.settings.clubLogo;
     } catch (error) {
-      console.error("Logo compression failed:", error);
-    }
-  }
-
-  deleteLogo() {
-    try {
-      if (this.settings && this.settings.clubLogo) {
-        delete this.settings.clubLogo;
-        this.save();
-        console.log("Logo deleted successfully");
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Error deleting logo:", error);
-      throw error;
-    }
-  }
-
-  getLogo() {
-    return this.settings && this.settings.clubLogo
-      ? this.settings.clubLogo
-      : null;
-  }
-
-  // NEU: Logo Management Methoden
-  saveLogo(base64Logo) {
-    try {
-      if (!this.settings) {
-        this.settings = {};
-      }
-
-      console.log(
-        "Saving logo, size:",
-        Math.round(base64Logo.length / 1024),
-        "KB"
-      );
-      this.settings.clubLogo = base64Logo;
-      this.save();
-      return true;
-    } catch (error) {
-      console.error("Error saving logo:", error);
-      throw error;
+      console.error("Error compressing logo:", error);
     }
   }
 
@@ -186,18 +138,16 @@ class Storage {
         visibleTeamIds: this.visibleTeamIds
           ? Array.from(this.visibleTeamIds)
           : null,
+        visibleShooterIds: this.visibleShooterIds // NEU
+          ? Array.from(this.visibleShooterIds)
+          : null,
         availableDisciplines: this.availableDisciplines,
         selectedDiscipline: this.selectedDiscipline,
         selectedCompetitionType: this.selectedCompetitionType,
-        settings: this.settings, // NEU: Settings speichern
+        settings: this.settings,
       };
 
       const dataString = JSON.stringify(data);
-      console.log(
-        "Attempting to save data. Size:",
-        Math.round(dataString.length / 1024),
-        "KB"
-      );
 
       // LocalStorage Größenlimit prüfen (ca. 5MB)
       if (dataString.length > 5000000) {
@@ -236,6 +186,9 @@ class Storage {
               results: this.results.map((r) => r.toJSON()),
               visibleTeamIds: this.visibleTeamIds
                 ? Array.from(this.visibleTeamIds)
+                : null,
+              visibleShooterIds: this.visibleShooterIds // NEU
+                ? Array.from(this.visibleShooterIds)
                 : null,
               availableDisciplines: this.availableDisciplines,
               selectedDiscipline: this.selectedDiscipline,
@@ -381,6 +334,12 @@ class Storage {
       this.standaloneShooters = this.standaloneShooters.filter(
         (s) => s.id !== shooterId
       );
+
+      // NEU: Entferne Schützen aus Sichtbarkeitsfilter
+      if (this.visibleShooterIds && this.visibleShooterIds.has(shooterId)) {
+        this.visibleShooterIds.delete(shooterId);
+      }
+
       this.save();
 
       console.log("Standalone shooter deleted successfully");
@@ -391,7 +350,7 @@ class Storage {
     return false;
   }
 
-  // In Storage class hinzufügen/ersetzen:
+  // Ergebnis-Management
   saveResult(entry) {
     if (!entry || !entry.shooterId || !entry.discipline) {
       throw new Error("Ergebnis muss Schützen-ID und Disziplin haben");
@@ -438,121 +397,95 @@ class Storage {
   }
 
   deleteResultsForShooter(shooterId) {
-    if (!shooterId) {
-      console.warn("No shooter ID provided for result deletion");
-      return false;
-    }
+    if (!shooterId) return;
 
     const oldLength = this.results.length;
     this.results = this.results.filter((r) => r.shooterId !== shooterId);
 
-    if (this.results.length < oldLength) {
-      const deletedCount = oldLength - this.results.length;
+    const deletedCount = oldLength - this.results.length;
+    if (deletedCount > 0) {
       console.log(`Deleted ${deletedCount} results for shooter:`, shooterId);
-      // Don't save here as this is usually called from other methods that will save
+    }
+  }
+
+  // Disziplinen-Management
+  addDiscipline(name) {
+    const trimmed = name.trim();
+    if (trimmed && !this.availableDisciplines.includes(trimmed)) {
+      this.availableDisciplines.push(trimmed);
+      this.save();
       return true;
     }
-
     return false;
   }
 
-  // Disziplin-Management
-  addDiscipline(name) {
-    const trimmed = name.trim();
-    if (!trimmed) {
-      throw new Error("Disziplinname darf nicht leer sein");
-    }
-
-    if (this.availableDisciplines.includes(trimmed)) {
-      throw new Error("Diese Disziplin existiert bereits");
-    }
-
-    this.availableDisciplines.push(trimmed);
-    if (!this.selectedDiscipline) {
-      this.selectedDiscipline = trimmed;
-    }
-    this.save();
-    console.log("Discipline added:", trimmed);
-    return true;
-  }
-
   updateDiscipline(index, newName) {
-    if (index < 0 || index >= this.availableDisciplines.length) {
-      throw new Error("Ungültiger Disziplin-Index");
+    if (index >= 0 && index < this.availableDisciplines.length) {
+      const trimmed = newName.trim();
+      if (trimmed) {
+        this.availableDisciplines[index] = trimmed;
+        this.save();
+        return true;
+      }
     }
-
-    const trimmed = newName.trim();
-    if (!trimmed) {
-      throw new Error("Disziplinname darf nicht leer sein");
-    }
-
-    if (this.availableDisciplines.includes(trimmed)) {
-      throw new Error("Diese Disziplin existiert bereits");
-    }
-
-    const oldName = this.availableDisciplines[index];
-    this.availableDisciplines[index] = trimmed;
-
-    if (this.selectedDiscipline === oldName) {
-      this.selectedDiscipline = trimmed;
-    }
-
-    this.save();
-    console.log("Discipline updated:", oldName, "->", trimmed);
-    return true;
+    return false;
   }
 
   deleteDiscipline(index) {
-    if (index < 0 || index >= this.availableDisciplines.length) {
-      throw new Error("Ungültiger Disziplin-Index");
+    if (index >= 0 && index < this.availableDisciplines.length) {
+      this.availableDisciplines.splice(index, 1);
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
+  // Logo-Management
+  saveLogo(base64Data) {
+    if (!base64Data || typeof base64Data !== "string") {
+      throw new Error("Ungültige Logo-Daten");
     }
 
-    const removedName = this.availableDisciplines[index];
-    this.availableDisciplines.splice(index, 1);
-
-    if (this.selectedDiscipline === removedName) {
-      this.selectedDiscipline = this.availableDisciplines[0] || null;
+    // Größenprüfung (5MB Limit)
+    if (base64Data.length > 5 * 1024 * 1024) {
+      throw new Error(
+        "Das Logo ist zu groß. Bitte verwenden Sie ein kleineres Bild."
+      );
     }
 
+    this.settings.clubLogo = base64Data;
     this.save();
-    console.log("Discipline deleted:", removedName);
     return true;
   }
 
-  // Filter-Management
-  setVisibleTeams(teamIds) {
-    this.visibleTeamIds = teamIds;
-    this.save();
-    return true;
+  getLogo() {
+    return this.settings.clubLogo || null;
   }
 
-  getFilteredTeams() {
-    if (this.visibleTeamIds) {
-      return this.teams.filter((team) => this.visibleTeamIds.has(team.id));
+  deleteLogo() {
+    if (this.settings.clubLogo) {
+      delete this.settings.clubLogo;
+      this.save();
+      return true;
     }
-    return this.teams;
+    return false;
   }
 
-  // Berechnung von Mannschaftsergebnissen
-  calculateTeamTotal(team, competitionType) {
-    if (!team) return 0;
-
-    switch (competitionType) {
-      case CompetitionType.PRAEZISION_DUELL:
-        return this.calculateBestThreeSum(team);
-      case CompetitionType.ANNEX_SCHEIBE:
-        return this.calculateBestThreeSumAnnex(team);
-      default:
-        return this.calculateBestThreeSum(team);
+  // NEU: Filter-Management für Einzelschützen
+  getFilteredStandaloneShooters() {
+    if (this.visibleShooterIds) {
+      return this.standaloneShooters.filter((shooter) =>
+        this.visibleShooterIds.has(shooter.id)
+      );
     }
+    return this.standaloneShooters;
   }
 
-  // Original Logik für Präzision/Duell
-  // Original Logik für Präzision/Duell
+  // Berechnungsmethoden
   calculateBestThreeSum(team) {
-    if (!team || !team.shooters) return 0;
+    if (!team || team.shooters.length === 0) return 0;
 
-    const totals = team.shooters.map((shooter) => {
+    const shooterTotals = team.shooters.map((shooter) => {
       const precision = this.results
         .filter(
           (r) =>
@@ -572,46 +505,36 @@ class Storage {
       return precision + duell;
     });
 
-    const sortedDesc = totals.sort((a, b) => b - a);
-    return sortedDesc.slice(0, 3).reduce((sum, total) => sum + total, 0);
+    // Sortiere absteigend und nimm die besten 3
+    const bestThree = shooterTotals.sort((a, b) => b - a).slice(0, 3);
+    return bestThree.reduce((sum, total) => sum + total, 0);
   }
 
-  // Neue Logik für Annex Scheibe
-  calculateBestThreeSumAnnex(team) {
-    if (!team || !team.shooters) return 0;
+  calculateTeamTotal(team, competitionType) {
+    if (!team || team.shooters.length === 0) return 0;
 
-    const totals = team.shooters.map((shooter) => {
-      const result = this.results.find(
-        (r) =>
-          r.teamId === team.id &&
-          r.shooterId === shooter.id &&
-          r.discipline === Discipline.ANNEX_SCHEIBE
-      );
-      return result ? this.calculateBestFiveSeriesSum(result) : 0;
-    });
+    if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
+      const shooterTotals = team.shooters.map((shooter) => {
+        const result = this.results.find(
+          (r) =>
+            r.teamId === team.id &&
+            r.shooterId === shooter.id &&
+            r.discipline === Discipline.ANNEX_SCHEIBE
+        );
+        return result ? result.total() : 0;
+      });
 
-    const sortedDesc = totals.sort((a, b) => b - a);
-    return sortedDesc.slice(0, 3).reduce((sum, total) => sum + total, 0);
+      // Bei Annex: Bester 3er-Schnitt
+      const bestThree = shooterTotals.sort((a, b) => b - a).slice(0, 3);
+      return bestThree.reduce((sum, total) => sum + total, 0);
+    } else {
+      // Bei Standard: Bester 3er-Schnitt aus Präzision + Duell
+      return this.calculateBestThreeSum(team);
+    }
   }
 
-  // Berechne beste 5 Serien aus 5 für einen einzelnen Schützen
-  calculateBestFiveSeriesSum(result) {
-    if (!result || !result.seriesSums) return 0;
-
-    const seriesSums = result.seriesSums();
-    return seriesSums
-      .sort((a, b) => b - a)
-      .slice(0, 5)
-      .reduce((sum, series) => sum + series, 0);
-  }
-
-  // Utility-Methoden
-  getTeamById(teamId) {
-    if (!teamId) return null;
-    return this.teams.find((t) => t.id === teamId) || null;
-  }
-
-  getShooterById(shooterId) {
+  // Suchfunktionen
+  findShooterById(shooterId) {
     if (!shooterId) return null;
 
     // Suche in Teams
@@ -669,6 +592,12 @@ class Storage {
       availableDisciplines: this.availableDisciplines,
       selectedDiscipline: this.selectedDiscipline,
       selectedCompetitionType: this.selectedCompetitionType,
+      visibleTeamIds: this.visibleTeamIds
+        ? Array.from(this.visibleTeamIds)
+        : null,
+      visibleShooterIds: this.visibleShooterIds // NEU
+        ? Array.from(this.visibleShooterIds)
+        : null,
       exportDate: new Date().toISOString(),
     };
   }
@@ -688,6 +617,10 @@ class Storage {
         this.selectedDiscipline = data.selectedDiscipline;
       if (data.selectedCompetitionType)
         this.selectedCompetitionType = data.selectedCompetitionType;
+      if (data.visibleTeamIds)
+        this.visibleTeamIds = new Set(data.visibleTeamIds);
+      if (data.visibleShooterIds) // NEU
+        this.visibleShooterIds = new Set(data.visibleShooterIds);
 
       this.save();
       console.log("Data imported successfully");
@@ -704,9 +637,11 @@ class Storage {
     this.standaloneShooters = [];
     this.results = [];
     this.visibleTeamIds = null;
+    this.visibleShooterIds = null; // NEU
     this.availableDisciplines = this.defaultDisciplines();
     this.selectedDiscipline = this.availableDisciplines[0];
     this.selectedCompetitionType = CompetitionType.PRAEZISION_DUELL;
+    this.settings = {};
 
     localStorage.removeItem("rundenkampf_bericht");
     console.log("Storage reset completed");

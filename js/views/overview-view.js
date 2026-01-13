@@ -3,6 +3,7 @@ class OverviewView {
     this.showingFilter = false;
   }
 
+  // Erweiterte render() Methode - nur die relevanten Teile
   render() {
     const container = document.createElement("div");
 
@@ -27,32 +28,33 @@ class OverviewView {
         });
       }
 
-      // Standalone shooters overview
-      if (storage.standaloneShooters.length > 0) {
+      // Standalone shooters overview - MIT FILTER
+      const filteredStandaloneShooters = this.getFilteredStandaloneShooters();
+      if (filteredStandaloneShooters.length > 0) {
         const soloCard = this.createSoloShootersCard();
         container.appendChild(soloCard);
       }
 
-      // Empty state only if NO teams AND no standalone shooters
+      // Empty state only if NO filtered teams AND no filtered standalone shooters
       if (
         filteredTeams.length === 0 &&
-        storage.standaloneShooters.length === 0
+        filteredStandaloneShooters.length === 0
       ) {
         const emptyState = document.createElement("div");
         emptyState.className = "card empty-state";
-        emptyState.style.cssText = "margin-bottom: 30px;"; // Zusätzlicher Abstand
+        emptyState.style.cssText = "margin-bottom: 30px;";
         emptyState.innerHTML = `
-					<h3>Keine Teams oder Schützen vorhanden</h3>
-					<p style="margin: 16px 0;">Fügen Sie zuerst Teams und Schützen hinzu.</p>
-					<div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
-						<button class="btn btn-primary" style="width: 50%; height: 70px;" onclick="app.showView('teams')">
-							Teams verwalten
-						</button>
-						<button class="btn btn-secondary" style="width: 50%; height: 70px;" onclick="app.showView('entry')">
-							Ergebnisse erfassen
-						</button>
-					</div>
-				`;
+        <h3>Keine Teams oder Schützen sichtbar</h3>
+        <p style="margin: 16px 0;">Passen Sie den Filter an oder fügen Sie Teams und Schützen hinzu.</p>
+        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+          <button class="btn btn-primary" style="width: 50%; height: 70px;" onclick="app.showView('teams')">
+            Teams verwalten
+          </button>
+          <button class="btn btn-secondary" style="width: 50%; height: 70px;" onclick="app.showView('entry')">
+            Ergebnisse erfassen
+          </button>
+        </div>
+      `;
         container.appendChild(emptyState);
       } else if (this.hasNoResults()) {
         // Show info card if teams exist but no results
@@ -61,12 +63,12 @@ class OverviewView {
         infoCard.style.cssText =
           "background: #fff3cd; border: 1px solid #ffeaa7; text-align: center; margin-bottom: 30px;";
         infoCard.innerHTML = `
-					<h4 style="margin: 0 0 8px 0; color: #856404;">Noch keine Ergebnisse erfasst</h4>
-					<p style="margin: 0; color: #856404;">Die Teams sind angelegt, aber es wurden noch keine Schussergebnisse erfasst.</p>
-					<button class="btn btn-primary" style="width: 100%; height: 70px; margin-top: 20px;" onclick="app.showView('entry')" style="margin-top: 12px;">
-						Jetzt Ergebnisse erfassen
-					</button>
-				`;
+        <h4 style="margin: 0 0 8px 0; color: #856404;">Noch keine Ergebnisse erfasst</h4>
+        <p style="margin: 0; color: #856404;">Die Teams sind angelegt, aber es wurden noch keine Schussergebnisse erfasst.</p>
+        <button class="btn btn-primary" style="width: 100%; height: 70px; margin-top: 20px;" onclick="app.showView('entry')" style="margin-top: 12px;">
+          Jetzt Ergebnisse erfassen
+        </button>
+      `;
         container.appendChild(infoCard);
       }
     } catch (error) {
@@ -143,10 +145,9 @@ class OverviewView {
       "display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;";
     header.innerHTML = `
 			<h3 style="margin: 0; flex: 1; line-height: 1.3;">${UIUtils.escapeHtml(
-        team.name
-      )}</h3>
-			<span style="color: #666; font-size: 14px;">Schützen: ${
-        team.shooters.length
+      team.name
+    )}</h3>
+			<span style="color: #666; font-size: 14px;">Schützen: ${team.shooters.length
       }</span>
 		`;
     card.appendChild(header);
@@ -196,13 +197,11 @@ class OverviewView {
 				${isWorst ? "color: #ff3b30; background-color: #ffebee;" : ""}
 			`;
       row.innerHTML = `
-				<div style="overflow: hidden; text-overflow: ellipsis; ${
-          isWorst ? "text-decoration: normal;" : ""
+				<div style="overflow: hidden; text-overflow: ellipsis; ${isWorst ? "text-decoration: normal;" : ""
         }">${UIUtils.escapeHtml(shooter.name)}</div>
 				<div style="text-align: center;">${precision}</div>
 				<div style="text-align: center;">${duell}</div>
-				<div style="text-align: right; font-weight: 500; ${
-          isWorst ? "text-decoration: normal;" : ""
+				<div style="text-align: right; font-weight: 500; ${isWorst ? "text-decoration: normal;" : ""
         }">${total}</div>
 			`;
       table.appendChild(row);
@@ -237,10 +236,9 @@ class OverviewView {
       "display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;";
     header.innerHTML = `
 			<h3 style="margin: 0; flex: 1; line-height: 1.3;">${UIUtils.escapeHtml(
-        team.name
-      )}</h3>
-			<span style="color: #666; font-size: 14px;">Schützen: ${
-        team.shooters.length
+      team.name
+    )}</h3>
+			<span style="color: #666; font-size: 14px;">Schützen: ${team.shooters.length
       }</span>
 		`;
     card.appendChild(header);
@@ -296,9 +294,8 @@ class OverviewView {
 				${isWorst ? "color: #ff3b30; background-color: #ffebee;" : ""}
 			`;
 
-      let rowHTML = `<div style="overflow: hidden; text-overflow: ellipsis; ${
-        isWorst ? "text-decoration: normal;" : ""
-      }">${UIUtils.escapeHtml(shooter.name)}</div>`;
+      let rowHTML = `<div style="overflow: hidden; text-overflow: ellipsis; ${isWorst ? "text-decoration: normal;" : ""
+        }">${UIUtils.escapeHtml(shooter.name)}</div>`;
 
       // Series sums
       for (let i = 0; i < 5; i++) {
@@ -306,9 +303,8 @@ class OverviewView {
         rowHTML += `<div style="text-align: center;">${seriesValue}</div>`;
       }
 
-      rowHTML += `<div style="text-align: right; font-weight: 500; ${
-        isWorst ? "text-decoration: normal;" : ""
-      }">${total}</div>`;
+      rowHTML += `<div style="text-align: right; font-weight: 500; ${isWorst ? "text-decoration: normal;" : ""
+        }">${total}</div>`;
 
       row.innerHTML = rowHTML;
       table.appendChild(row);
@@ -336,6 +332,7 @@ class OverviewView {
     return card;
   }
 
+  // Erweiterte createSoloShootersCard() Methode um Filter zu berücksichtigen
   createSoloShootersCard() {
     const competitionType = storage.selectedCompetitionType;
 
@@ -355,6 +352,18 @@ class OverviewView {
     header.innerHTML = '<h3 style="margin: 0 0 16px 0;">Einzelschützen</h3>';
     card.appendChild(header);
 
+    // Use filtered shooters instead of all shooters
+    const filteredShooters = this.getFilteredStandaloneShooters();
+
+    if (filteredShooters.length === 0) {
+      const noShooters = document.createElement("div");
+      noShooters.style.cssText =
+        "text-align: center; color: #666; padding: 20px;";
+      noShooters.textContent = "Keine Einzelschützen sichtbar";
+      card.appendChild(noShooters);
+      return card;
+    }
+
     // Table
     const table = document.createElement("div");
     table.style.cssText =
@@ -363,42 +372,42 @@ class OverviewView {
     // Table header
     const tableHeader = document.createElement("div");
     tableHeader.style.cssText =
-      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 4px; font-weight: 600; font-size: 12px;";
+      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 8px; font-weight: 600; font-size: 12px;";
     tableHeader.innerHTML = `
-			<div>Name</div>
-			<div style="text-align: center;">Präz.</div>
+			<div style="text-align: left;">Name</div>
+			<div style="text-align: right;">Präz.</div>
 			<div style="text-align: center;">Duell</div>
 			<div style="text-align: right;">Gesamt</div>
 		`;
     table.appendChild(tableHeader);
 
-    // Sort shooters by name
-    const sortedShooters = [...storage.standaloneShooters].sort((a, b) =>
-      a.name.localeCompare(b.name, "de", { sensitivity: "base" })
-    );
+    // Shooter rows with filtered data
+    filteredShooters
+      .map((shooter) => {
+        const precision = storage.results
+          .filter(
+            (r) =>
+              r.teamId === null &&
+              r.shooterId === shooter.id &&
+              r.discipline === Discipline.PRAEZISION
+          )
+          .reduce((sum, r) => sum + r.total(), 0);
+        const duell = storage.results
+          .filter(
+            (r) =>
+              r.teamId === null &&
+              r.shooterId === shooter.id &&
+              r.discipline === Discipline.DUELL
+          )
+          .reduce((sum, r) => sum + r.total(), 0);
+        return [shooter, precision, duell, precision + duell];
+      })
+      .sort((a, b) => b[3] - a[3])
+      .forEach((data, index) => {
+        const [shooter, precision, duell, total] = data;
 
-    // Shooter rows
-    sortedShooters.forEach((shooter, index) => {
-      const precision = storage.results
-        .filter(
-          (r) =>
-            r.teamId === null &&
-            r.shooterId === shooter.id &&
-            r.discipline === Discipline.PRAEZISION
-        )
-        .reduce((sum, r) => sum + r.total(), 0);
-      const duell = storage.results
-        .filter(
-          (r) =>
-            r.teamId === null &&
-            r.shooterId === shooter.id &&
-            r.discipline === Discipline.DUELL
-        )
-        .reduce((sum, r) => sum + r.total(), 0);
-      const total = precision + duell;
-
-      const row = document.createElement("div");
-      row.style.cssText = `
+        const row = document.createElement("div");
+        row.style.cssText = `
 				padding: 8px; 
 				display: grid; 
 				grid-template-columns: 1fr 50px 50px 50px; 
@@ -407,7 +416,7 @@ class OverviewView {
 				border-top: 1px solid #f0f0f0;
 				${index % 2 === 1 ? "background: #f8f9fa;" : ""}
 			`;
-      row.innerHTML = `
+        row.innerHTML = `
 				<div style="overflow: hidden; text-overflow: ellipsis;">${UIUtils.escapeHtml(
           shooter.name
         )}</div>
@@ -415,8 +424,8 @@ class OverviewView {
 				<div style="text-align: center;">${duell}</div>
 				<div style="text-align: right; font-weight: 500;">${total}</div>
 			`;
-      table.appendChild(row);
-    });
+        table.appendChild(row);
+      });
 
     card.appendChild(table);
     return card;
@@ -425,12 +434,23 @@ class OverviewView {
   createSoloShootersCardAnnex() {
     const card = document.createElement("div");
     card.className = "card";
-    card.style.cssText = "margin-bottom: 30px;"; // Zusätzlicher Abstand
 
     // Header
     const header = document.createElement("div");
     header.innerHTML = '<h3 style="margin: 0 0 16px 0;">Einzelschützen</h3>';
     card.appendChild(header);
+
+    // Use filtered shooters instead of all shooters
+    const filteredShooters = this.getFilteredStandaloneShooters();
+
+    if (filteredShooters.length === 0) {
+      const noShooters = document.createElement("div");
+      noShooters.style.cssText =
+        "text-align: center; color: #666; padding: 20px;";
+      noShooters.textContent = "Keine Einzelschützen sichtbar";
+      card.appendChild(noShooters);
+      return card;
+    }
 
     // Scrollable table container
     const tableContainer = document.createElement("div");
@@ -455,30 +475,29 @@ class OverviewView {
 		`;
     table.appendChild(tableHeader);
 
-    // Sort shooters by name
-    const sortedShooters = [...storage.standaloneShooters].sort((a, b) =>
-      a.name.localeCompare(b.name, "de", { sensitivity: "base" })
-    );
+    // Shooter rows with filtered data
+    filteredShooters
+      .map((shooter) => {
+        const result = storage.results.find(
+          (r) =>
+            r.teamId === null &&
+            r.shooterId === shooter.id &&
+            r.discipline === Discipline.ANNEX_SCHEIBE
+        );
 
-    // Shooter rows
-    sortedShooters.forEach((shooter, index) => {
-      const result = storage.results.find(
-        (r) =>
-          r.teamId === null &&
-          r.shooterId === shooter.id &&
-          r.discipline === Discipline.ANNEX_SCHEIBE
-      );
+        if (result && result.seriesSums) {
+          const seriesSums = result.seriesSums();
+          const total = result.total();
+          return [shooter, seriesSums, total];
+        }
+        return [shooter, [0, 0, 0, 0, 0], 0];
+      })
+      .sort((a, b) => b[2] - a[2])
+      .forEach((data, index) => {
+        const [shooter, seriesSums, total] = data;
 
-      let seriesSums = [0, 0, 0, 0, 0];
-      let total = 0;
-
-      if (result && result.seriesSums) {
-        seriesSums = result.seriesSums();
-        total = result.total();
-      }
-
-      const row = document.createElement("div");
-      row.style.cssText = `
+        const row = document.createElement("div");
+        row.style.cssText = `
 				padding: 8px; 
 				display: grid; 
 				grid-template-columns: 1fr repeat(5, 28px) 35px; 
@@ -488,21 +507,21 @@ class OverviewView {
 				${index % 2 === 1 ? "background: #f8f9fa;" : ""}
 			`;
 
-      let rowHTML = `<div style="overflow: hidden; text-overflow: ellipsis;">${UIUtils.escapeHtml(
-        shooter.name
-      )}</div>`;
+        let rowHTML = `<div style="overflow: hidden; text-overflow: ellipsis;">${UIUtils.escapeHtml(
+          shooter.name
+        )}</div>`;
 
-      // Series sums
-      for (let i = 0; i < 5; i++) {
-        const seriesValue = i < seriesSums.length ? seriesSums[i] : 0;
-        rowHTML += `<div style="text-align: center;">${seriesValue}</div>`;
-      }
+        // Series sums
+        for (let i = 0; i < 5; i++) {
+          const seriesValue = i < seriesSums.length ? seriesSums[i] : 0;
+          rowHTML += `<div style="text-align: center;">${seriesValue}</div>`;
+        }
 
-      rowHTML += `<div style="text-align: right; font-weight: 500;">${total}</div>`;
+        rowHTML += `<div style="text-align: right; font-weight: 500;">${total}</div>`;
 
-      row.innerHTML = rowHTML;
-      table.appendChild(row);
-    });
+        row.innerHTML = rowHTML;
+        table.appendChild(row);
+      });
 
     tableContainer.appendChild(table);
     card.appendChild(tableContainer);
@@ -611,22 +630,44 @@ class OverviewView {
     return storage.teams;
   }
 
+  // Neue Methode für gefilterte Einzelschützen
+  getFilteredStandaloneShooters() {
+    if (storage.visibleShooterIds) {
+      return storage.standaloneShooters.filter((shooter) =>
+        storage.visibleShooterIds.has(shooter.id)
+      );
+    }
+    return storage.standaloneShooters;
+  }
+
+  // Erweiterte showFilterModal Funktion
   showFilterModal() {
     const content = document.createElement("div");
     content.innerHTML = `
-			<div class="form-section">
-				<div class="form-section-header">Anzuzeigende Mannschaften</div>
-				<div class="form-row">
-					<label style="display: flex; align-items: center; gap: 8px;">
-						<input type="checkbox" id="showAllTeams" ${
-              !storage.visibleTeamIds ? "checked" : ""
-            }>
-						<span>Alle anzeigen</span>
-					</label>
-				</div>
-				<div id="teamCheckboxes"></div>
-			</div>
-		`;
+    <div class="form-section">
+      <div class="form-section-header">Anzuzeigende Mannschaften</div>
+      <div class="form-row">
+        <label style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="showAllTeams" ${!storage.visibleTeamIds ? "checked" : ""
+      }>
+          <span>Alle anzeigen</span>
+        </label>
+      </div>
+      <div id="teamCheckboxes"></div>
+    </div>
+    
+    <div class="form-section">
+      <div class="form-section-header">Anzuzeigende Einzelschützen</div>
+      <div class="form-row">
+        <label style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="showAllShooters" ${!storage.visibleShooterIds ? "checked" : ""
+      }>
+          <span>Alle anzeigen</span>
+        </label>
+      </div>
+      <div id="shooterCheckboxes"></div>
+    </div>
+  `;
 
     const modal = new ModalComponent("Filter", content);
     modal.addAction(
@@ -646,14 +687,18 @@ class OverviewView {
     }, 100);
   }
 
+  // Erweiterte setupFilterModal Funktion
   setupFilterModal() {
-    const showAllCheckbox = document.getElementById("showAllTeams");
-    const checkboxesContainer = document.getElementById("teamCheckboxes");
+    const showAllTeamsCheckbox = document.getElementById("showAllTeams");
+    const teamCheckboxesContainer = document.getElementById("teamCheckboxes");
+    const showAllShootersCheckbox = document.getElementById("showAllShooters");
+    const shooterCheckboxesContainer = document.getElementById("shooterCheckboxes");
 
-    if (showAllCheckbox && checkboxesContainer) {
+    // Teams Handling
+    if (showAllTeamsCheckbox && teamCheckboxesContainer) {
       // Show all teams checkbox handler
-      showAllCheckbox.addEventListener("change", (e) => {
-        const teamCheckboxes = checkboxesContainer.querySelectorAll(
+      showAllTeamsCheckbox.addEventListener("change", (e) => {
+        const teamCheckboxes = teamCheckboxesContainer.querySelectorAll(
           'input[type="checkbox"]'
         );
         teamCheckboxes.forEach((cb) => {
@@ -666,26 +711,59 @@ class OverviewView {
         const row = document.createElement("div");
         row.className = "form-row";
         row.innerHTML = `
-					<label style="display: flex; align-items: center; gap: 8px;">
-						<input type="checkbox" class="team-checkbox" data-team-id="${team.id}" 
-							${
-                !storage.visibleTeamIds || storage.visibleTeamIds.has(team.id)
-                  ? "checked"
-                  : ""
-              }
-							${!storage.visibleTeamIds ? "disabled" : ""}>
-						<span>${UIUtils.escapeHtml(team.name)}</span>
-					</label>
-				`;
-        checkboxesContainer.appendChild(row);
+        <label style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" class="team-checkbox" data-team-id="${team.id}" 
+            ${!storage.visibleTeamIds || storage.visibleTeamIds.has(team.id)
+            ? "checked"
+            : ""
+          }
+            ${!storage.visibleTeamIds ? "disabled" : ""}>
+          <span>${UIUtils.escapeHtml(team.name)}</span>
+        </label>
+      `;
+        teamCheckboxesContainer.appendChild(row);
+      });
+    }
+
+    // Shooters Handling
+    if (showAllShootersCheckbox && shooterCheckboxesContainer) {
+      // Show all shooters checkbox handler
+      showAllShootersCheckbox.addEventListener("change", (e) => {
+        const shooterCheckboxes = shooterCheckboxesContainer.querySelectorAll(
+          'input[type="checkbox"]'
+        );
+        shooterCheckboxes.forEach((cb) => {
+          cb.disabled = e.target.checked;
+        });
+      });
+
+      // Shooter checkboxes
+      storage.standaloneShooters.forEach((shooter) => {
+        const row = document.createElement("div");
+        row.className = "form-row";
+        row.innerHTML = `
+        <label style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" class="shooter-checkbox" data-shooter-id="${shooter.id}" 
+            ${!storage.visibleShooterIds || storage.visibleShooterIds.has(shooter.id)
+            ? "checked"
+            : ""
+          }
+            ${!storage.visibleShooterIds ? "disabled" : ""}>
+          <span>${UIUtils.escapeHtml(shooter.name)}</span>
+        </label>
+      `;
+        shooterCheckboxesContainer.appendChild(row);
       });
     }
   }
 
+  // Erweiterte saveFilter Funktion
   saveFilter() {
-    const showAllCheckbox = document.getElementById("showAllTeams");
+    const showAllTeamsCheckbox = document.getElementById("showAllTeams");
+    const showAllShootersCheckbox = document.getElementById("showAllShooters");
 
-    if (showAllCheckbox && showAllCheckbox.checked) {
+    // Teams Filter
+    if (showAllTeamsCheckbox && showAllTeamsCheckbox.checked) {
       storage.visibleTeamIds = null;
     } else {
       const teamCheckboxes = document.querySelectorAll(".team-checkbox");
@@ -700,8 +778,34 @@ class OverviewView {
       storage.visibleTeamIds = visibleTeamIds;
     }
 
+    // Shooters Filter
+    if (showAllShootersCheckbox && showAllShootersCheckbox.checked) {
+      storage.visibleShooterIds = null;
+    } else {
+      const shooterCheckboxes = document.querySelectorAll(".shooter-checkbox");
+      const visibleShooterIds = new Set();
+
+      shooterCheckboxes.forEach((checkbox) => {
+        if (checkbox.checked) {
+          visibleShooterIds.add(checkbox.dataset.shooterId);
+        }
+      });
+
+      storage.visibleShooterIds = visibleShooterIds;
+    }
+
     storage.save();
     UIUtils.showSuccessMessage("Filter aktualisiert");
+  }
+
+  // Neue Funktion für gefilterte Einzelschützen
+  getFilteredStandaloneShooters() {
+    if (storage.visibleShooterIds) {
+      return storage.standaloneShooters.filter((shooter) =>
+        storage.visibleShooterIds.has(shooter.id)
+      );
+    }
+    return storage.standaloneShooters;
   }
 
   exportToPDF() {

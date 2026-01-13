@@ -1,6 +1,5 @@
 // =================================================================
-// PDF EXPORTER - Rundenkampfbericht
-// Verbesserte und zuverlässige PDF-Export-Funktionalität
+// PDF EXPORTER - Erweiterte Version mit Einzelschützen-Filter
 // =================================================================
 
 class PDFExporter {
@@ -12,7 +11,7 @@ class PDFExporter {
   }
 
   // =================================================================
-  // CSS LOADING
+  // CSS LOADING (bleibt unverändert)
   // =================================================================
 
   async loadCSS() {
@@ -38,7 +37,7 @@ class PDFExporter {
   }
 
   // =================================================================
-  // HAUPTEXPORT-METHODE
+  // HAUPTEXPORT-METHODE (erweitert)
   // =================================================================
 
   async exportToPDF() {
@@ -54,11 +53,13 @@ class PDFExporter {
       this.logoBase64 = logoBase64;
 
       const filteredTeams = this.getFilteredTeams();
+      const filteredStandaloneShooters = this.getFilteredStandaloneShooters(); // NEU
       const competitionType = storage.selectedCompetitionType;
 
       // HTML-Content erstellen
       const htmlContent = this.createPDFHTML(
         filteredTeams,
+        filteredStandaloneShooters, // NEU
         competitionType,
         cssStyles
       );
@@ -92,12 +93,12 @@ class PDFExporter {
   }
 
   // =================================================================
-  // HTML-STRUKTUR AUFBAU
+  // HTML-STRUKTUR AUFBAU (erweitert)
   // =================================================================
 
-  createPDFHTML(filteredTeams, competitionType, cssStyles) {
+  createPDFHTML(filteredTeams, filteredStandaloneShooters, competitionType, cssStyles) {
     const header = this.createHeader();
-    const mainContent = this.createMainContent(filteredTeams, competitionType);
+    const mainContent = this.createMainContent(filteredTeams, filteredStandaloneShooters, competitionType);
     const footer = this.createFooter();
 
     return `
@@ -156,7 +157,7 @@ class PDFExporter {
         `;
   }
 
-  createMainContent(filteredTeams, competitionType) {
+  createMainContent(filteredTeams, filteredStandaloneShooters, competitionType) {
     let content = '<main class="pdf-main">';
 
     // Teams
@@ -166,9 +167,9 @@ class PDFExporter {
       });
     }
 
-    // Einzelschützen
-    if (storage.standaloneShooters.length > 0) {
-      content += this.createSoloShootersSection(competitionType);
+    // NEU: Einzelschützen - nur die gefilterten
+    if (filteredStandaloneShooters.length > 0) {
+      content += this.createSoloShootersSection(filteredStandaloneShooters, competitionType);
     }
 
     content += "</main>";
@@ -189,7 +190,7 @@ class PDFExporter {
   }
 
   // =================================================================
-  // TEAM-SEKTION ERSTELLUNG
+  // TEAM-SEKTION ERSTELLUNG (bleibt unverändert)
   // =================================================================
 
   createTeamSection(team, competitionType) {
@@ -221,203 +222,73 @@ class PDFExporter {
         `;
   }
 
-  // Verbesserte Tabellen-Erstellung ohne verwirrende Formatierung
-
-  createStandardTable(shooterData, worstShooterId, teamTotal) {
-    let rows = "";
-
-    // ALLE Schützen anzeigen (sortiert nach Name)
-    const sortedShooterData = shooterData.sort((a, b) =>
-      a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" })
-    );
-
-    sortedShooterData.forEach((data, index) => {
-      const [shooter, precision, duell, total] = data;
-      const isWorst = shooter.id === worstShooterId;
-
-      // Einfache Logik: Worst Shooter rot, sonst abwechselnd weiß/grau
-      let rowClass = "";
-      let backgroundColor = "";
-
-      if (isWorst) {
-        rowClass = "worst-shooter";
-        backgroundColor = "background-color: #ffebee;";
-      } else if (index % 2 === 1) {
-        rowClass = "zebra";
-        backgroundColor = "background-color: #f8f9fa;";
-      }
-
-      rows += `
-        <tr class="table-row ${rowClass}" style="${backgroundColor}">
-            <td class="name-cell" style="${
-              isWorst ? "color: #d32f2f;" : ""
-            }">${UIUtils.escapeHtml(shooter.name)}</td>
-            <td class="score-cell">${precision}</td>
-            <td class="score-cell">${duell}</td>
-            <td class="total-cell" style="${
-              isWorst ? "font-weight: bold; color: #d32f2f;" : ""
-            }">${total}</td>
-        </tr>
-        `;
-    });
-
-    return `
-    <table class="results-table">
-        <thead>
-            <tr class="header-row" style="background-color: #e9ecef; font-weight: bold;">
-                <th class="name-header">Name</th>
-                <th class="score-header">Präzision</th>
-                <th class="score-header">Duell</th>
-                <th class="total-header">Gesamt</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${rows}
-            <tr class="total-row" style="background-color: #e9ecef !important; font-weight: bold !important;">
-                <td class="total-label">Mannschaft Gesamt</td>
-                <td class="total-label"></td>
-                <td class="total-label"></td>
-                <td class="total-value">${teamTotal}</td>
-            </tr>
-        </tbody>
-    </table>
-    `;
-  }
-
-  createAnnexTable(shooterData, worstShooterId, teamTotal) {
-    let rows = "";
-
-    // ALLE Schützen anzeigen (sortiert nach Name)
-    const sortedShooterData = shooterData.sort((a, b) =>
-      a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" })
-    );
-
-    sortedShooterData.forEach((data, index) => {
-      const [shooter, seriesSums, total] = data;
-      const isWorst = shooter.id === worstShooterId;
-
-      // Einfache Logik: Worst Shooter rot, sonst abwechselnd weiß/grau
-      let rowClass = "";
-      let backgroundColor = "";
-
-      if (isWorst) {
-        rowClass = "worst-shooter";
-        backgroundColor = "background-color: #ffebee;";
-      } else if (index % 2 === 1) {
-        rowClass = "zebra";
-        backgroundColor = "background-color: #f8f9fa;";
-      }
-
-      let seriesCells = "";
-      for (let i = 0; i < 5; i++) {
-        const value = i < seriesSums.length ? seriesSums[i] : 0;
-        seriesCells += `<td class="series-cell">${value}</td>`;
-      }
-
-      rows += `
-        <tr class="table-row ${rowClass}" style="${backgroundColor}">
-            <td class="name-cell" style="${
-              isWorst ? "color: #d32f2f;" : ""
-            }">${UIUtils.escapeHtml(shooter.name)}</td>
-            ${seriesCells}
-            <td class="total-cell" style="${
-              isWorst ? "font-weight: bold; color: #d32f2f;" : ""
-            }">${total}</td>
-        </tr>
-        `;
-    });
-
-    return `
-    <table class="results-table annex-table">
-        <thead>
-            <tr class="header-row" style="background-color: #e9ecef; font-weight: bold;">
-                <th class="name-header">Name</th>
-                <th class="series-header">S1</th>
-                <th class="series-header">S2</th>
-                <th class="series-header">S3</th>
-                <th class="series-header">S4</th>
-                <th class="series-header">S5</th>
-                <th class="total-header">Gesamt</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${rows}
-            <tr class="total-row" style="background-color: #e9ecef; font-weight: bold;">
-                <td class="total-label">Mannschaft Gesamt</td>
-                <td class="total-value"></td>
-                <td class="total-value"></td>
-                <td class="total-value"></td>
-                <td class="total-value"></td>
-                <td class="total-value"></td>
-                <td class="total-value">${teamTotal}</td>
-            </tr>
-        </tbody>
-    </table>
-    `;
-  }
-
   // =================================================================
-  // EINZELSCHÜTZEN-SEKTION
+  // NEU: EINZELSCHÜTZEN-SEKTION ERSTELLUNG
   // =================================================================
 
-  createSoloShootersSection(competitionType) {
-    const sortedShooters = [...storage.standaloneShooters].sort((a, b) =>
-      a.name.localeCompare(b.name, "de", { sensitivity: "base" })
-    );
+  createSoloShootersSection(filteredStandaloneShooters, competitionType) {
+    let content = `
+        <section class="team-section">
+            <h2 class="team-title">
+                Einzelschützen 
+                <span class="team-count">(${filteredStandaloneShooters.length} Schützen)</span>
+            </h2>
+        `;
 
-    let tableHtml;
     if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
-      tableHtml = this.createSoloAnnexTable(sortedShooters);
+      content += this.createSoloShootersAnnexTable(filteredStandaloneShooters);
     } else {
-      tableHtml = this.createSoloStandardTable(sortedShooters);
+      content += this.createSoloShootersStandardTable(filteredStandaloneShooters);
     }
 
-    return `
-        <section class="solo-section">
-            <h2 class="team-title">Einzelschützen</h2>
-            ${tableHtml}
-        </section>
-        `;
+    content += `</section>`;
+    return content;
   }
 
-  createSoloStandardTable(sortedShooters) {
+  createSoloShootersStandardTable(filteredStandaloneShooters) {
     let rows = "";
 
-    sortedShooters.forEach((shooter, index) => {
-      const precision = storage.results
-        .filter(
-          (r) =>
-            r.teamId === null &&
-            r.shooterId === shooter.id &&
-            r.discipline === Discipline.PRAEZISION
-        )
-        .reduce((sum, r) => sum + r.total(), 0);
-      const duell = storage.results
-        .filter(
-          (r) =>
-            r.teamId === null &&
-            r.shooterId === shooter.id &&
-            r.discipline === Discipline.DUELL
-        )
-        .reduce((sum, r) => sum + r.total(), 0);
-      const total = precision + duell;
+    // Prepare shooter data
+    const shooterData = filteredStandaloneShooters
+      .map((shooter) => {
+        const precision = storage.results
+          .filter(
+            (r) =>
+              r.teamId === null &&
+              r.shooterId === shooter.id &&
+              r.discipline === Discipline.PRAEZISION
+          )
+          .reduce((sum, r) => sum + r.total(), 0);
+        const duell = storage.results
+          .filter(
+            (r) =>
+              r.teamId === null &&
+              r.shooterId === shooter.id &&
+              r.discipline === Discipline.DUELL
+          )
+          .reduce((sum, r) => sum + r.total(), 0);
+        return [shooter, precision, duell, precision + duell];
+      })
+      .sort((a, b) => b[3] - a[3]); // Sortiert nach Gesamtpunkten
 
-      const zebraClass = index % 2 === 1 ? "zebra" : "";
+    shooterData.forEach((data, index) => {
+      const [shooter, precision, duell, total] = data;
+      const rowClass = index % 2 === 0 ? "table-row" : "table-row zebra";
 
       rows += `
-            <tr class="table-row ${zebraClass}">
-                <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
-                <td class="score-cell">${precision}</td>
-                <td class="score-cell">${duell}</td>
-                <td class="total-cell">${total}</td>
-            </tr>
-            `;
+          <tr class="${rowClass}">
+              <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
+              <td class="score-cell">${precision}</td>
+              <td class="score-cell">${duell}</td>
+              <td class="total-cell">${total}</td>
+          </tr>
+      `;
     });
 
     return `
         <table class="results-table">
             <thead>
-                <tr class="header-row" style="background-color: #e9ecef; font-weight: bold;">
+                <tr class="header-row">
                     <th class="name-header">Name</th>
                     <th class="score-header">Präzision</th>
                     <th class="score-header">Duell</th>
@@ -428,54 +299,60 @@ class PDFExporter {
                 ${rows}
             </tbody>
         </table>
-        `;
+    `;
   }
 
-  createSoloAnnexTable(sortedShooters) {
+  createSoloShootersAnnexTable(filteredStandaloneShooters) {
     let rows = "";
 
-    sortedShooters.forEach((shooter, index) => {
-      const result = storage.results.find(
-        (r) =>
-          r.teamId === null &&
-          r.shooterId === shooter.id &&
-          r.discipline === Discipline.ANNEX_SCHEIBE
-      );
+    // Prepare shooter data for Annex
+    const shooterData = filteredStandaloneShooters
+      .map((shooter) => {
+        const result = storage.results.find(
+          (r) =>
+            r.teamId === null &&
+            r.shooterId === shooter.id &&
+            r.discipline === Discipline.ANNEX_SCHEIBE
+        );
 
-      let seriesSums = [0, 0, 0, 0, 0];
-      let total = 0;
+        if (result && result.seriesSums) {
+          const seriesSums = result.seriesSums();
+          const total = result.total();
+          return [shooter, seriesSums, total];
+        }
+        return [shooter, [0, 0, 0, 0, 0], 0];
+      })
+      .sort((a, b) => b[2] - a[2]); // Sortiert nach Gesamtpunkten
 
-      if (result && result.seriesSums) {
-        seriesSums = result.seriesSums();
-        total = result.total();
-      }
-
-      const zebraClass = index % 2 === 1 ? "zebra" : "";
+    shooterData.forEach((data, index) => {
+      const [shooter, seriesSums, total] = data;
+      const rowClass = index % 2 === 0 ? "table-row" : "table-row zebra";
 
       let seriesCells = "";
       for (let i = 0; i < 5; i++) {
-        seriesCells += `<td class="series-cell">${seriesSums[i]}</td>`;
+        const seriesValue = i < seriesSums.length ? seriesSums[i] : 0;
+        seriesCells += `<td class="series-cell">${seriesValue}</td>`;
       }
 
       rows += `
-            <tr class="table-row ${zebraClass}">
-                <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
-                ${seriesCells}
-                <td class="total-cell">${total}</td>
-            </tr>
-            `;
+          <tr class="${rowClass}">
+              <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
+              ${seriesCells}
+              <td class="total-cell">${total}</td>
+          </tr>
+      `;
     });
 
     return `
-        <table class="results-table annex-table">
+        <table class="results-table">
             <thead>
-                <tr class="header-row" style="background-color: #e9ecef; font-weight: bold;">
+                <tr class="header-row">
                     <th class="name-header">Name</th>
-                    <th class="series-header">S1</th>
-                    <th class="series-header">S2</th>
-                    <th class="series-header">S3</th>
-                    <th class="series-header">S4</th>
-                    <th class="series-header">S5</th>
+                    <th class="series-header">Serie 1</th>
+                    <th class="series-header">Serie 2</th>
+                    <th class="series-header">Serie 3</th>
+                    <th class="series-header">Serie 4</th>
+                    <th class="series-header">Serie 5</th>
                     <th class="total-header">Gesamt</th>
                 </tr>
             </thead>
@@ -483,11 +360,119 @@ class PDFExporter {
                 ${rows}
             </tbody>
         </table>
-        `;
+    `;
   }
 
   // =================================================================
-  // FALLBACK CSS (falls externe Datei nicht lädt)
+  // TABELLEN-ERSTELLUNG (bleibt größtenteils unverändert)
+  // =================================================================
+
+  createStandardTable(shooterData, worstShooterId, teamTotal) {
+    let rows = "";
+
+    shooterData.forEach((data, index) => {
+      const [shooter, precision, duell, total] = data;
+      const isWorst = shooter.id === worstShooterId;
+      const rowClass = isWorst
+        ? "table-row worst-shooter"
+        : index % 2 === 0
+        ? "table-row"
+        : "table-row zebra";
+
+      rows += `
+          <tr class="${rowClass}">
+              <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
+              <td class="score-cell">${precision}</td>
+              <td class="score-cell">${duell}</td>
+              <td class="total-cell">${total}</td>
+          </tr>
+      `;
+    });
+
+    // Team total row
+    rows += `
+        <tr class="total-row">
+            <td class="total-label">Mannschaft Gesamt:</td>
+            <td colspan="2"></td>
+            <td class="total-value">${teamTotal}</td>
+        </tr>
+    `;
+
+    return `
+        <table class="results-table">
+            <thead>
+                <tr class="header-row">
+                    <th class="name-header">Name</th>
+                    <th class="score-header">Präzision</th>
+                    <th class="score-header">Duell</th>
+                    <th class="total-header">Gesamt</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows}
+            </tbody>
+        </table>
+    `;
+  }
+
+  createAnnexTable(shooterData, worstShooterId, teamTotal) {
+    let rows = "";
+
+    shooterData.forEach((data, index) => {
+      const [shooter, seriesSums, total] = data;
+      const isWorst = shooter.id === worstShooterId;
+      const rowClass = isWorst
+        ? "table-row worst-shooter"
+        : index % 2 === 0
+        ? "table-row"
+        : "table-row zebra";
+
+      let seriesCells = "";
+      for (let i = 0; i < 5; i++) {
+        const seriesValue = i < seriesSums.length ? seriesSums[i] : 0;
+        seriesCells += `<td class="series-cell">${seriesValue}</td>`;
+      }
+
+      rows += `
+          <tr class="${rowClass}">
+              <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
+              ${seriesCells}
+              <td class="total-cell">${total}</td>
+          </tr>
+      `;
+    });
+
+    // Team total row
+    rows += `
+        <tr class="total-row">
+            <td class="total-label">Mannschaft Gesamt:</td>
+            <td colspan="5"></td>
+            <td class="total-value">${teamTotal}</td>
+        </tr>
+    `;
+
+    return `
+        <table class="results-table">
+            <thead>
+                <tr class="header-row">
+                    <th class="name-header">Name</th>
+                    <th class="series-header">Serie 1</th>
+                    <th class="series-header">Serie 2</th>
+                    <th class="series-header">Serie 3</th>
+                    <th class="series-header">Serie 4</th>
+                    <th class="series-header">Serie 5</th>
+                    <th class="total-header">Gesamt</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows}
+            </tbody>
+        </table>
+    `;
+  }
+
+  // =================================================================
+  // FALLBACK CSS (bleibt unverändert)
   // =================================================================
 
   getFallbackCSS() {
@@ -534,7 +519,7 @@ class PDFExporter {
   }
 
   // =================================================================
-  // HILFSMETHODEN
+  // HILFSMETHODEN (erweitert)
   // =================================================================
 
   getFilteredTeams() {
@@ -544,6 +529,16 @@ class PDFExporter {
       );
     }
     return storage.teams;
+  }
+
+  // NEU: Methode für gefilterte Einzelschützen
+  getFilteredStandaloneShooters() {
+    if (storage.visibleShooterIds) {
+      return storage.standaloneShooters.filter((shooter) =>
+        storage.visibleShooterIds.has(shooter.id)
+      );
+    }
+    return storage.standaloneShooters;
   }
 
   prepareShooterData(team, competitionType) {
@@ -640,9 +635,6 @@ class PDFExporter {
     return sorted[0]?.id;
   }
 
-  // In pdf-exporter.js - Ersetzen Sie die loadLogoAsBase64 Methode:
-
-  // In pdf-exporter.js - loadLogoAsBase64 Methode ersetzen:
   async loadLogoAsBase64() {
     return new Promise((resolve) => {
       // Zuerst prüfen, ob ein hochgeladenes Logo existiert

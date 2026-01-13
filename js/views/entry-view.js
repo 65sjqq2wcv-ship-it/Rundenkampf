@@ -230,46 +230,46 @@ class EntryView {
   // =================================================================
 
   loadExistingResults() {
-  if (!this.selectedShooterId || !this.selectedDiscipline) {
-    this.shots = new Array(40).fill(null);
-    this.currentShotIndex = 0;
-    return;
-  }
-
-  const existingResult = storage.results.find(
-    (r) =>
-      r.shooterId === this.selectedShooterId &&
-      r.discipline === this.selectedDiscipline &&
-      r.teamId === this.selectedTeamId
-  );
-
-  if (existingResult) {
-    this.shots = [...existingResult.shots];
-    
-    // NEU: Setze currentShotIndex auf die Position nach dem letzten Eintrag
-    this.currentShotIndex = -1;
-    const maxShots = getCompetitionType(this.selectedDiscipline) === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
-    
-    // Finde letzten Eintrag
-    for (let i = maxShots - 1; i >= 0; i--) {
-      if (this.shots[i] !== null) {
-        this.currentShotIndex = i + 1;
-        break;
-      }
-    }
-    
-    // Falls alle Positionen leer sind, starte bei 0
-    if (this.currentShotIndex === -1) {
+    if (!this.selectedShooterId || !this.selectedDiscipline) {
+      this.shots = new Array(40).fill(null);
       this.currentShotIndex = 0;
+      return;
     }
-    
-    console.log("Loaded existing results, next position:", this.currentShotIndex);
-  } else {
-    this.shots = new Array(40).fill(null);
-    this.currentShotIndex = 0;
-    console.log("No existing results found - starting fresh");
+
+    const existingResult = storage.results.find(
+      (r) =>
+        r.shooterId === this.selectedShooterId &&
+        r.discipline === this.selectedDiscipline &&
+        r.teamId === this.selectedTeamId
+    );
+
+    if (existingResult) {
+      this.shots = [...existingResult.shots];
+
+      // NEU: Setze currentShotIndex auf die Position nach dem letzten Eintrag
+      this.currentShotIndex = -1;
+      const maxShots = getCompetitionType(this.selectedDiscipline) === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
+
+      // Finde letzten Eintrag
+      for (let i = maxShots - 1; i >= 0; i--) {
+        if (this.shots[i] !== null) {
+          this.currentShotIndex = i + 1;
+          break;
+        }
+      }
+
+      // Falls alle Positionen leer sind, starte bei 0
+      if (this.currentShotIndex === -1) {
+        this.currentShotIndex = 0;
+      }
+
+      console.log("Loaded existing results, next position:", this.currentShotIndex);
+    } else {
+      this.shots = new Array(40).fill(null);
+      this.currentShotIndex = 0;
+      console.log("No existing results found - starting fresh");
+    }
   }
-}
 
   // =================================================================
   // SELECT UPDATES
@@ -490,14 +490,14 @@ class EntryView {
     cameraBtn.textContent = "📷 Scheibe";
     buttonsContainer.appendChild(cameraBtn);
 
-// NEU: Button für Foto-Bearbeitung
-const photoEditBtn = document.createElement("button");
-photoEditBtn.id = "photoEditBtn";
-photoEditBtn.className = "btn btn-secondary";
-photoEditBtn.style.cssText =
-  "height: 50px; background-color: #ff9500; color: white;";
-photoEditBtn.textContent = "📷 wählen";
-buttonsContainer.appendChild(photoEditBtn);
+    // NEU: Button für Foto-Bearbeitung
+    const photoEditBtn = document.createElement("button");
+    photoEditBtn.id = "photoEditBtn";
+    photoEditBtn.className = "btn btn-secondary";
+    photoEditBtn.style.cssText =
+      "height: 50px; background-color: #ff9500; color: white;";
+    photoEditBtn.textContent = "📷 wählen";
+    buttonsContainer.appendChild(photoEditBtn);
 
     flexContainer.appendChild(buttonsContainer);
     card.appendChild(flexContainer);
@@ -533,13 +533,13 @@ buttonsContainer.appendChild(photoEditBtn);
       );
     }
 
-// NEU: Photo Edit Button Event Listener
-const photoEditBtn = document.getElementById("photoEditBtn");
-if (photoEditBtn) {
-  this.eventRegistry.register(photoEditBtn, "click", () =>
-    this.processExistingPhoto()
-  );
-}
+    // NEU: Photo Edit Button Event Listener
+    const photoEditBtn = document.getElementById("photoEditBtn");
+    if (photoEditBtn) {
+      this.eventRegistry.register(photoEditBtn, "click", () =>
+        this.processExistingPhoto()
+      );
+    }
   }
 
   // =================================================================
@@ -547,51 +547,51 @@ if (photoEditBtn) {
   // =================================================================
 
   addShot(value) {
-  try {
-    if (!this.selectedDiscipline) {
-      UIUtils.showError("Bitte wählen Sie zuerst eine Disziplin aus.");
-      return;
-    }
+    try {
+      if (!this.selectedDiscipline) {
+        UIUtils.showError("Bitte wählen Sie zuerst eine Disziplin aus.");
+        return;
+      }
 
-    const validatedValue = InputValidator.validateShotValue(
-      value,
-      this.selectedDiscipline
-    );
-    const competitionType = getCompetitionType(this.selectedDiscipline);
-    const maxShots =
-      competitionType === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
+      const validatedValue = InputValidator.validateShotValue(
+        value,
+        this.selectedDiscipline
+      );
+      const competitionType = getCompetitionType(this.selectedDiscipline);
+      const maxShots =
+        competitionType === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
 
-    // Verwende currentShotIndex falls gesetzt, sonst finde ersten freien Platz
-    let targetIndex = this.currentShotIndex || -1;
-    
-    if (targetIndex === -1 || targetIndex >= maxShots || this.shots[targetIndex] !== null) {
-      // Finde ersten freien Platz
-      for (let i = 0; i < maxShots; i++) {
-        if (this.shots[i] === null) {
-          targetIndex = i;
-          break;
+      // Verwende currentShotIndex falls gesetzt, sonst finde ersten freien Platz
+      let targetIndex = this.currentShotIndex || -1;
+
+      if (targetIndex === -1 || targetIndex >= maxShots || this.shots[targetIndex] !== null) {
+        // Finde ersten freien Platz
+        for (let i = 0; i < maxShots; i++) {
+          if (this.shots[i] === null) {
+            targetIndex = i;
+            break;
+          }
         }
       }
-    }
 
-    if (targetIndex !== -1 && targetIndex < maxShots) {
-      this.shots[targetIndex] = validatedValue;
-      
-      // Setze nächsten Index
-      this.currentShotIndex = targetIndex + 1;
-      if (this.currentShotIndex >= maxShots) {
-        this.currentShotIndex = -1; // Alle Plätze belegt
+      if (targetIndex !== -1 && targetIndex < maxShots) {
+        this.shots[targetIndex] = validatedValue;
+
+        // Setze nächsten Index
+        this.currentShotIndex = targetIndex + 1;
+        if (this.currentShotIndex >= maxShots) {
+          this.currentShotIndex = -1; // Alle Plätze belegt
+        }
+
+        this.updateShotsDisplay();
+      } else {
+        UIUtils.showError("Alle Positionen sind bereits belegt.");
       }
-      
-      this.updateShotsDisplay();
-    } else {
-      UIUtils.showError("Alle Positionen sind bereits belegt.");
+    } catch (error) {
+      console.error("Invalid shot value:", error);
+      UIUtils.showError(error.message);
     }
-  } catch (error) {
-    console.error("Invalid shot value:", error);
-    UIUtils.showError(error.message);
   }
-}
 
   removeLastShot() {
     try {
@@ -687,304 +687,304 @@ if (photoEditBtn) {
 
   // In entry-view.js - createAnnexKeypad Methode erweitern:
 
-createAnnexKeypad(container) {
-  const keypad = document.createElement("div");
-  keypad.className = "keypad";
-  keypad.style.cssText =
-    "display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 100px; margin-bottom: 20px;";
+  createAnnexKeypad(container) {
+    const keypad = document.createElement("div");
+    keypad.className = "keypad";
+    keypad.style.cssText =
+      "display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 100px; margin-bottom: 20px;";
 
-  [0, 1, 2, 3].forEach((num) => {
-    const btn = document.createElement("button");
-    btn.className = "btn btn-secondary";
-    btn.style.cssText =
-      "aspect-ratio: 1; font-size: 16px; font-weight: 500; padding: 12px; min-height: 50px;";
-    btn.textContent = num.toString();
+    [0, 1, 2, 3].forEach((num) => {
+      const btn = document.createElement("button");
+      btn.className = "btn btn-secondary";
+      btn.style.cssText =
+        "aspect-ratio: 1; font-size: 16px; font-weight: 500; padding: 12px; min-height: 50px;";
+      btn.textContent = num.toString();
 
-    this.eventRegistry.register(btn, "click", () => this.addShot(num));
-    keypad.appendChild(btn);
-  });
+      this.eventRegistry.register(btn, "click", () => this.addShot(num));
+      keypad.appendChild(btn);
+    });
 
-  // Delete button
-  const deleteBtn = document.createElement("button");
-  deleteBtn.className = "btn btn-secondary";
-  deleteBtn.style.cssText =
-    "aspect-ratio: 1; font-size: 16px; font-weight: 500; gap: 8px; padding: 12px; height: 50px;";
-  deleteBtn.textContent = "⌫";
+    // Delete button
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "btn btn-secondary";
+    deleteBtn.style.cssText =
+      "aspect-ratio: 1; font-size: 16px; font-weight: 500; gap: 8px; padding: 12px; height: 50px;";
+    deleteBtn.textContent = "⌫";
 
-  this.eventRegistry.register(deleteBtn, "click", () =>
-    this.removeLastShot()
-  );
-  keypad.appendChild(deleteBtn);
-
-  // NEU: Return Button
-  const garageReturnBtn = document.createElement("button");
-  garageReturnBtn.className = "btn btn-secondary";
-  garageReturnBtn.style.cssText =
-    "aspect-ratio: 1; font-size: 16px; font-weight: 500; gap: 8px; padding: 12px; height: 50px;";
-  garageReturnBtn.textContent = "⏎";
-
-  this.eventRegistry.register(garageReturnBtn, "click", () =>
-    this.jumpToNextSeries()
-  );
-  keypad.appendChild(garageReturnBtn);
-
-  container.appendChild(keypad);
-}
-
-// NEU: Methode zum Springen zur nächsten Serie
-// In entry-view.js - jumpToNextSeries Methode überarbeiten:
-// In entry-view.js - jumpToNextSeries Methode überarbeiten:
-
-jumpToNextSeries() {
-  try {
-    // Finde die aktuelle Position (letzter gefüllter Schuss)
-    let currentIndex = -1;
-    for (let i = 39; i >= 0; i--) { // Rückwärts suchen für letzten Eintrag
-      if (this.shots[i] !== null) {
-        currentIndex = i;
-        break;
-      }
-    }
-
-    // Bestimme aktuelle Serie
-    let currentSeries = currentIndex === -1 ? -1 : Math.floor(currentIndex / 8);
-    
-    // Bestimme die Ziel-Serie (nächste Serie)
-    let targetSeries = currentSeries + 1;
-    
-    // Falls noch keine Daten vorhanden sind, starte bei Serie 0
-    if (currentSeries === -1) {
-      targetSeries = 0;
-    }
-
-    // NEU: Zyklisches Springen - nach S5 wieder zu S1
-    if (targetSeries >= 5) {
-      targetSeries = 0; // Springe zurück zu Serie 1
-    }
-
-    // NEU: Setze Position IMMER auf den Anfang der Ziel-Serie (nicht erstes leeres!)
-    const targetIndex = targetSeries * 8; // Erstes Feld der Serie
-    
-    // Setze currentShotIndex für die nächste Eingabe
-    this.currentShotIndex = targetIndex;
-    
-    // Aktualisiere die Anzeige
-    this.updateShotsDisplay();
-    
-    // Hervorhebung NACH dem Update der Anzeige
-    setTimeout(() => {
-      this.highlightNextShotPosition(targetIndex);
-    }, 150);
-    
-    // Korrekte Anzeige der Position
-    UIUtils.showSuccessMessage(`Springe zu Serie ${targetSeries + 1} - Position 1`);
-    
-  } catch (error) {
-    console.error("Error jumping to next series:", error);
-    UIUtils.showError("Fehler beim Springen zur nächsten Serie");
-  }
-}
-
-// Korrigierte highlightNextShotPosition Methode:
-highlightNextShotPosition(index) {
-  // Entferne vorherige Hervorhebungen
-  const previousHighlights = document.querySelectorAll('[style*="border: 2px solid #007bff"]');
-  previousHighlights.forEach(el => {
-    el.style.border = "1px solid #d1d1d6";
-    el.style.backgroundColor = "";
-    el.style.transform = "";
-  });
-  
-  // Berechne Serie und Schuss KORREKT
-  const series = Math.floor(index / 8);        // Serie 0-4
-  const shotInSeries = (index % 8);            // Position 0-7
-  const displaySeries = series + 1;            // Serie 1-5 für Anzeige
-  const displayPosition = shotInSeries + 1;    // Position 1-8 für Anzeige
-  
-  console.log(`Highlighting Serie ${displaySeries}, Position ${displayPosition} (Index: ${index})`);
-  
-  // Warte bis DOM vollständig aktualisiert ist
-  setTimeout(() => {
-    const grid = document.getElementById("shotsGrid");
-    if (!grid) return;
-
-    const gridWrapper = grid.querySelector('div[style*="overflow-x: auto"]');
-    if (!gridWrapper) return;
-
-    // Finde die spezifische Serie-Zeile
-    const rows = gridWrapper.querySelectorAll('div[style*="grid-template-columns: 40px repeat(8, 30px)"]');
-    
-    if (rows[series]) {
-      const cells = rows[series].children;
-      
-      // +1 weil das erste Element das Serie-Label ist
-      const targetCell = cells[shotInSeries + 1];
-      if (targetCell) {
-        targetCell.style.border = "2px solid #007bff";
-        targetCell.style.backgroundColor = "#e7f3ff";
-        targetCell.style.transform = "scale(1.1)";
-        targetCell.style.transition = "all 0.3s ease";
-        
-        console.log(`Successfully highlighted Serie ${displaySeries}, Position ${displayPosition}`);
-        
-        // Entferne Hervorhebung nach 3 Sekunden
-        setTimeout(() => {
-          targetCell.style.border = "1px solid #d1d1d6";
-          targetCell.style.backgroundColor = "";
-          targetCell.style.transform = "";
-        }, 3000);
-      }
-    }
-  }, 200);
-}
-
-// Zusätzlich: Bessere Initialisierung beim Laden von existierenden Ergebnissen
-loadExistingResults() {
-  if (!this.selectedShooterId || !this.selectedDiscipline) {
-    this.shots = new Array(40).fill(null);
-    this.currentShotIndex = 0; // NEU: Setze auf Anfang
-    return;
-  }
-
-  // Suche nach existierendem Ergebnis
-  const existingResult = storage.results.find(
-    (r) =>
-      r.shooterId === this.selectedShooterId &&
-      r.discipline === this.selectedDiscipline &&
-      r.teamId === this.selectedTeamId
-  );
-
-  if (existingResult) {
-    // Lade existierende Shots
-    this.shots = [...existingResult.shots];
-    
-    // NEU: Setze currentShotIndex auf nächste freie Position
-    this.currentShotIndex = -1;
-    const maxShots = getCompetitionType(this.selectedDiscipline) === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
-    for (let i = 0; i < maxShots; i++) {
-      if (this.shots[i] === null) {
-        this.currentShotIndex = i;
-        break;
-      }
-    }
-    
-    console.log("Loaded existing results for shooter:", this.selectedShooterId);
-  } else {
-    // Keine Ergebnisse vorhanden - leeres Array
-    this.shots = new Array(40).fill(null);
-    this.currentShotIndex = 0; // NEU: Starte am Anfang
-    console.log("No existing results found - starting fresh");
-  }
-}
-
-
-// Verbesserte addShot Methode:
-addShot(value) {
-  try {
-    if (!this.selectedDiscipline) {
-      UIUtils.showError("Bitte wählen Sie zuerst eine Disziplin aus.");
-      return;
-    }
-
-    const validatedValue = InputValidator.validateShotValue(
-      value,
-      this.selectedDiscipline
+    this.eventRegistry.register(deleteBtn, "click", () =>
+      this.removeLastShot()
     );
-    const competitionType = getCompetitionType(this.selectedDiscipline);
-    const maxShots = competitionType === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
+    keypad.appendChild(deleteBtn);
 
-    let targetIndex = -1;
+    // NEU: Return Button
+    const garageReturnBtn = document.createElement("button");
+    garageReturnBtn.className = "btn btn-secondary";
+    garageReturnBtn.style.cssText =
+      "aspect-ratio: 1; font-size: 16px; font-weight: 500; gap: 8px; padding: 12px; height: 50px;";
+    garageReturnBtn.textContent = "⏎";
 
-    // Falls currentShotIndex gesetzt ist, verwende ihn (auch wenn Position belegt ist!)
-    if (this.currentShotIndex !== -1 && this.currentShotIndex < maxShots) {
-      targetIndex = this.currentShotIndex;
-    } else {
-      // Sonst finde den nächsten freien Platz
-      for (let i = 0; i < maxShots; i++) {
-        if (this.shots[i] === null) {
-          targetIndex = i;
+    this.eventRegistry.register(garageReturnBtn, "click", () =>
+      this.jumpToNextSeries()
+    );
+    keypad.appendChild(garageReturnBtn);
+
+    container.appendChild(keypad);
+  }
+
+  // NEU: Methode zum Springen zur nächsten Serie
+  // In entry-view.js - jumpToNextSeries Methode überarbeiten:
+  // In entry-view.js - jumpToNextSeries Methode überarbeiten:
+
+  jumpToNextSeries() {
+    try {
+      // Finde die aktuelle Position (letzter gefüllter Schuss)
+      let currentIndex = -1;
+      for (let i = 39; i >= 0; i--) { // Rückwärts suchen für letzten Eintrag
+        if (this.shots[i] !== null) {
+          currentIndex = i;
           break;
         }
       }
-    }
 
-    if (targetIndex !== -1 && targetIndex < maxShots) {
-      // NEU: Überschreibe auch belegte Positionen wenn currentShotIndex gesetzt
-      this.shots[targetIndex] = validatedValue;
-      
-      // Setze nächsten Index für fortlaufende Eingabe
-      this.currentShotIndex = targetIndex + 1;
-      if (this.currentShotIndex >= maxShots) {
-        this.currentShotIndex = -1; // Alle Positionen durchlaufen
+      // Bestimme aktuelle Serie
+      let currentSeries = currentIndex === -1 ? -1 : Math.floor(currentIndex / 8);
+
+      // Bestimme die Ziel-Serie (nächste Serie)
+      let targetSeries = currentSeries + 1;
+
+      // Falls noch keine Daten vorhanden sind, starte bei Serie 0
+      if (currentSeries === -1) {
+        targetSeries = 0;
       }
-      
+
+      // NEU: Zyklisches Springen - nach S5 wieder zu S1
+      if (targetSeries >= 5) {
+        targetSeries = 0; // Springe zurück zu Serie 1
+      }
+
+      // NEU: Setze Position IMMER auf den Anfang der Ziel-Serie (nicht erstes leeres!)
+      const targetIndex = targetSeries * 8; // Erstes Feld der Serie
+
+      // Setze currentShotIndex für die nächste Eingabe
+      this.currentShotIndex = targetIndex;
+
+      // Aktualisiere die Anzeige
       this.updateShotsDisplay();
-      
-      // Zeige aktuelle Position an
-      if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
-        const series = Math.floor(targetIndex / 8) + 1;
-        const position = (targetIndex % 8) + 1;
-        console.log(`Eingabe in Serie ${series}, Position ${position}`);
-      }
-    } else {
-      UIUtils.showError("Alle Positionen sind bereits belegt.");
+
+      // Hervorhebung NACH dem Update der Anzeige
+      setTimeout(() => {
+        this.highlightNextShotPosition(targetIndex);
+      }, 150);
+
+      // Korrekte Anzeige der Position
+      UIUtils.showSuccessMessage(`Springe zu Serie ${targetSeries + 1} - Position 1`);
+
+    } catch (error) {
+      console.error("Error jumping to next series:", error);
+      UIUtils.showError("Fehler beim Springen zur nächsten Serie");
     }
-  } catch (error) {
-    console.error("Invalid shot value:", error);
-    UIUtils.showError(error.message);
   }
-}
 
-// Erweiterte clear Methode:
-clear() {
-  this.shots = new Array(40).fill(null);
-  this.currentShotIndex = 0; // NEU: Starte bei Position 0
-  this.updateShotsDisplay();
-}
+  // Korrigierte highlightNextShotPosition Methode:
+  highlightNextShotPosition(index) {
+    // Entferne vorherige Hervorhebungen
+    const previousHighlights = document.querySelectorAll('[style*="border: 2px solid #007bff"]');
+    previousHighlights.forEach(el => {
+      el.style.border = "1px solid #d1d1d6";
+      el.style.backgroundColor = "";
+      el.style.transform = "";
+    });
 
-// Beim Wechseln der Disziplin auch Position zurücksetzen:
-// In der handleDisciplineChange Methode hinzufügen:
-handleDisciplineChange() {
-  const select = document.getElementById("disciplineSelect");
-  if (!select) return;
+    // Berechne Serie und Schuss KORREKT
+    const series = Math.floor(index / 8);        // Serie 0-4
+    const shotInSeries = (index % 8);            // Position 0-7
+    const displaySeries = series + 1;            // Serie 1-5 für Anzeige
+    const displayPosition = shotInSeries + 1;    // Position 1-8 für Anzeige
 
-  this.selectedDiscipline = select.value || null;
-  this.currentShotIndex = 0; // NEU: Position zurücksetzen
-  this.updateShotsDisplay();
-}
+    console.log(`Highlighting Serie ${displaySeries}, Position ${displayPosition} (Index: ${index})`);
 
-// NEU: Methode zum Hervorheben der nächsten Position
-highlightNextShotPosition(index) {
-  // Entferne vorherige Hervorhebungen
-  const previousHighlights = document.querySelectorAll('.next-shot-highlight');
-  previousHighlights.forEach(el => el.classList.remove('next-shot-highlight'));
-  
-  // Berechne Serie und Schuss
-  const series = Math.floor(index / 8);
-  const shotInSeries = index % 8;
-  
-  // Finde das entsprechende Grid-Element und hebe es hervor
-  setTimeout(() => {
-    const grid = document.getElementById("shotsGrid");
-    if (grid) {
-      const rows = grid.querySelectorAll('[style*="grid-template-columns: 40px repeat(8, 30px)"]');
+    // Warte bis DOM vollständig aktualisiert ist
+    setTimeout(() => {
+      const grid = document.getElementById("shotsGrid");
+      if (!grid) return;
+
+      const gridWrapper = grid.querySelector('div[style*="overflow-x: auto"]');
+      if (!gridWrapper) return;
+
+      // Finde die spezifische Serie-Zeile
+      const rows = gridWrapper.querySelectorAll('div[style*="grid-template-columns: 40px repeat(8, 30px)"]');
+
       if (rows[series]) {
         const cells = rows[series].children;
+
         // +1 weil das erste Element das Serie-Label ist
-        if (cells[shotInSeries + 1]) {
-          cells[shotInSeries + 1].style.border = "2px solid #007bff";
-          cells[shotInSeries + 1].style.backgroundColor = "#e7f3ff";
-          
+        const targetCell = cells[shotInSeries + 1];
+        if (targetCell) {
+          targetCell.style.border = "2px solid #007bff";
+          targetCell.style.backgroundColor = "#e7f3ff";
+          targetCell.style.transform = "scale(1.1)";
+          targetCell.style.transition = "all 0.3s ease";
+
+          console.log(`Successfully highlighted Serie ${displaySeries}, Position ${displayPosition}`);
+
           // Entferne Hervorhebung nach 3 Sekunden
           setTimeout(() => {
-            cells[shotInSeries + 1].style.border = "1px solid #d1d1d6";
-            cells[shotInSeries + 1].style.backgroundColor = "";
+            targetCell.style.border = "1px solid #d1d1d6";
+            targetCell.style.backgroundColor = "";
+            targetCell.style.transform = "";
           }, 3000);
         }
       }
+    }, 200);
+  }
+
+  // Zusätzlich: Bessere Initialisierung beim Laden von existierenden Ergebnissen
+  loadExistingResults() {
+    if (!this.selectedShooterId || !this.selectedDiscipline) {
+      this.shots = new Array(40).fill(null);
+      this.currentShotIndex = 0; // NEU: Setze auf Anfang
+      return;
     }
-  }, 100);
-}
+
+    // Suche nach existierendem Ergebnis
+    const existingResult = storage.results.find(
+      (r) =>
+        r.shooterId === this.selectedShooterId &&
+        r.discipline === this.selectedDiscipline &&
+        r.teamId === this.selectedTeamId
+    );
+
+    if (existingResult) {
+      // Lade existierende Shots
+      this.shots = [...existingResult.shots];
+
+      // NEU: Setze currentShotIndex auf nächste freie Position
+      this.currentShotIndex = -1;
+      const maxShots = getCompetitionType(this.selectedDiscipline) === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
+      for (let i = 0; i < maxShots; i++) {
+        if (this.shots[i] === null) {
+          this.currentShotIndex = i;
+          break;
+        }
+      }
+
+      console.log("Loaded existing results for shooter:", this.selectedShooterId);
+    } else {
+      // Keine Ergebnisse vorhanden - leeres Array
+      this.shots = new Array(40).fill(null);
+      this.currentShotIndex = 0; // NEU: Starte am Anfang
+      console.log("No existing results found - starting fresh");
+    }
+  }
+
+
+  // Verbesserte addShot Methode:
+  addShot(value) {
+    try {
+      if (!this.selectedDiscipline) {
+        UIUtils.showError("Bitte wählen Sie zuerst eine Disziplin aus.");
+        return;
+      }
+
+      const validatedValue = InputValidator.validateShotValue(
+        value,
+        this.selectedDiscipline
+      );
+      const competitionType = getCompetitionType(this.selectedDiscipline);
+      const maxShots = competitionType === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
+
+      let targetIndex = -1;
+
+      // Falls currentShotIndex gesetzt ist, verwende ihn (auch wenn Position belegt ist!)
+      if (this.currentShotIndex !== -1 && this.currentShotIndex < maxShots) {
+        targetIndex = this.currentShotIndex;
+      } else {
+        // Sonst finde den nächsten freien Platz
+        for (let i = 0; i < maxShots; i++) {
+          if (this.shots[i] === null) {
+            targetIndex = i;
+            break;
+          }
+        }
+      }
+
+      if (targetIndex !== -1 && targetIndex < maxShots) {
+        // NEU: Überschreibe auch belegte Positionen wenn currentShotIndex gesetzt
+        this.shots[targetIndex] = validatedValue;
+
+        // Setze nächsten Index für fortlaufende Eingabe
+        this.currentShotIndex = targetIndex + 1;
+        if (this.currentShotIndex >= maxShots) {
+          this.currentShotIndex = -1; // Alle Positionen durchlaufen
+        }
+
+        this.updateShotsDisplay();
+
+        // Zeige aktuelle Position an
+        if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
+          const series = Math.floor(targetIndex / 8) + 1;
+          const position = (targetIndex % 8) + 1;
+          console.log(`Eingabe in Serie ${series}, Position ${position}`);
+        }
+      } else {
+        UIUtils.showError("Alle Positionen sind bereits belegt.");
+      }
+    } catch (error) {
+      console.error("Invalid shot value:", error);
+      UIUtils.showError(error.message);
+    }
+  }
+
+  // Erweiterte clear Methode:
+  clear() {
+    this.shots = new Array(40).fill(null);
+    this.currentShotIndex = 0; // NEU: Starte bei Position 0
+    this.updateShotsDisplay();
+  }
+
+  // Beim Wechseln der Disziplin auch Position zurücksetzen:
+  // In der handleDisciplineChange Methode hinzufügen:
+  handleDisciplineChange() {
+    const select = document.getElementById("disciplineSelect");
+    if (!select) return;
+
+    this.selectedDiscipline = select.value || null;
+    this.currentShotIndex = 0; // NEU: Position zurücksetzen
+    this.updateShotsDisplay();
+  }
+
+  // NEU: Methode zum Hervorheben der nächsten Position
+  highlightNextShotPosition(index) {
+    // Entferne vorherige Hervorhebungen
+    const previousHighlights = document.querySelectorAll('.next-shot-highlight');
+    previousHighlights.forEach(el => el.classList.remove('next-shot-highlight'));
+
+    // Berechne Serie und Schuss
+    const series = Math.floor(index / 8);
+    const shotInSeries = index % 8;
+
+    // Finde das entsprechende Grid-Element und hebe es hervor
+    setTimeout(() => {
+      const grid = document.getElementById("shotsGrid");
+      if (grid) {
+        const rows = grid.querySelectorAll('[style*="grid-template-columns: 40px repeat(8, 30px)"]');
+        if (rows[series]) {
+          const cells = rows[series].children;
+          // +1 weil das erste Element das Serie-Label ist
+          if (cells[shotInSeries + 1]) {
+            cells[shotInSeries + 1].style.border = "2px solid #007bff";
+            cells[shotInSeries + 1].style.backgroundColor = "#e7f3ff";
+
+            // Entferne Hervorhebung nach 3 Sekunden
+            setTimeout(() => {
+              cells[shotInSeries + 1].style.border = "1px solid #d1d1d6";
+              cells[shotInSeries + 1].style.backgroundColor = "";
+            }, 3000);
+          }
+        }
+      }
+    }, 100);
+  }
 
   // =================================================================
   // SHOTS DISPLAY UPDATE
@@ -1028,8 +1028,8 @@ highlightNextShotPosition(index) {
       title.textContent =
         competitionType === CompetitionType.ANNEX_SCHEIBE
           ? //? `Serien (8 × 5 Schuss)${shooterText}`
-            //: `Serie (20 Schuss)${shooterText}`;
-            `Serien (8 × 5 Schuss)`
+          //: `Serie (20 Schuss)${shooterText}`;
+          `Serien (8 × 5 Schuss)`
           : `Serie (20 Schuss)`;
     }
 
@@ -1146,85 +1146,85 @@ highlightNextShotPosition(index) {
   }
 
   // In entry-view.js - updateShotsStats erweitern:
-updateShotsStats() {
-  const stats = document.getElementById("shotsStats");
-  if (!stats) return;
+  updateShotsStats() {
+    const stats = document.getElementById("shotsStats");
+    if (!stats) return;
 
-  if (!this.selectedDiscipline) {
+    if (!this.selectedDiscipline) {
+      stats.innerHTML = "";
+      return;
+    }
+
+    const competitionType = getCompetitionType(this.selectedDiscipline);
+    const shotCount =
+      competitionType === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
+    const filledShots = this.shots
+      .slice(0, shotCount)
+      .filter((s) => s !== null);
+    const total = filledShots.reduce((sum, shot) => sum + shot, 0);
+
+    const label =
+      competitionType === CompetitionType.ANNEX_SCHEIBE ? "Gesamt" : "Ringe";
+
+    // Clear and create new content
     stats.innerHTML = "";
-    return;
-  }
 
-  const competitionType = getCompetitionType(this.selectedDiscipline);
-  const shotCount =
-    competitionType === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
-  const filledShots = this.shots
-    .slice(0, shotCount)
-    .filter((s) => s !== null);
-  const total = filledShots.reduce((sum, shot) => sum + shot, 0);
+    // Ändere das Layout zu vertikal für mehrere Zeilen
+    stats.style.cssText = "margin-top: 12px; font-size: 14px; color: #666;";
 
-  const label =
-    competitionType === CompetitionType.ANNEX_SCHEIBE ? "Gesamt" : "Ringe";
+    // Erste Zeile: Schüsse und Ringe (horizontal)
+    const firstLineDiv = document.createElement("div");
+    firstLineDiv.style.cssText = "display: flex; justify-content: space-between; margin-bottom: 4px;";
 
-  // Clear and create new content
-  stats.innerHTML = "";
-  
-  // Ändere das Layout zu vertikal für mehrere Zeilen
-  stats.style.cssText = "margin-top: 12px; font-size: 14px; color: #666;";
+    const shotCountSpan = document.createElement("span");
+    shotCountSpan.textContent = `Schüsse: ${filledShots.length}/${shotCount}`;
 
-  // Erste Zeile: Schüsse und Ringe (horizontal)
-  const firstLineDiv = document.createElement("div");
-  firstLineDiv.style.cssText = "display: flex; justify-content: space-between; margin-bottom: 4px;";
-  
-  const shotCountSpan = document.createElement("span");
-  shotCountSpan.textContent = `Schüsse: ${filledShots.length}/${shotCount}`;
+    const totalSpan = document.createElement("span");
+    totalSpan.textContent = `${label}: ${total}`;
 
-  const totalSpan = document.createElement("span");
-  totalSpan.textContent = `${label}: ${total}`;
+    firstLineDiv.appendChild(shotCountSpan);
+    firstLineDiv.appendChild(totalSpan);
+    stats.appendChild(firstLineDiv);
 
-  firstLineDiv.appendChild(shotCountSpan);
-  firstLineDiv.appendChild(totalSpan);
-  stats.appendChild(firstLineDiv);
-
-  // Zweite Zeile: Schuss-Gruppierung (nur für Präzision/Duell)
-  if (competitionType !== CompetitionType.ANNEX_SCHEIBE && filledShots.length > 0) {
-    const shotDistribution = this.calculateShotDistribution(filledShots);
-    if (shotDistribution) {
-      const distributionDiv = document.createElement("div");
-      distributionDiv.style.cssText = "font-size: 12px; color: #666; text-align: center; margin-top: 4px;";
-      distributionDiv.textContent = shotDistribution;
-      stats.appendChild(distributionDiv);
+    // Zweite Zeile: Schuss-Gruppierung (nur für Präzision/Duell)
+    if (competitionType !== CompetitionType.ANNEX_SCHEIBE && filledShots.length > 0) {
+      const shotDistribution = this.calculateShotDistribution(filledShots);
+      if (shotDistribution) {
+        const distributionDiv = document.createElement("div");
+        distributionDiv.style.cssText = "font-size: 12px; color: #666; text-align: center; margin-top: 4px;";
+        distributionDiv.textContent = shotDistribution;
+        stats.appendChild(distributionDiv);
+      }
     }
   }
-}
 
-// NEU: Methode zur Berechnung der Schuss-Verteilung
-calculateShotDistribution(shots) {
-  if (!shots || shots.length === 0) return null;
-  
-  // Zähle jede Ringzahl
-  const counts = {};
-  shots.forEach(shot => {
-    counts[shot] = (counts[shot] || 0) + 1;
-  });
-  
-  // Sortiere nach Ringzahl (absteigend)
-  const sortedCounts = Object.entries(counts)
-    .map(([rings, count]) => ({ rings: parseInt(rings), count }))
-    .sort((a, b) => b.rings - a.rings);
-  
-  // Formatiere als "7×10 8×9 3×7 2×0"
-  const distribution = sortedCounts
-    .map(({ rings, count }) => {
-      if (rings === 0) {
-        return `${count}×-`;
-      }
-      return `${count}×${rings}`;
-    })
-    .join(' ');
-  
-  return distribution;
-}
+  // NEU: Methode zur Berechnung der Schuss-Verteilung
+  calculateShotDistribution(shots) {
+    if (!shots || shots.length === 0) return null;
+
+    // Zähle jede Ringzahl
+    const counts = {};
+    shots.forEach(shot => {
+      counts[shot] = (counts[shot] || 0) + 1;
+    });
+
+    // Sortiere nach Ringzahl (absteigend)
+    const sortedCounts = Object.entries(counts)
+      .map(([rings, count]) => ({ rings: parseInt(rings), count }))
+      .sort((a, b) => b.rings - a.rings);
+
+    // Formatiere als "7×10 8×9 3×7 2×0"
+    const distribution = sortedCounts
+      .map(({ rings, count }) => {
+        if (rings === 0) {
+          return `${count}×-`;
+        }
+        return `${count}×${rings}`;
+      })
+      .join(' ');
+
+    return distribution;
+  }
 
   updateSeriesSummary() {
     const summary = document.getElementById("seriesSummary");
@@ -1342,10 +1342,10 @@ calculateShotDistribution(shots) {
         return;
       }
 
-      if (!this.shots.some((shot) => shot !== null)) {
+      /*if (!this.shots.some((shot) => shot !== null)) {
         UIUtils.showError("Bitte erfassen Sie mindestens einen Schuss.");
         return;
-      }
+      }*/
 
       const entry = new ResultEntry(
         this.selectedTeamId,
@@ -1443,171 +1443,6 @@ calculateShotDistribution(shots) {
     const modalContent = document.createElement("div");
     modalContent.style.cssText = "width: 100%; max-width: 500px;";
 
-    // Kamera-Bereich
-    const cameraContainer = document.createElement("div");
-    cameraContainer.style.cssText = "position: relative; margin-bottom: 16px;";
-
-    // Video Element für Kamera-Preview
-    const video = document.createElement("video");
-    video.style.cssText =
-      "width: 100%; height: 300px; background: #000; border-radius: 8px; object-fit: cover; aspect-ratio: 1/1;";
-    video.autoplay = true;
-    video.muted = true;
-    video.playsInline = true;
-    cameraContainer.appendChild(video);
-
-    // Canvas für Foto (versteckt)
-    const canvas = document.createElement("canvas");
-    canvas.style.display = "none";
-    cameraContainer.appendChild(canvas);
-
-    // === ERWEITERTE POSITIONSHILFEN-OVERLAY ===
-    // === ÜBERARBEITETE POSITIONSHILFEN-OVERLAY ===
-const guidesOverlay = document.createElement("div");
-guidesOverlay.className = "guides-overlay";
-guidesOverlay.style.cssText = `
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  border: 2px dashed rgba(0, 255, 0, 0.8);
-  border-radius: 8px;
-  display: block;
-`;
-
-// Mittlere Kreuzlinien (horizontal und vertikal durch die Mitte)
-const centerLineV = document.createElement("div");
-centerLineV.style.cssText = `
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 80%;
-  background: linear-gradient(to bottom, transparent, rgba(0, 255, 0, 0.8) 20%, rgba(0, 255, 0, 0.8) 80%, transparent);
-`;
-guidesOverlay.appendChild(centerLineV);
-
-const centerLineH = document.createElement("div");
-centerLineH.style.cssText = `
-  position: absolute;
-  top: 50%;
-  left: 10%;
-  transform: translateY(-50%);
-  width: 80%;
-  height: 2px;
-  background: linear-gradient(to right, transparent, rgba(0, 255, 0, 0.8) 20%, rgba(0, 255, 0, 0.8) 80%, transparent);
-`;
-guidesOverlay.appendChild(centerLineH);
-
-// Drittel-Linien (Rule of thirds) - kompakter und grün
-const thirdLineV1 = document.createElement("div");
-thirdLineV1.style.cssText = `
-  position: absolute;
-  top: 20%;
-  left: 33.33%;
-  transform: translateX(-50%);
-  width: 1px;
-  height: 60%;
-  background-color: rgba(0, 200, 0, 0.4);
-`;
-guidesOverlay.appendChild(thirdLineV1);
-
-const thirdLineV2 = document.createElement("div");
-thirdLineV2.style.cssText = `
-  position: absolute;
-  top: 20%;
-  left: 66.67%;
-  transform: translateX(-50%);
-  width: 1px;
-  height: 60%;
-  background-color: rgba(0, 200, 0, 0.4);
-`;
-guidesOverlay.appendChild(thirdLineV2);
-
-const thirdLineH1 = document.createElement("div");
-thirdLineH1.style.cssText = `
-  position: absolute;
-  top: 33.33%;
-  left: 20%;
-  transform: translateY(-50%);
-  width: 60%;
-  height: 1px;
-  background-color: rgba(0, 200, 0, 0.4);
-`;
-guidesOverlay.appendChild(thirdLineH1);
-
-const thirdLineH2 = document.createElement("div");
-thirdLineH2.style.cssText = `
-  position: absolute;
-  top: 66.67%;
-  left: 20%;
-  transform: translateY(-50%);
-  width: 60%;
-  height: 1px;
-  background-color: rgba(0, 200, 0, 0.4);
-`;
-guidesOverlay.appendChild(thirdLineH2);
-
-// Verbessertes mittleres Fadenkreuz - grün
-const crosshair = document.createElement("div");
-crosshair.style.cssText = `
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 50px;
-  height: 50px;
-  border: 2px solid rgba(0, 255, 0, 0.9);
-  border-radius: 50%;
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-`;
-
-const crosshairV = document.createElement("div");
-crosshairV.style.cssText = `
-  position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 80px;
-  background: linear-gradient(to bottom, transparent, rgba(0, 255, 0, 1) 30%, rgba(0, 255, 0, 1) 70%, transparent);
-`;
-
-const crosshairH = document.createElement("div");
-crosshairH.style.cssText = `
-  position: absolute;
-  top: 50%;
-  left: -15px;
-  transform: translateY(-50%);
-  width: 80px;
-  height: 2px;
-  background: linear-gradient(to right, transparent, rgba(0, 255, 0, 1) 30%, rgba(0, 255, 0, 1) 70%, transparent);
-`;
-
-crosshair.appendChild(crosshairV);
-crosshair.appendChild(crosshairH);
-guidesOverlay.appendChild(crosshair);
-
-// Zusätzlicher Zielkreis für Scheibenzentrierung
-const targetCircle = document.createElement("div");
-targetCircle.style.cssText = `
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 120px;
-  height: 120px;
-  border: 1px solid rgba(0, 200, 0, 0.6);
-  border-radius: 50%;
-  border-style: dashed;
-`;
-guidesOverlay.appendChild(targetCircle);
-
-cameraContainer.appendChild(guidesOverlay);
-
     // Info-Bereich (Text "Disziplin" durch "Scheibe" ersetzt)
     const infoDiv = document.createElement("div");
     infoDiv.style.cssText =
@@ -1621,33 +1456,92 @@ cameraContainer.appendChild(guidesOverlay);
     </div>
   `;
 
+    // Video Container mit erweiterten Guides
+    const videoContainer = document.createElement("div");
+    videoContainer.id = "cameraContainer";
+    videoContainer.style.cssText = `
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  `;
+
+    const video = document.createElement("video");
+    video.id = "cameraVideo";
+    video.style.cssText = "width: 100%; height: 100%; object-fit: cover;";
+    video.autoplay = true;
+    video.playsInline = true;
+    videoContainer.appendChild(video);
+
+    // Erweiterte Kamera-Guides hinzufügen
+    this.createCameraGuides(videoContainer);
+
+    // Guide-Optionen
+    const guidesOptions = document.createElement("div");
+    guidesOptions.style.cssText = "margin-bottom: 16px; display: flex; gap: 12px; font-size: 14px;";
+    guidesOptions.innerHTML = `
+    <label style="display: flex; align-items: center; gap: 4px;">
+      <input type="checkbox" id="toggleGrid" ${this.showGrid ? 'checked' : ''}>
+      <span>Gitter anzeigen</span>
+    </label>
+    <label style="display: flex; align-items: center; gap: 4px;">
+      <input type="checkbox" id="toggleLevel" checked>
+      <span>Wasserwage</span>
+    </label>
+  `;
+
     modalContent.appendChild(infoDiv);
-    modalContent.appendChild(cameraContainer);
+    modalContent.appendChild(videoContainer);
+    modalContent.appendChild(guidesOptions);
 
-    const modal = new ModalComponent("Scheibe dokumentieren", modalContent);
+    const modal = new ModalComponent("📸 Scheibe dokumentieren", modalContent);
 
-    modal.addAction(
-      "Abbrechen",
-      () => {
-        this.stopCamera();
-      },
-      false,
-      false
-    );
+    modal.addAction("Abbrechen", () => {
+      this.stopCamera();
+    }, false, false);
 
-    modal.addAction(
-      "📸 Foto aufnehmen",
-      () => {
-        this.takePhoto(video, canvas, shooterInfo);
-      },
-      true,
-      false
-    );
+    modal.addAction("Foto aufnehmen", () => {
+      this.capturePhoto(shooterInfo);
+    }, true, false);
+
+    modal.onCloseHandler(() => {
+      this.stopCamera();
+    });
 
     modal.show();
 
-    // Kamera starten
-    this.startCamera(video);
+    // Event Listeners für Optionen
+    setTimeout(() => {
+      const gridToggle = document.getElementById("toggleGrid");
+      const levelToggle = document.getElementById("toggleLevel");
+
+      if (gridToggle) {
+        gridToggle.addEventListener('change', (e) => {
+          this.showGrid = e.target.checked;
+          // Aktualisiere Guides
+          const container = document.getElementById("cameraContainer");
+          const overlay = container.querySelector('div[style*="z-index: 10"]');
+          if (overlay) {
+            overlay.remove();
+            this.createCameraGuides(container);
+          }
+        });
+      }
+
+      if (levelToggle) {
+        levelToggle.addEventListener('change', (e) => {
+          const levelIndicator = document.getElementById("levelIndicator");
+          if (levelIndicator) {
+            levelIndicator.style.display = e.target.checked ? 'flex' : 'none';
+          }
+        });
+      }
+
+      this.startCamera();
+    }, 100);
   }
 
   async startCamera(video) {
@@ -1675,13 +1569,20 @@ cameraContainer.appendChild(guidesOverlay);
   }
 
   stopCamera() {
-    if (this.cameraStream) {
-      this.cameraStream.getTracks().forEach((track) => track.stop());
-      this.cameraStream = null;
-      this.isCapturing = false;
-      console.log("Camera stopped");
+    if (this.stream) {
+      this.stream.getTracks().forEach(track => track.stop());
+      this.stream = null;
     }
+
+    // Stoppe Orientierungs-Listener
+    if (this.orientationHandler) {
+      window.removeEventListener('deviceorientation', this.orientationHandler);
+      this.orientationHandler = null;
+    }
+
+    this.wasLevel = false;
   }
+
 
   takePhoto(video, canvas, shooterInfo) {
     try {
@@ -1708,240 +1609,240 @@ cameraContainer.appendChild(guidesOverlay);
     }
   }
 
-addOverlayToCanvas(ctx, width, height, shooterInfo, customShots = null) {
-  const competitionType = getCompetitionType(this.selectedDiscipline);
+  addOverlayToCanvas(ctx, width, height, shooterInfo, customShots = null) {
+    const competitionType = getCompetitionType(this.selectedDiscipline);
 
-  // Angepasste Box-Größen und Abstände
-  const isAnnex = competitionType === CompetitionType.ANNEX_SCHEIBE;
-  const boxWidth = Math.min(width * 0.8, isAnnex ? 370 : 370);
-  const boxHeight = isAnnex ? 270 : 270;
-  const x = 20;
-  const y = 20;
+    // Angepasste Box-Größen und Abstände
+    const isAnnex = competitionType === CompetitionType.ANNEX_SCHEIBE;
+    const boxWidth = Math.min(width * 0.8, isAnnex ? 370 : 370);
+    const boxHeight = isAnnex ? 270 : 270;
+    const x = 20;
+    const y = 20;
 
-  // Box zeichnen
-  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-  ctx.fillRect(x, y, boxWidth, boxHeight);
+    // Box zeichnen
+    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+    ctx.fillRect(x, y, boxWidth, boxHeight);
 
-  // Rahmen
-  ctx.strokeStyle = "black";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(x, y, boxWidth, boxHeight);
+    // Rahmen
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, boxWidth, boxHeight);
 
-  // Text-Stil für Header-Infos
-  ctx.fillStyle = "black";
-  ctx.font = "bold 14px Arial";
-  ctx.textAlign = "left";
+    // Text-Stil für Header-Infos
+    ctx.fillStyle = "black";
+    ctx.font = "bold 14px Arial";
+    ctx.textAlign = "left";
 
-  // Header-Informationen
-  const info = [
-    `Name: ${shooterInfo.name}`,
-    `Disziplin: ${shooterInfo.currentDiscipline}`,
-    `Scheibe: ${shooterInfo.discipline}`,
-    `Datum: ${shooterInfo.date}`,
-  ];
+    // Header-Informationen
+    const info = [
+      `Name: ${shooterInfo.name}`,
+      `Disziplin: ${shooterInfo.currentDiscipline}`,
+      `Scheibe: ${shooterInfo.discipline}`,
+      `Datum: ${shooterInfo.date}`,
+    ];
 
-  info.forEach((line, index) => {
-    ctx.fillText(line, x + 10, y + 20 + index * 18);
-  });
+    info.forEach((line, index) => {
+      ctx.fillText(line, x + 10, y + 20 + index * 18);
+    });
 
-  // Schuss-Matrix zeichnen - mit optionalen Schuss-Daten
-  const matrixStartY = isAnnex ? y + 110 : y + 100;
+    // Schuss-Matrix zeichnen - mit optionalen Schuss-Daten
+    const matrixStartY = isAnnex ? y + 110 : y + 100;
 
-  if (isAnnex) {
-    this.drawAnnexMatrix(ctx, x + 10, matrixStartY, boxWidth - 20, customShots);
-  } else {
-    this.drawStandardMatrix(ctx, x + 10, matrixStartY, boxWidth - 20, customShots);
+    if (isAnnex) {
+      this.drawAnnexMatrix(ctx, x + 10, matrixStartY, boxWidth - 20, customShots);
+    } else {
+      this.drawStandardMatrix(ctx, x + 10, matrixStartY, boxWidth - 20, customShots);
+    }
   }
-}
 
-drawStandardMatrix(ctx, startX, startY, maxWidth, customShots = null) {
-  const cellSize = Math.min(25, (maxWidth - 40) / 5);
-  const gap = 3;
+  drawStandardMatrix(ctx, startX, startY, maxWidth, customShots = null) {
+    const cellSize = Math.min(25, (maxWidth - 40) / 5);
+    const gap = 3;
 
-  // Verwende entweder die übergebenen Schuss-Daten oder die aktuellen
-  const shotsToUse = customShots || this.shots;
+    // Verwende entweder die übergebenen Schuss-Daten oder die aktuellen
+    const shotsToUse = customShots || this.shots;
 
-  ctx.font = "bold 12px Arial";
-  ctx.textAlign = "center";
-  ctx.fillStyle = "black";
+    ctx.font = "bold 12px Arial";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "black";
 
-  // 4 Reihen × 5 Spalten = 20 Schüsse
-  for (let row = 0; row < 4; row++) {
-    for (let col = 0; col < 5; col++) {
-      const shotIndex = row * 5 + col;
-      const cellX = startX + col * (cellSize + gap);
-      const cellY = startY + row * (cellSize + gap);
+    // 4 Reihen × 5 Spalten = 20 Schüsse
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 5; col++) {
+        const shotIndex = row * 5 + col;
+        const cellX = startX + col * (cellSize + gap);
+        const cellY = startY + row * (cellSize + gap);
 
-      // Zelle zeichnen
-      ctx.strokeStyle = "#666";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(cellX, cellY, cellSize, cellSize);
+        // Zelle zeichnen
+        ctx.strokeStyle = "#666";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(cellX, cellY, cellSize, cellSize);
 
-      // Schuss-Wert
-      const shotValue = shotsToUse[shotIndex];
-      if (shotValue !== null) {
-        ctx.fillStyle = "black";
+        // Schuss-Wert
+        const shotValue = shotsToUse[shotIndex];
+        if (shotValue !== null) {
+          ctx.fillStyle = "black";
+          ctx.fillText(
+            shotValue.toString(),
+            cellX + cellSize / 2,
+            cellY + cellSize / 2 + 4
+          );
+        } else {
+          ctx.fillStyle = "#ccc";
+          ctx.fillText("—", cellX + cellSize / 2, cellY + cellSize / 2 + 4);
+        }
+      }
+    }
+
+    // Gesamtpunkte unter der Matrix
+    const filledShots = shotsToUse.slice(0, 20).filter((s) => s !== null);
+    const total = filledShots.reduce((sum, shot) => sum + shot, 0);
+
+    ctx.font = "bold 14px Arial";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "left";
+
+    // Erste Zeile: Schüsse und Ringe
+    ctx.fillText(
+      `Schüsse: ${filledShots.length}/20  |  Ringe: ${total}`,
+      startX,
+      startY + 4 * (cellSize + gap) + 25
+    );
+
+    // Zweite Zeile: Schuss-Gruppierung (nur wenn Schüsse vorhanden sind)
+    if (filledShots.length > 0) {
+      const shotDistribution = this.calculateShotDistribution(filledShots);
+      if (shotDistribution) {
+        ctx.font = "12px Arial"; // Etwas kleiner für die Gruppierung
+        ctx.fillStyle = "#666"; // Etwas heller
         ctx.fillText(
-          shotValue.toString(),
-          cellX + cellSize / 2,
-          cellY + cellSize / 2 + 4
+          shotDistribution,
+          startX,
+          startY + 4 * (cellSize + gap) + 45 // 20 Pixel unter der ersten Zeile
         );
-      } else {
-        ctx.fillStyle = "#ccc";
-        ctx.fillText("—", cellX + cellSize / 2, cellY + cellSize / 2 + 4);
       }
     }
   }
 
-  // Gesamtpunkte unter der Matrix
-  const filledShots = shotsToUse.slice(0, 20).filter((s) => s !== null);
-  const total = filledShots.reduce((sum, shot) => sum + shot, 0);
+  // NEU: Methode zur Berechnung der Schuss-Verteilung in mehreren Zeilen
+  calculateShotDistributionLines(shots) {
+    if (!shots || shots.length === 0) return [];
 
-  ctx.font = "bold 14px Arial";
-  ctx.fillStyle = "black";
-  ctx.textAlign = "left";
-  
-  // Erste Zeile: Schüsse und Ringe
-  ctx.fillText(
-    `Schüsse: ${filledShots.length}/20  |  Ringe: ${total}`,
-    startX,
-    startY + 4 * (cellSize + gap) + 25
-  );
+    // Zähle jede Ringzahl
+    const counts = {};
+    shots.forEach(shot => {
+      counts[shot] = (counts[shot] || 0) + 1;
+    });
 
-  // Zweite Zeile: Schuss-Gruppierung (nur wenn Schüsse vorhanden sind)
-  if (filledShots.length > 0) {
-    const shotDistribution = this.calculateShotDistribution(filledShots);
-    if (shotDistribution) {
-      ctx.font = "12px Arial"; // Etwas kleiner für die Gruppierung
-      ctx.fillStyle = "#666"; // Etwas heller
-      ctx.fillText(
-        shotDistribution,
-        startX,
-        startY + 4 * (cellSize + gap) + 45 // 20 Pixel unter der ersten Zeile
-      );
+    // Sortiere nach Ringzahl (absteigend)
+    const sortedCounts = Object.entries(counts)
+      .map(([rings, count]) => ({ rings: parseInt(rings), count }))
+      .sort((a, b) => b.rings - a.rings);
+
+    // Teile in Zeilen auf (max. 4-5 Werte pro Zeile für bessere Lesbarkeit)
+    const lines = [];
+    const maxPerLine = 4;
+
+    for (let i = 0; i < sortedCounts.length; i += maxPerLine) {
+      const lineItems = sortedCounts.slice(i, i + maxPerLine);
+      const lineText = lineItems
+        .map(({ rings, count }) => {
+          if (rings === 0) {
+            return `${count}×-`;
+          }
+          return `${count}×${rings}`;
+        })
+        .join('  ');
+      lines.push(lineText);
     }
-  }
-}
 
-// NEU: Methode zur Berechnung der Schuss-Verteilung in mehreren Zeilen
-calculateShotDistributionLines(shots) {
-  if (!shots || shots.length === 0) return [];
-  
-  // Zähle jede Ringzahl
-  const counts = {};
-  shots.forEach(shot => {
-    counts[shot] = (counts[shot] || 0) + 1;
-  });
-  
-  // Sortiere nach Ringzahl (absteigend)
-  const sortedCounts = Object.entries(counts)
-    .map(([rings, count]) => ({ rings: parseInt(rings), count }))
-    .sort((a, b) => b.rings - a.rings);
-  
-  // Teile in Zeilen auf (max. 4-5 Werte pro Zeile für bessere Lesbarkeit)
-  const lines = [];
-  const maxPerLine = 4;
-  
-  for (let i = 0; i < sortedCounts.length; i += maxPerLine) {
-    const lineItems = sortedCounts.slice(i, i + maxPerLine);
-    const lineText = lineItems
-      .map(({ rings, count }) => {
-        if (rings === 0) {
-          return `${count}×-`;
-        }
-        return `${count}×${rings}`;
-      })
-      .join('  ');
-    lines.push(lineText);
-  }
-  
-  return lines;
-}
-
-drawAnnexMatrix(ctx, startX, startY, maxWidth, customShots = null) {
-  const cellSize = Math.min(20, (maxWidth - 60) / 9);
-  const gap = 2;
-
-  // Verwende entweder die übergebenen Schuss-Daten oder die aktuellen
-  const shotsToUse = customShots || this.shots;
-
-  ctx.font = "10px Arial";
-  ctx.textAlign = "center";
-  ctx.fillStyle = "black";
-
-  // Header: Serie | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
-  const headerY = startY - 20;
-  ctx.font = "bold 10px Arial";
-  ctx.fillText("Serie", startX + 20, headerY);
-  for (let i = 1; i <= 8; i++) {
-    ctx.fillText(i.toString(), startX + 40 + i * (cellSize + gap), headerY);
+    return lines;
   }
 
-  // 5 Serien × 8 Schüsse = 40 Schüsse
-  ctx.font = "10px Arial";
-  const seriesSums = [];
+  drawAnnexMatrix(ctx, startX, startY, maxWidth, customShots = null) {
+    const cellSize = Math.min(20, (maxWidth - 60) / 9);
+    const gap = 2;
 
-  for (let series = 0; series < 5; series++) {
-    const rowY = startY + series * (cellSize + gap);
-
-    // Serie-Label (S1, S2, etc.)
-    ctx.font = "bold 10px Arial";
-    ctx.fillText(`S${series + 1}`, startX + 20, rowY + cellSize / 2 + 3);
+    // Verwende entweder die übergebenen Schuss-Daten oder die aktuellen
+    const shotsToUse = customShots || this.shots;
 
     ctx.font = "10px Arial";
-    let seriesSum = 0;
+    ctx.textAlign = "center";
+    ctx.fillStyle = "black";
 
-    for (let shot = 0; shot < 8; shot++) {
-      const shotIndex = series * 8 + shot;
-      const cellX = startX + 40 + (shot + 1) * (cellSize + gap);
-
-      // Zelle zeichnen
-      ctx.strokeStyle = "#666";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(cellX, rowY, cellSize, cellSize);
-
-      // Schuss-Wert
-      const shotValue = shotsToUse[shotIndex];
-      if (shotValue !== null) {
-        ctx.fillStyle = "black";
-        ctx.fillText(
-          shotValue.toString(),
-          cellX + cellSize / 2,
-          rowY + cellSize / 2 + 3
-        );
-        seriesSum += shotValue;
-      } else {
-        ctx.fillStyle = "#ccc";
-        ctx.fillText("—", cellX + cellSize / 2, rowY + cellSize / 2 + 3);
-      }
+    // Header: Serie | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+    const headerY = startY - 20;
+    ctx.font = "bold 10px Arial";
+    ctx.fillText("Serie", startX + 20, headerY);
+    for (let i = 1; i <= 8; i++) {
+      ctx.fillText(i.toString(), startX + 40 + i * (cellSize + gap), headerY);
     }
 
-    seriesSums.push(seriesSum);
+    // 5 Serien × 8 Schüsse = 40 Schüsse
+    ctx.font = "10px Arial";
+    const seriesSums = [];
+
+    for (let series = 0; series < 5; series++) {
+      const rowY = startY + series * (cellSize + gap);
+
+      // Serie-Label (S1, S2, etc.)
+      ctx.font = "bold 10px Arial";
+      ctx.fillText(`S${series + 1}`, startX + 20, rowY + cellSize / 2 + 3);
+
+      ctx.font = "10px Arial";
+      let seriesSum = 0;
+
+      for (let shot = 0; shot < 8; shot++) {
+        const shotIndex = series * 8 + shot;
+        const cellX = startX + 40 + (shot + 1) * (cellSize + gap);
+
+        // Zelle zeichnen
+        ctx.strokeStyle = "#666";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(cellX, rowY, cellSize, cellSize);
+
+        // Schuss-Wert
+        const shotValue = shotsToUse[shotIndex];
+        if (shotValue !== null) {
+          ctx.fillStyle = "black";
+          ctx.fillText(
+            shotValue.toString(),
+            cellX + cellSize / 2,
+            rowY + cellSize / 2 + 3
+          );
+          seriesSum += shotValue;
+        } else {
+          ctx.fillStyle = "#ccc";
+          ctx.fillText("—", cellX + cellSize / 2, rowY + cellSize / 2 + 3);
+        }
+      }
+
+      seriesSums.push(seriesSum);
+    }
+
+    // Serien-Ergebnisse und Gesamtpunkte
+    const filledShots = shotsToUse.slice(0, 40).filter((s) => s !== null);
+    const total = filledShots.reduce((sum, shot) => sum + shot, 0);
+
+    const summaryY = startY + 5 * (cellSize + gap) + 15;
+
+    ctx.font = "bold 12px Arial";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "left";
+
+    // Serien-Summen
+    const seriesText = seriesSums
+      .map((sum, i) => `S${i + 1}:${sum}`)
+      .join("  ");
+    ctx.fillText(seriesText, startX, summaryY);
+
+    // Gesamtergebnis
+    ctx.fillText(
+      `Schüsse: ${filledShots.length}/40  |  Gesamt: ${total}`,
+      startX,
+      summaryY + 18
+    );
   }
-
-  // Serien-Ergebnisse und Gesamtpunkte
-  const filledShots = shotsToUse.slice(0, 40).filter((s) => s !== null);
-  const total = filledShots.reduce((sum, shot) => sum + shot, 0);
-
-  const summaryY = startY + 5 * (cellSize + gap) + 15;
-
-  ctx.font = "bold 12px Arial";
-  ctx.fillStyle = "black";
-  ctx.textAlign = "left";
-
-  // Serien-Summen
-  const seriesText = seriesSums
-    .map((sum, i) => `S${i + 1}:${sum}`)
-    .join("  ");
-  ctx.fillText(seriesText, startX, summaryY);
-
-  // Gesamtergebnis
-  ctx.fillText(
-    `Schüsse: ${filledShots.length}/40  |  Gesamt: ${total}`,
-    startX,
-    summaryY + 18
-  );
-}
 
   downloadPhoto(canvas, shooterInfo) {
     try {
@@ -2017,42 +1918,42 @@ drawAnnexMatrix(ctx, startX, startY, maxWidth, customShots = null) {
   }
 
   // =================================================================
-// NEU: EXISTIERENDE FOTO-BEARBEITUNG
-// =================================================================
+  // NEU: EXISTIERENDE FOTO-BEARBEITUNG
+  // =================================================================
 
-async processExistingPhoto() {
-  try {
-    // Validierung
-    if (!this.selectedShooterId) {
-      UIUtils.showError("Bitte wählen Sie zuerst einen Schützen aus.");
-      return;
+  async processExistingPhoto() {
+    try {
+      // Validierung
+      if (!this.selectedShooterId) {
+        UIUtils.showError("Bitte wählen Sie zuerst einen Schützen aus.");
+        return;
+      }
+
+      // Schützen-Informationen ermitteln
+      const shooterInfo = this.getShooterInfo();
+      if (!shooterInfo) {
+        UIUtils.showError("Schützeninformationen nicht verfügbar.");
+        return;
+      }
+
+      // Foto-Bearbeitungs-Modal anzeigen
+      this.showPhotoEditModal(shooterInfo);
+    } catch (error) {
+      console.error("Error starting photo editing:", error);
+      UIUtils.showError("Fehler beim Starten der Foto-Bearbeitung: " + error.message);
     }
-
-    // Schützen-Informationen ermitteln
-    const shooterInfo = this.getShooterInfo();
-    if (!shooterInfo) {
-      UIUtils.showError("Schützeninformationen nicht verfügbar.");
-      return;
-    }
-
-    // Foto-Bearbeitungs-Modal anzeigen
-    this.showPhotoEditModal(shooterInfo);
-  } catch (error) {
-    console.error("Error starting photo editing:", error);
-    UIUtils.showError("Fehler beim Starten der Foto-Bearbeitung: " + error.message);
   }
-}
 
-showPhotoEditModal(shooterInfo) {
-  // Modal Container
-  const modalContent = document.createElement("div");
-  modalContent.style.cssText = "width: 100%; max-width: 500px;";
+  showPhotoEditModal(shooterInfo) {
+    // Modal Container
+    const modalContent = document.createElement("div");
+    modalContent.style.cssText = "width: 100%; max-width: 500px;";
 
-  // Info-Bereich (gleich wie bei Kamera)
-  const infoDiv = document.createElement("div");
-  infoDiv.style.cssText =
-    "margin-bottom: 16px; padding: 12px; background: #f8f9fa; border-radius: 8px;";
-  infoDiv.innerHTML = `
+    // Info-Bereich (gleich wie bei Kamera)
+    const infoDiv = document.createElement("div");
+    infoDiv.style.cssText =
+      "margin-bottom: 16px; padding: 12px; background: #f8f9fa; border-radius: 8px;";
+    infoDiv.innerHTML = `
     <div style="font-weight: 600; margin-bottom: 4px;">${shooterInfo.name}</div>
     <div style="font-size: 14px; color: #666;">
       Disziplin: ${shooterInfo.currentDiscipline}<br>
@@ -2061,176 +1962,571 @@ showPhotoEditModal(shooterInfo) {
     </div>
   `;
 
-  // Datums-Auswahl
-  const dateDiv = document.createElement("div");
-  dateDiv.style.cssText = "margin-bottom: 16px;";
-  
-  const dateLabel = document.createElement("label");
-  dateLabel.textContent = "Datum für Overlay:";
-  dateLabel.style.cssText = "display: block; font-weight: 600; margin-bottom: 8px;";
-  
-  const dateInput = document.createElement("input");
-  dateInput.type = "date";
-  dateInput.id = "overlayDate";
-  dateInput.style.cssText = "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;";
-  
-  // Aktuelles Datum als Standard
-  const today = new Date();
-  dateInput.value = today.toISOString().split('T')[0];
-  
-  // Event-Listener für Datums-Änderung
-  dateInput.addEventListener('change', () => {
-    const selectedDate = new Date(dateInput.value);
-    const formattedDate = selectedDate.toLocaleDateString("de-DE");
-    document.getElementById("selectedDate").textContent = formattedDate;
-  });
+    // Datums-Auswahl
+    const dateDiv = document.createElement("div");
+    dateDiv.style.cssText = "margin-bottom: 16px;";
 
-  dateDiv.appendChild(dateLabel);
-  dateDiv.appendChild(dateInput);
+    const dateLabel = document.createElement("label");
+    dateLabel.textContent = "Datum für Overlay:";
+    dateLabel.style.cssText = "display: block; font-weight: 600; margin-bottom: 8px;";
 
-  // Foto-Auswahl
-  const fileDiv = document.createElement("div");
-  fileDiv.style.cssText = "margin-bottom: 16px;";
-  
-  const fileLabel = document.createElement("label");
-  fileLabel.textContent = "Foto auswählen:";
-  fileLabel.style.cssText = "display: block; font-weight: 600; margin-bottom: 8px;";
-  
-  const fileInput = document.createElement("input");
-  fileInput.type = "file";
-  fileInput.id = "photoFile";
-  fileInput.accept = "image/*";
-  fileInput.style.cssText = "width: 100%; padding: 8px;";
+    const dateInput = document.createElement("input");
+    dateInput.type = "date";
+    dateInput.id = "overlayDate";
+    dateInput.style.cssText = "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;";
 
-  fileDiv.appendChild(fileLabel);
-  fileDiv.appendChild(fileInput);
+    // Aktuelles Datum als Standard
+    const today = new Date();
+    dateInput.value = today.toISOString().split('T')[0];
 
-  // Vorschau-Container
-  const previewDiv = document.createElement("div");
-  previewDiv.id = "photoPreview";
-  previewDiv.style.cssText = "margin-bottom: 16px; text-align: center;";
-
-  // File-Input Event-Listener für Vorschau
-  fileInput.addEventListener('change', (e) => {
-    this.showPhotoPreview(e.target.files[0], previewDiv);
-  });
-
-  modalContent.appendChild(infoDiv);
-  modalContent.appendChild(dateDiv);
-  modalContent.appendChild(fileDiv);
-  modalContent.appendChild(previewDiv);
-
-  const modal = new ModalComponent("Foto mit Overlay versehen", modalContent);
-
-  modal.addAction(
-    "Abbrechen",
-    () => {},
-    false,
-    false
-  );
-
-  modal.addAction(
-    "Overlay hinzufügen",
-    () => {
-      const file = fileInput.files[0];
-      if (!file) {
-        UIUtils.showError("Bitte wählen Sie ein Foto aus.");
-        return;
-      }
-      
-      // Aktualisiere shooterInfo mit gewähltem Datum
+    // Event-Listener für Datums-Änderung
+    dateInput.addEventListener('change', () => {
       const selectedDate = new Date(dateInput.value);
-      const updatedShooterInfo = {
-        ...shooterInfo,
-        date: selectedDate.toLocaleDateString("de-DE")
-      };
-      
-      this.addOverlayToPhoto(file, updatedShooterInfo);
-    },
-    true,
-    false
-  );
+      const formattedDate = selectedDate.toLocaleDateString("de-DE");
+      document.getElementById("selectedDate").textContent = formattedDate;
+    });
 
-  modal.show();
-}
+    dateDiv.appendChild(dateLabel);
+    dateDiv.appendChild(dateInput);
 
-showPhotoPreview(file, previewContainer) {
-  previewContainer.innerHTML = "";
-  
-  if (!file || !file.type.startsWith('image/')) {
-    return;
+    // Foto-Auswahl
+    const fileDiv = document.createElement("div");
+    fileDiv.style.cssText = "margin-bottom: 16px;";
+
+    const fileLabel = document.createElement("label");
+    fileLabel.textContent = "Foto auswählen:";
+    fileLabel.style.cssText = "display: block; font-weight: 600; margin-bottom: 8px;";
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.id = "photoFile";
+    fileInput.accept = "image/*";
+    fileInput.style.cssText = "width: 100%; padding: 8px;";
+
+    fileDiv.appendChild(fileLabel);
+    fileDiv.appendChild(fileInput);
+
+    // Vorschau-Container
+    const previewDiv = document.createElement("div");
+    previewDiv.id = "photoPreview";
+    previewDiv.style.cssText = "margin-bottom: 16px; text-align: center;";
+
+    // File-Input Event-Listener für Vorschau
+    fileInput.addEventListener('change', (e) => {
+      this.showPhotoPreview(e.target.files[0], previewDiv);
+    });
+
+    modalContent.appendChild(infoDiv);
+    modalContent.appendChild(dateDiv);
+    modalContent.appendChild(fileDiv);
+    modalContent.appendChild(previewDiv);
+
+    const modal = new ModalComponent("Foto mit Overlay versehen", modalContent);
+
+    modal.addAction(
+      "Abbrechen",
+      () => { },
+      false,
+      false
+    );
+
+    modal.addAction(
+      "Overlay hinzufügen",
+      () => {
+        const file = fileInput.files[0];
+        if (!file) {
+          UIUtils.showError("Bitte wählen Sie ein Foto aus.");
+          return;
+        }
+
+        // Aktualisiere shooterInfo mit gewähltem Datum
+        const selectedDate = new Date(dateInput.value);
+        const updatedShooterInfo = {
+          ...shooterInfo,
+          date: selectedDate.toLocaleDateString("de-DE")
+        };
+
+        this.addOverlayToPhoto(file, updatedShooterInfo);
+      },
+      true,
+      false
+    );
+
+    modal.show();
   }
 
-  const img = document.createElement("img");
-  img.style.cssText = "max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid #ddd;";
-  
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-  
-  previewContainer.appendChild(img);
-}
+  showPhotoPreview(file, previewContainer) {
+    previewContainer.innerHTML = "";
 
-addOverlayToPhoto(file, shooterInfo) {
-  const reader = new FileReader();
-  
-  reader.onload = (e) => {
-    const img = new Image();
-    
-    img.onload = () => {
-      // Canvas erstellen
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      
-      const ctx = canvas.getContext("2d");
-      
-      // Originalbild zeichnen
-      ctx.drawImage(img, 0, 0);
-      
-      // Overlay hinzufügen - verwende aktuelle Schuss-Daten falls vorhanden
-      // Für Präzision/Duell: Nur wenn Schüsse eingegeben wurden, sonst leeres Overlay
-      const competitionType = getCompetitionType(this.selectedDiscipline);
-      let shotsToUse = null;
-      
-      if (competitionType !== CompetitionType.ANNEX_SCHEIBE) {
-        // Bei Präzision/Duell: Verwende aktuelle Schüsse falls vorhanden
-        const hasShots = this.shots.some((shot) => shot !== null);
-        if (hasShots) {
-          shotsToUse = [...this.shots]; // Kopie der aktuellen Schüsse
-        }
-      } else {
-        // Bei Annex: Verwende aktuelle Schüsse falls vorhanden
-        const hasShots = this.shots.some((shot) => shot !== null);
-        if (hasShots) {
-          shotsToUse = [...this.shots]; // Kopie der aktuellen Schüsse
-        }
-      }
-      
-      this.addOverlayToCanvas(ctx, canvas.width, canvas.height, shooterInfo, shotsToUse);
-      
-      // Download
-      this.downloadPhoto(canvas, shooterInfo);
-      
-      UIUtils.showSuccessMessage("Foto mit Overlay wurde gespeichert!");
+    if (!file || !file.type.startsWith('image/')) {
+      return;
+    }
+
+    const img = document.createElement("img");
+    img.style.cssText = "max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid #ddd;";
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      img.src = e.target.result;
     };
-    
-    img.src = e.target.result;
-  };
-  
-  reader.onerror = () => {
-    UIUtils.showError("Fehler beim Laden des Fotos.");
-  };
-  
-  reader.readAsDataURL(file);
-}
+    reader.readAsDataURL(file);
+
+    previewContainer.appendChild(img);
+  }
+
+  addOverlayToPhoto(file, shooterInfo) {
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const img = new Image();
+
+      img.onload = () => {
+        // Canvas erstellen
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        const ctx = canvas.getContext("2d");
+
+        // Originalbild zeichnen
+        ctx.drawImage(img, 0, 0);
+
+        // Overlay hinzufügen - verwende aktuelle Schuss-Daten falls vorhanden
+        // Für Präzision/Duell: Nur wenn Schüsse eingegeben wurden, sonst leeres Overlay
+        const competitionType = getCompetitionType(this.selectedDiscipline);
+        let shotsToUse = null;
+
+        if (competitionType !== CompetitionType.ANNEX_SCHEIBE) {
+          // Bei Präzision/Duell: Verwende aktuelle Schüsse falls vorhanden
+          const hasShots = this.shots.some((shot) => shot !== null);
+          if (hasShots) {
+            shotsToUse = [...this.shots]; // Kopie der aktuellen Schüsse
+          }
+        } else {
+          // Bei Annex: Verwende aktuelle Schüsse falls vorhanden
+          const hasShots = this.shots.some((shot) => shot !== null);
+          if (hasShots) {
+            shotsToUse = [...this.shots]; // Kopie der aktuellen Schüsse
+          }
+        }
+
+        this.addOverlayToCanvas(ctx, canvas.width, canvas.height, shooterInfo, shotsToUse);
+
+        // Download
+        this.downloadPhoto(canvas, shooterInfo);
+
+        UIUtils.showSuccessMessage("Foto mit Overlay wurde gespeichert!");
+      };
+
+      img.src = e.target.result;
+    };
+
+    reader.onerror = () => {
+      UIUtils.showError("Fehler beim Laden des Fotos.");
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+
+  // =================================================================
+  // ERWEITERTE KAMERA-GUIDES MIT WASSERWAGE
+  // =================================================================
+
+  createCameraGuides(cameraContainer) {
+    // Guides Container
+    const guidesOverlay = document.createElement("div");
+    guidesOverlay.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  `;
+
+    // Mittlere Kreuzlinien (horizontal und vertikal durch die Mitte)
+    const centerLineV = document.createElement("div");
+    centerLineV.style.cssText = `
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 80%;
+    background: linear-gradient(to bottom, transparent, rgba(0, 255, 0, 0.8) 20%, rgba(0, 255, 0, 0.8) 80%, transparent);
+  `;
+    guidesOverlay.appendChild(centerLineV);
+
+    const centerLineH = document.createElement("div");
+    centerLineH.style.cssText = `
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    transform: translateY(-50%);
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, rgba(0, 255, 0, 0.8) 20%, rgba(0, 255, 0, 0.8) 80%, transparent);
+  `;
+    guidesOverlay.appendChild(centerLineH);
+
+    // Drittel-Linien (Rule of thirds) - kompakter und grün
+    const thirdLines = [
+      { pos: '33.33%', direction: 'vertical' },
+      { pos: '66.67%', direction: 'vertical' },
+      { pos: '33.33%', direction: 'horizontal' },
+      { pos: '66.67%', direction: 'horizontal' }
+    ];
+
+    thirdLines.forEach(line => {
+      const element = document.createElement("div");
+      if (line.direction === 'vertical') {
+        element.style.cssText = `
+        position: absolute;
+        top: 20%;
+        left: ${line.pos};
+        transform: translateX(-50%);
+        width: 1px;
+        height: 60%;
+        background-color: rgba(0, 200, 0, 0.4);
+      `;
+      } else {
+        element.style.cssText = `
+        position: absolute;
+        top: ${line.pos};
+        left: 20%;
+        transform: translateY(-50%);
+        width: 60%;
+        height: 1px;
+        background-color: rgba(0, 200, 0, 0.4);
+      `;
+      }
+      guidesOverlay.appendChild(element);
+    });
+
+    // Verbessertes mittleres Fadenkreuz - grün
+    const crosshair = document.createElement("div");
+    crosshair.style.cssText = `
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    border: 2px solid rgba(0, 255, 0, 0.9);
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+  `;
+
+    const crosshairV = document.createElement("div");
+    crosshairV.style.cssText = `
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100px;
+    background: linear-gradient(to bottom, transparent, rgba(0, 255, 0, 1) 25%, rgba(0, 255, 0, 1) 75%, transparent);
+  `;
+
+    const crosshairH = document.createElement("div");
+    crosshairH.style.cssText = `
+    position: absolute;
+    top: 50%;
+    left: -20px;
+    transform: translateY(-50%);
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(to right, transparent, rgba(0, 255, 0, 1) 25%, rgba(0, 255, 0, 1) 75%, transparent);
+  `;
+
+    crosshair.appendChild(crosshairV);
+    crosshair.appendChild(crosshairH);
+    guidesOverlay.appendChild(crosshair);
+
+    // Zusätzlicher Zielkreis für Scheibenzentrierung
+    const targetCircle = document.createElement("div");
+    targetCircle.style.cssText = `
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px;
+    height: 140px;
+    border: 1px solid rgba(0, 200, 0, 0.6);
+    border-radius: 50%;
+    border-style: dashed;
+  `;
+    guidesOverlay.appendChild(targetCircle);
+
+    // NEU: WASSERWAGE
+    this.createLevelIndicator(guidesOverlay);
+
+    // NEU: ECKEN-MARKIERUNGEN für bessere Ausrichtung
+    this.createCornerMarkers(guidesOverlay);
+
+    // NEU: GITTER-OPTION (optional)
+    if (this.showGrid) {
+      this.createGrid(guidesOverlay);
+    }
+
+    cameraContainer.appendChild(guidesOverlay);
+  }
+
+  // =================================================================
+  // NEU: WASSERWAGE-INDIKATOR
+  // =================================================================
+
+  createLevelIndicator(container) {
+    // Wasserwage Container
+    const levelContainer = document.createElement("div");
+    levelContainer.id = "levelIndicator";
+    levelContainer.style.cssText = `
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+  `;
+
+    // Wasserwage Hintergrund
+    const levelTrack = document.createElement("div");
+    levelTrack.style.cssText = `
+    width: 180px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  `;
+
+    // Zentrale Markierung (Ideal-Position)
+    const centerMark = document.createElement("div");
+    centerMark.style.cssText = `
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 16px;
+    background: #00ff00;
+    border-radius: 1px;
+  `;
+
+    // Wasserwage Blase (beweglicher Indikator)
+    const levelBubble = document.createElement("div");
+    levelBubble.id = "levelBubble";
+    levelBubble.style.cssText = `
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(circle, rgba(255, 255, 0, 0.9) 0%, rgba(255, 200, 0, 0.7) 70%, rgba(255, 150, 0, 0.5) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    transition: all 0.1s ease-out;
+    box-shadow: 0 0 10px rgba(255, 255, 0, 0.6);
+  `;
+
+    levelTrack.appendChild(centerMark);
+    levelTrack.appendChild(levelBubble);
+    levelContainer.appendChild(levelTrack);
+
+    // Status Text
+    const levelStatus = document.createElement("div");
+    levelStatus.id = "levelStatus";
+    levelStatus.style.cssText = `
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  `;
+    levelStatus.textContent = "Gerät ausrichten...";
+
+    levelContainer.appendChild(levelStatus);
+    container.appendChild(levelContainer);
+
+    // Starte Orientierungserkennung
+    this.startDeviceOrientation();
+  }
+
+  // =================================================================
+  // NEU: GERÄTE-ORIENTIERUNG
+  // =================================================================
+
+  startDeviceOrientation() {
+    // Prüfe ob DeviceOrientationEvent verfügbar ist
+    if (!window.DeviceOrientationEvent) {
+      console.warn("Device orientation not supported");
+      const status = document.getElementById("levelStatus");
+      if (status) status.textContent = "Wasserwage nicht verfügbar";
+      return;
+    }
+
+    // iOS 13+ Permission Request
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then(response => {
+          if (response === 'granted') {
+            this.setupOrientationListener();
+          } else {
+            console.warn("Device orientation permission denied");
+            const status = document.getElementById("levelStatus");
+            if (status) status.textContent = "Berechtigung erforderlich";
+          }
+        })
+        .catch(console.error);
+    } else {
+      // Für andere Browser
+      this.setupOrientationListener();
+    }
+  }
+
+  updateLevelIndicator(event) {
+    const bubble = document.getElementById("levelBubble");
+    const status = document.getElementById("levelStatus");
+
+    if (!bubble || !status) return;
+
+    // Verwende gamma für Roll (links/rechts Neigung)
+    let roll = event.gamma || 0;
+
+    // Begrenze den Wert auf ±45 Grad für bessere Darstellung
+    roll = Math.max(-45, Math.min(45, roll));
+
+    // Berechne Position der Blase (0-180px Bereich)
+    const bubblePosition = 90 + (roll * 2); // 90 ist Mitte, ±2px pro Grad
+    bubble.style.left = `${bubblePosition}px`;
+    bubble.style.transform = 'translateX(-50%)';
+
+    // Farbe basierend auf Genauigkeit
+    const absRoll = Math.abs(roll);
+    let color, statusText, isLevel = false;
+
+    if (absRoll <= 1) {
+      color = '#00ff00'; // Grün - perfekt ausgerichtet
+      statusText = '✓ Perfekt ausgerichtet';
+      isLevel = true;
+    } else if (absRoll <= 3) {
+      color = '#90ff00'; // Hell-grün - sehr gut
+      statusText = '✓ Sehr gut ausgerichtet';
+      isLevel = true;
+    } else if (absRoll <= 5) {
+      color = '#ffff00'; // Gelb - gut
+      statusText = 'Gut ausgerichtet';
+    } else if (absRoll <= 10) {
+      color = '#ff9000'; // Orange - mäßig
+      statusText = `${roll > 0 ? 'Nach rechts' : 'Nach links'} neigen`;
+    } else {
+      color = '#ff3000'; // Rot - schlecht
+      statusText = `${roll > 0 ? 'Stark nach links' : 'Stark nach rechts'} neigen`;
+    }
+
+    // Update Bubble Farbe
+    bubble.style.background = `radial-gradient(circle, ${color}99 0%, ${color}bb 70%, ${color}77 100%)`;
+    bubble.style.boxShadow = `0 0 ${isLevel ? '15' : '8'}px ${color}99`;
+
+    // Update Status
+    status.textContent = statusText;
+    status.style.color = color;
+
+    // Vibriere bei perfekter Ausrichtung (einmalig)
+    if (isLevel && !this.wasLevel && navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+    this.wasLevel = isLevel;
+  }
+
+  setupOrientationListener() {
+    this.orientationHandler = (event) => {
+      this.updateLevelIndicator(event);
+    };
+
+    window.addEventListener('deviceorientation', this.orientationHandler);
+  }
+
+  // =================================================================
+  // NEU: ECKEN-MARKIERUNGEN
+  // =================================================================
+
+  createCornerMarkers(container) {
+    const corners = [
+      { top: '10px', left: '10px' },
+      { top: '10px', right: '10px' },
+      { bottom: '10px', left: '10px' },
+      { bottom: '10px', right: '10px' }
+    ];
+
+    corners.forEach(corner => {
+      const marker = document.createElement("div");
+      marker.style.cssText = `
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(0, 255, 0, 0.8);
+      ${corner.top ? `top: ${corner.top};` : ''}
+      ${corner.bottom ? `bottom: ${corner.bottom};` : ''}
+      ${corner.left ? `left: ${corner.left};` : ''}
+      ${corner.right ? `right: ${corner.right};` : ''}
+      ${corner.top && corner.left ? 'border-bottom: none; border-right: none;' : ''}
+      ${corner.top && corner.right ? 'border-bottom: none; border-left: none;' : ''}
+      ${corner.bottom && corner.left ? 'border-top: none; border-right: none;' : ''}
+      ${corner.bottom && corner.right ? 'border-top: none; border-left: none;' : ''}
+    `;
+      container.appendChild(marker);
+    });
+  }
+
+  createGrid(container) {
+    const gridSize = 6; // 6x6 Gitter
+
+    // Horizontale Linien
+    for (let i = 1; i < gridSize; i++) {
+      const line = document.createElement("div");
+      line.style.cssText = `
+      position: absolute;
+      top: ${(i / gridSize) * 100}%;
+      left: 10%;
+      width: 80%;
+      height: 1px;
+      background: rgba(0, 200, 0, 0.2);
+    `;
+      container.appendChild(line);
+    }
+
+    // Vertikale Linien
+    for (let i = 1; i < gridSize; i++) {
+      const line = document.createElement("div");
+      line.style.cssText = `
+      position: absolute;
+      top: 10%;
+      left: ${(i / gridSize) * 100}%;
+      width: 1px;
+      height: 80%;
+      background: rgba(0, 200, 0, 0.2);
+    `;
+      container.appendChild(line);
+    }
+  }
 
   // =================================================================
   // ERWEITERTE CLEANUP-METHODE
   // =================================================================
-
   destroy() {
     this.isDestroyed = true;
     this.stopCamera();
@@ -2239,5 +2535,7 @@ addOverlayToPhoto(file, shooterInfo) {
     this.selectedShooterId = null;
     this.selectedDiscipline = null;
     this.shots = new Array(40).fill(null);
+    this.showGrid = false;
+    this.wasLevel = false;
   }
 }
