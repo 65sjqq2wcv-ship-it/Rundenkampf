@@ -1200,7 +1200,7 @@ class EntryView {
 
   // NEU: Methode zur Berechnung der Schuss-Verteilung
   calculateShotDistribution(shots) {
-    if (!shots || shots.length === 0) return null;
+    if (!shots || shots.length === 0) return "";
 
     // Zähle jede Ringzahl
     const counts = {};
@@ -1208,20 +1208,23 @@ class EntryView {
       counts[shot] = (counts[shot] || 0) + 1;
     });
 
-    // Sortiere nach Ringzahl (absteigend)
-    const sortedCounts = Object.entries(counts)
-      .map(([rings, count]) => ({ rings: parseInt(rings), count }))
-      .sort((a, b) => b.rings - a.rings);
-
-    // Formatiere als "7×10 8×9 3×7 2×0"
-    const distribution = sortedCounts
-      .map(({ rings, count }) => {
-        if (rings === 0) {
+    // Sortiere nach Ringzahl (absteigend) und erstelle Text
+    const distribution = Object.entries(counts)
+      .map(([rings, count]) => {
+        if (rings === '0') {
           return `${count}×-`;
         }
         return `${count}×${rings}`;
       })
-      .join(' ');
+      .sort((a, b) => {
+        // Sortiere nach Ringzahl (extrahiere Zahl aus "2×10" Format)
+        const getRingValue = (str) => {
+          if (str.includes('×-')) return 0;
+          return parseInt(str.split('×')[1]) || 0;
+        };
+        return getRingValue(b) - getRingValue(a);
+      })
+      .join('  ');
 
     return distribution;
   }
@@ -1544,45 +1547,234 @@ class EntryView {
     }, 100);
   }
 
-  async startCamera(video) {
+  async startCamera() {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      console.log("Starting camera...");
+
+      const video = document.getElementById("cameraVideo");
+      if (!video) {
+        throw new Error("Video element not found");
+      }
+
+      // Stoppe eventuell laufende Streams
+      if (this.stream) {
+        this.stream.getTracks().forEach(track => track.stop());
+      }
+
+      // Kamera-Constraints mit Fallback-Optionen
+      const constraints = {
         video: {
-          facingMode: { exact: "environment" }, // Rückkamera bevorzugen
-          width: { ideal: 1080 }, // ← Geändert: quadratisch 1080x1080
-          height: { ideal: 1080 }, // ← Geändert: quadratisch 1080x1080
-          aspectRatio: 1.0, // ← Neu: explizit 1:1 Verhältnis
+          facingMode: { ideal: "environment" }, // Rückkamera bevorzugen
+          width: { ideal: 1920, min: 640 },
+          height: { ideal: 1920, min: 480 },
+          aspectRatio: { ideal: 1.0 } // Quadratisch bevorzugen
         },
+        audio: false
+      };
+
+      console.log("Requesting camera access...");
+      this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      video.srcObject = this.stream;
+
+      // Warte bis Video ready ist
+      await new Promise((resolve, reject) => {
+        video.onloadedmetadata = () => {
+          console.log("Video metadata loaded, starting playback...");
+          video.play()
+            .then(resolve)
+            .catch(reject);
+        };
+
+        video.onerror = (error) => {
+          console.error("Video error:", error);
+          reject(new Error("Video playback failed"));
+        };
+
+        // Timeout nach 10 Sekunden
+        setTimeout(() => {
+          reject(new Error("Camera startup timeout"));
+        }, 10000);
       });
 
-      video.srcObject = stream;
-      this.cameraStream = stream;
+      console.log("Camera started successfully");
       this.isCapturing = true;
 
-      console.log("Camera started successfully");
+      // Update Status
+      const status = document.getElementById("levelStatus");
+      if (status && !status.textContent.includes("nicht verfügbar")) {
+        status.textContent = "Kamera bereit - Gerät ausrichten";
+      }
+
     } catch (error) {
       console.error("Error starting camera:", error);
-      UIUtils.showError(
-        "Kamera konnte nicht gestartet werden: " + error.message
-      );
+      this.handleCameraError(error);
     }
   }
 
+  async capturePhoto(shooterInfo) {
+    try {
+      const video = document.getElementById("cameraVideo");
+      if (!video || !this.stream) {
+        throw new Error("Kamera nicht bereit");
+      }
+
+      console.log("Capturing photo...");
+
+      // Canvas für das Foto erstellen
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Canvas-Größe an Video anpassen
+      canvas.width = video.videoWidth || video.clientWidth;
+      canvas.height = video.videoHeight || video.clientHeight;
+
+      console.log(`Photo dimensions: ${canvas.width}x${canvas.height}`);
+
+      // Video-Frame auf Canvas zeichnen
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Overlay hinzufügen - verwende aktuelle Schuss-Daten falls vorhanden
+      const competitionType = getCompetitionType(this.selectedDiscipline);
+      let shotsToUse = null;
+
+      // Nur Schüsse verwenden wenn welche eingegeben wurden
+      const hasShots = this.shots && this.shots.some((shot) => shot !== null);
+      if (hasShots) {
+        shotsToUse = [...this.shots]; // Kopie der aktuellen Schüsse
+      }
+
+      this.addOverlayToCanvas(ctx, canvas.width, canvas.height, shooterInfo, shotsToUse);
+
+      // Foto herunterladen
+      await this.downloadPhoto(canvas, shooterInfo);
+
+      // Kamera stoppen und Modal schließen
+      this.stopCamera();
+
+      // Success-Feedback
+      UIUtils.showSuccessMessage("📸 Foto wurde gespeichert!");
+
+      // Kurzes haptisches Feedback
+      if (navigator.vibrate) {
+        navigator.vibrate(100);
+      }
+
+      console.log("Photo captured successfully");
+
+    } catch (error) {
+      console.error("Error capturing photo:", error);
+      UIUtils.showError("Fehler beim Aufnehmen des Fotos: " + error.message);
+    }
+  }
+
+  addShotsMatrix(ctx, startX, startY, boxWidth, scale, competitionType) {
+    try {
+      const matrixTitle = "SCHUSS-ERGEBNISSE";
+
+      ctx.fillStyle = "rgba(0, 100, 0, 0.1)";
+      ctx.fillRect(startX, startY, boxWidth, 80 * scale);
+
+      ctx.fillStyle = "black";
+      ctx.font = `bold ${14 * scale}px Arial`;
+      ctx.textAlign = "center";
+      ctx.fillText(matrixTitle, startX + boxWidth / 2, startY + 20 * scale);
+
+      if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
+        this.drawAnnexMatrix(ctx, startX, startY + 30 * scale, boxWidth, scale);
+      } else {
+        this.drawStandardMatrix(ctx, startX, startY + 30 * scale, boxWidth, scale);
+      }
+
+    } catch (error) {
+      console.error("Error adding shots matrix:", error);
+    }
+  }
+
+
   stopCamera() {
+    console.log("Stopping camera...");
+
+    // Stream stoppen
     if (this.stream) {
-      this.stream.getTracks().forEach(track => track.stop());
+      this.stream.getTracks().forEach(track => {
+        track.stop();
+        console.log(`Stopped ${track.kind} track`);
+      });
       this.stream = null;
     }
 
-    // Stoppe Orientierungs-Listener
+    // Video Element leeren
+    const video = document.getElementById("cameraVideo");
+    if (video) {
+      video.srcObject = null;
+    }
+
+    // Orientierungs-Listener stoppen
     if (this.orientationHandler) {
       window.removeEventListener('deviceorientation', this.orientationHandler);
       this.orientationHandler = null;
     }
 
+    // Status zurücksetzen
+    this.isCapturing = false;
     this.wasLevel = false;
+
+    console.log("Camera stopped successfully");
   }
 
+  // =================================================================
+  // FALLBACK FÜR NICHT-HTTPS UMGEBUNGEN
+  // =================================================================
+
+  checkCameraSupport() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      return {
+        supported: false,
+        reason: "Browser unterstützt keine Kamera-API"
+      };
+    }
+
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      return {
+        supported: false,
+        reason: "Kamera benötigt HTTPS-Verbindung"
+      };
+    }
+
+    return { supported: true };
+  }
+
+  async processCamera() {
+    try {
+      // Validierung
+      if (!this.selectedShooterId) {
+        UIUtils.showError("Bitte wählen Sie zuerst einen Schützen aus.");
+        return;
+      }
+
+      // Kamera-Unterstützung prüfen
+      const cameraCheck = this.checkCameraSupport();
+      if (!cameraCheck.supported) {
+        UIUtils.showError(`Kamera nicht verfügbar: ${cameraCheck.reason}`);
+        return;
+      }
+
+      // Schützen-Informationen ermitteln
+      const shooterInfo = this.getShooterInfo();
+      if (!shooterInfo) {
+        UIUtils.showError("Schützeninformationen nicht verfügbar.");
+        return;
+      }
+
+      // Kamera-Modal anzeigen
+      this.showCameraModal(shooterInfo);
+
+    } catch (error) {
+      console.error("Error starting camera process:", error);
+      UIUtils.showError("Fehler beim Starten der Kamera: " + error.message);
+    }
+  }
 
   takePhoto(video, canvas, shooterInfo) {
     try {
@@ -1612,15 +1804,15 @@ class EntryView {
   addOverlayToCanvas(ctx, width, height, shooterInfo, customShots = null) {
     const competitionType = getCompetitionType(this.selectedDiscipline);
 
-    // Angepasste Box-Größen und Abstände
+    // Angepasste Box-Größen - KOMPAKTER für Annex
     const isAnnex = competitionType === CompetitionType.ANNEX_SCHEIBE;
-    const boxWidth = Math.min(width * 0.8, isAnnex ? 370 : 370);
+    const boxWidth = Math.min(width * 0.9, isAnnex ? 420 : 370);
     const boxHeight = isAnnex ? 270 : 270;
     const x = 20;
     const y = 20;
 
     // Box zeichnen
-    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
     ctx.fillRect(x, y, boxWidth, boxHeight);
 
     // Rahmen
@@ -1645,12 +1837,13 @@ class EntryView {
       ctx.fillText(line, x + 10, y + 20 + index * 18);
     });
 
-    // Schuss-Matrix zeichnen - mit optionalen Schuss-Daten
-    const matrixStartY = isAnnex ? y + 110 : y + 100;
+    // Schuss-Matrix zeichnen
+    const matrixStartY = y + 100;
 
     if (isAnnex) {
       this.drawAnnexMatrix(ctx, x + 10, matrixStartY, boxWidth - 20, customShots);
     } else {
+      // STANDARD MATRIX
       this.drawStandardMatrix(ctx, x + 10, matrixStartY, boxWidth - 20, customShots);
     }
   }
@@ -1725,8 +1918,8 @@ class EntryView {
   }
 
   // NEU: Methode zur Berechnung der Schuss-Verteilung in mehreren Zeilen
-  calculateShotDistributionLines(shots) {
-    if (!shots || shots.length === 0) return [];
+  calculateShotDistribution(shots) {
+    if (!shots || shots.length === 0) return null;
 
     // Zähle jede Ringzahl
     const counts = {};
@@ -1734,29 +1927,25 @@ class EntryView {
       counts[shot] = (counts[shot] || 0) + 1;
     });
 
-    // Sortiere nach Ringzahl (absteigend)
-    const sortedCounts = Object.entries(counts)
-      .map(([rings, count]) => ({ rings: parseInt(rings), count }))
-      .sort((a, b) => b.rings - a.rings);
+    // Sortiere nach Ringzahl (absteigend) und erstelle Text
+    const distribution = Object.entries(counts)
+      .map(([rings, count]) => {
+        if (rings === '0') {
+          return `${count}×-`;
+        }
+        return `${count}×${rings}`;
+      })
+      .sort((a, b) => {
+        // Sortiere nach Ringzahl (extrahiere Zahl aus "2×10" Format)
+        const getRingValue = (str) => {
+          if (str.includes('×-')) return 0;
+          return parseInt(str.split('×')[1]) || 0;
+        };
+        return getRingValue(b) - getRingValue(a);
+      })
+      .join(' ');
 
-    // Teile in Zeilen auf (max. 4-5 Werte pro Zeile für bessere Lesbarkeit)
-    const lines = [];
-    const maxPerLine = 4;
-
-    for (let i = 0; i < sortedCounts.length; i += maxPerLine) {
-      const lineItems = sortedCounts.slice(i, i + maxPerLine);
-      const lineText = lineItems
-        .map(({ rings, count }) => {
-          if (rings === 0) {
-            return `${count}×-`;
-          }
-          return `${count}×${rings}`;
-        })
-        .join('  ');
-      lines.push(lineText);
-    }
-
-    return lines;
+    return distribution;
   }
 
   drawAnnexMatrix(ctx, startX, startY, maxWidth, customShots = null) {
@@ -1771,11 +1960,11 @@ class EntryView {
     ctx.fillStyle = "black";
 
     // Header: Serie | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
-    const headerY = startY - 20;
+    const headerY = startY - 5;
     ctx.font = "bold 10px Arial";
     ctx.fillText("Serie", startX + 20, headerY);
     for (let i = 1; i <= 8; i++) {
-      ctx.fillText(i.toString(), startX + 40 + i * (cellSize + gap), headerY);
+      ctx.fillText(i.toString(), startX + 48 + i * (cellSize + gap), headerY);
     }
 
     // 5 Serien × 8 Schüsse = 40 Schüsse
@@ -1787,6 +1976,7 @@ class EntryView {
 
       // Serie-Label (S1, S2, etc.)
       ctx.font = "bold 10px Arial";
+      ctx.fillStyle = "black"; // EXPLIZIT SCHWARZ
       ctx.fillText(`S${series + 1}`, startX + 20, rowY + cellSize / 2 + 3);
 
       ctx.font = "10px Arial";
@@ -1824,7 +2014,7 @@ class EntryView {
     const filledShots = shotsToUse.slice(0, 40).filter((s) => s !== null);
     const total = filledShots.reduce((sum, shot) => sum + shot, 0);
 
-    const summaryY = startY + 5 * (cellSize + gap) + 15;
+    const summaryY = startY + 5 * (cellSize + gap) + 25;
 
     ctx.font = "bold 12px Arial";
     ctx.fillStyle = "black";
@@ -1844,60 +2034,38 @@ class EntryView {
     );
   }
 
-  downloadPhoto(canvas, shooterInfo) {
+  async downloadPhoto(canvas, shooterInfo) {
     try {
-      // Normalisierungsfunktion lokal definieren
-      const normalizeFileName = (text) => {
-        return text
-          .replace(/ä/g, "ae")
-          .replace(/ö/g, "oe")
-          .replace(/ü/g, "ue")
-          .replace(/Ä/g, "Ae")
-          .replace(/Ö/g, "Oe")
-          .replace(/Ü/g, "Ue")
-          .replace(/ß/g, "ss")
-          .replace(/[^a-zA-Z0-9]/g, "_");
-      };
+      const now = new Date();
+      const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      const shooterName = shooterInfo.name.replace(/[^\w]/g, "_");
+      const disciplineName = shooterInfo.discipline.replace(/[^\w]/g, "_");
 
-      // Dateiname erstellen im Format: <Datum>-<Name>-<Scheibe>
-      const date = new Date().toLocaleDateString("de-DE").replace(/\./g, "-"); // DD-MM-YYYY
-      const time = new Date().toLocaleTimeString("de-DE").replace(/:/g, "-"); // HH-MM-SS
-
-      // Name normalisieren (bereits mit Verein kombiniert falls Mannschaftsschütze)
-      const normalizedName = normalizeFileName(shooterInfo.name);
-
-      // Scheibe/Disziplin normalisieren
-      const normalizedDiscipline = normalizeFileName(shooterInfo.discipline);
-
-      const fileName = `${date}_${time}-${normalizedName}-${normalizedDiscipline}.jpg`;
+      const fileName = `Scheibe_${timestamp}_${shooterName}_${disciplineName}.jpg`;
 
       // Canvas zu Blob konvertieren
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            throw new Error("Fehler beim Erstellen des Bildes");
-          }
+      const blob = await new Promise(resolve => {
+        canvas.toBlob(resolve, 'image/jpeg', 0.9);
+      });
 
-          // Download-Link erstellen
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = fileName;
-          link.style.display = "none";
+      // Download starten
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      link.style.display = "none";
 
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-          // URL freigeben
-          setTimeout(() => URL.revokeObjectURL(url), 1000);
-        },
-        "image/jpeg",
-        0.95
-      );
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      console.log(`Photo saved as: ${fileName}`);
+
     } catch (error) {
       console.error("Error downloading photo:", error);
-      UIUtils.showError("Fehler beim Speichern des Fotos: " + error.message);
+      throw error;
     }
   }
 
@@ -1915,6 +2083,88 @@ class EntryView {
 
     errorCard.appendChild(errorText);
     container.appendChild(errorCard);
+  }
+
+  handleCameraError(error) {
+    let userMessage = "Kamera konnte nicht gestartet werden";
+    let suggestions = [];
+
+    console.error("Camera error details:", error);
+
+    if (error.name === "NotAllowedError" || error.message.includes("Permission")) {
+      userMessage = "Kamera-Berechtigung verweigert";
+      suggestions = [
+        "Erlauben Sie der App den Kamerazugriff",
+        "Überprüfen Sie die Browser-Einstellungen",
+        "Laden Sie die Seite neu und versuchen Sie es erneut"
+      ];
+    } else if (error.name === "NotFoundError" || error.message.includes("not found")) {
+      userMessage = "Keine Kamera gefunden";
+      suggestions = [
+        "Stellen Sie sicher, dass eine Kamera angeschlossen ist",
+        "Schließen Sie andere Apps, die die Kamera verwenden",
+        "Versuchen Sie es mit einem anderen Gerät"
+      ];
+    } else if (error.name === "NotReadableError") {
+      userMessage = "Kamera ist nicht verfügbar";
+      suggestions = [
+        "Die Kamera wird möglicherweise von einer anderen App verwendet",
+        "Starten Sie das Gerät neu",
+        "Überprüfen Sie die Kamera-Hardware"
+      ];
+    } else if (error.message.includes("timeout")) {
+      userMessage = "Kamera-Start dauerte zu lange";
+      suggestions = [
+        "Versuchen Sie es erneut",
+        "Überprüfen Sie Ihre Internetverbindung",
+        "Laden Sie die Seite neu"
+      ];
+    }
+
+    // Detaillierte Fehlermeldung im Modal anzeigen
+    this.showCameraErrorModal(userMessage, suggestions, error);
+  }
+
+  showCameraErrorModal(userMessage, suggestions, originalError) {
+    const errorContent = document.createElement("div");
+    errorContent.innerHTML = `
+    <div style="text-align: center; padding: 20px;">
+      <div style="font-size: 48px; margin-bottom: 16px;">📷❌</div>
+      <h3 style="color: #ff3b30; margin-bottom: 16px;">${userMessage}</h3>
+      
+      ${suggestions.length > 0 ? `
+        <div style="text-align: left; margin: 20px 0;">
+          <h4 style="margin-bottom: 8px;">Lösungsvorschläge:</h4>
+          <ul style="margin-left: 20px;">
+            ${suggestions.map(s => `<li style="margin: 4px 0;">${s}</li>`).join('')}
+          </ul>
+        </div>
+      ` : ''}
+      
+      <div style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 12px; color: #666;">
+        <strong>Technische Details:</strong><br>
+        ${originalError.name || 'Unknown'}: ${originalError.message}
+      </div>
+    </div>
+  `;
+
+    const modal = new ModalComponent("Kamera-Fehler", errorContent);
+
+    modal.addAction("Erneut versuchen", () => {
+      // Versuche Kamera erneut zu starten
+      setTimeout(() => {
+        const shooterInfo = this.getShooterInfo();
+        if (shooterInfo) {
+          this.showCameraModal(shooterInfo);
+        }
+      }, 500);
+    }, true, false);
+
+    modal.addAction("Abbrechen", () => {
+      // Nichts tun, Modal schließt sich
+    }, false, false);
+
+    modal.show();
   }
 
   // =================================================================
