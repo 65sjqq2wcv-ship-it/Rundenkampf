@@ -402,7 +402,8 @@ class OverviewView {
           .reduce((sum, r) => sum + r.total(), 0);
         return [shooter, precision, duell, precision + duell];
       })
-      .sort((a, b) => b[3] - a[3])
+      //.sort((a, b) => b[3] - a[3])
+      .sort((a, b) => a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" }))
       .forEach((data, index) => {
         const [shooter, precision, duell, total] = data;
 
@@ -492,7 +493,8 @@ class OverviewView {
         }
         return [shooter, [0, 0, 0, 0, 0], 0];
       })
-      .sort((a, b) => b[2] - a[2])
+      //.sort((a, b) => b[2] - a[2])
+      .sort((a, b) => a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" }))
       .forEach((data, index) => {
         const [shooter, seriesSums, total] = data;
 

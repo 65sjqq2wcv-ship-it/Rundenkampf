@@ -141,7 +141,7 @@ class SettingsView {
 		<div style="margin-top: 12px;">
 		<div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
 		<span>App Version</span>
-		<span style="color: #8e8e93;">1.57</span>
+		<span style="color: #8e8e93;">1.58</span>
 		</div>
 		<div style="display: flex; justify-content: space-between; padding: 8px 0;">
 		<span>Rundenkampfbericht</span>
@@ -149,7 +149,7 @@ class SettingsView {
 		</div>
 		</div>
 		<div style="margin-top: 16px;">
-		<button class="btn btn-secondary" onclick="app.views.settings.resetApp()" style="width: 100%;">
+		<button class="btn btn-danger" onclick="app.views.settings.resetApp()" style="width: 100%;">
 		App zurücksetzen
 		</button>
 		</div>

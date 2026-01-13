@@ -142,13 +142,13 @@ class PDFExporter {
                     <div class="subtitle-info">
                         <div class="info-row">
                             <strong>Disziplin:</strong> ${UIUtils.escapeHtml(
-                              storage.selectedDiscipline || "Nicht gewählt"
-                            )}
+      storage.selectedDiscipline || "Nicht gewählt"
+    )}
                         </div>
                         <div class="info-row">
                             <strong>Wettkampfdatum:</strong> ${new Date().toLocaleDateString(
-                              "de-DE"
-                            )}
+      "de-DE"
+    )}
                         </div>
                     </div>
                 </div>
@@ -213,9 +213,8 @@ class PDFExporter {
         <section class="team-section">
             <h2 class="team-title">
                 ${UIUtils.escapeHtml(team.name)} 
-                <span class="team-count">(${
-                  team.shooters.length
-                } Schützen)</span>
+                <span class="team-count">(${team.shooters.length
+      } Schützen)</span>
             </h2>
             ${tableHtml}
         </section>
@@ -269,7 +268,8 @@ class PDFExporter {
           .reduce((sum, r) => sum + r.total(), 0);
         return [shooter, precision, duell, precision + duell];
       })
-      .sort((a, b) => b[3] - a[3]); // Sortiert nach Gesamtpunkten
+      //.sort((a, b) => b[3] - a[3]); // Sortiert nach Gesamtpunkten
+      .sort((a, b) => a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" })); // Sortiert alphabetisch nach Namen
 
     shooterData.forEach((data, index) => {
       const [shooter, precision, duell, total] = data;
@@ -322,7 +322,8 @@ class PDFExporter {
         }
         return [shooter, [0, 0, 0, 0, 0], 0];
       })
-      .sort((a, b) => b[2] - a[2]); // Sortiert nach Gesamtpunkten
+      //.sort((a, b) => b[2] - a[2]); // Sortiert nach Gesamtpunkten
+      .sort((a, b) => a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" })); // Sortiert alphabetisch nach Namen
 
     shooterData.forEach((data, index) => {
       const [shooter, seriesSums, total] = data;
@@ -376,8 +377,8 @@ class PDFExporter {
       const rowClass = isWorst
         ? "table-row worst-shooter"
         : index % 2 === 0
-        ? "table-row"
-        : "table-row zebra";
+          ? "table-row"
+          : "table-row zebra";
 
       rows += `
           <tr class="${rowClass}">
@@ -424,8 +425,8 @@ class PDFExporter {
       const rowClass = isWorst
         ? "table-row worst-shooter"
         : index % 2 === 0
-        ? "table-row"
-        : "table-row zebra";
+          ? "table-row"
+          : "table-row zebra";
 
       let seriesCells = "";
       for (let i = 0; i < 5; i++) {

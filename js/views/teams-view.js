@@ -199,15 +199,13 @@ class TeamsView {
 		<button class="btn btn-secondary" id="addShooterBtn">Hinzufügen</button>
 		</div>
 		</div>
-		${
-      team.shooters.length >= 4
+		${team.shooters.length >= 4
         ? '<p style="color: #666; font-size: 12px; margin-top: 8px;">ℹ️ Eine Mannschaft darf maximal 4 Schützen haben. Für die Wertung zählen die besten 3 Ergebnisse.</p>'
         : '<p style="color: #666; font-size: 12px; margin-top: 8px;">💡 Tipp: Für die Mannschaftswertung werden die besten 3 von 4 Schützen gewertet.</p>'
-    }
+      }
 		</div>
 		
-		${
-      !isNew
+		${!isNew
         ? `
 		<div class="form-section">
 		<div class="form-row">
@@ -218,7 +216,7 @@ class TeamsView {
 		</div>
 		`
         : ""
-    }
+      }
 		`;
 
     const modal = new ModalComponent(
@@ -344,6 +342,12 @@ class TeamsView {
         ) {
           storage.deleteTeam(team.id);
           UIUtils.showSuccessMessage("Mannschaft gelöscht");
+
+
+          const modal = document.querySelector('.modal');
+          if (modal) {
+            modal.remove();
+          }
           app.showView("teams");
         }
       });
@@ -430,8 +434,7 @@ class TeamsView {
 		</div>
 		</div>
 		
-		${
-      !isNew
+		${!isNew
         ? `
 		<div class="form-section">
 		<div class="form-row">
@@ -442,7 +445,7 @@ class TeamsView {
 		</div>
 		`
         : ""
-    }
+      }
 		`;
 
     const modal = new ModalComponent(
@@ -474,6 +477,13 @@ class TeamsView {
           ) {
             storage.deleteStandaloneShooter(shooter.id);
             UIUtils.showSuccessMessage("Schütze gelöscht");
+
+            // NEU: Modal explizit schließen
+            const modal = document.querySelector('.modal');
+            if (modal) {
+              modal.remove();
+            }
+
             app.showView("teams");
           }
         });
@@ -664,8 +674,7 @@ class TeamsView {
               // Prüfung: Maximal 4 Schützen pro Mannschaft
               if (team.shooters.length >= 4) {
                 errors.push(
-                  `Zeile ${
-                    index + 1
+                  `Zeile ${index + 1
                   }: Mannschaft "${verein}" hat bereits 4 Schützen (Maximum erreicht)`
                 );
                 skippedShooters++;
