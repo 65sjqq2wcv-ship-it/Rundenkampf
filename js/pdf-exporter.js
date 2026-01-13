@@ -571,7 +571,10 @@ class PDFExporter {
           .reduce((sum, r) => sum + r.total(), 0);
         return [shooter, precision, duell, precision + duell];
       })
-      .sort((a, b) => b[3] - a[3]); // Sortiert nach Gesamtpunkten, höchste zuerst
+      // ALTE ZEILE:
+      //.sort((a, b) => b[3] - a[3]); // Sortiert nach Gesamtpunkten, höchste zuerst
+      // NEUE ZEILE:
+      .sort((a, b) => a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" })); // Sortiert alphabetisch nach Namen
   }
 
   prepareAnnexShooterData(team) {
@@ -591,7 +594,10 @@ class PDFExporter {
         }
         return [shooter, [0, 0, 0, 0, 0], 0];
       })
-      .sort((a, b) => b[2] - a[2]); // Sortiert nach Gesamtpunkten, höchste zuerst
+      // ALTE ZEILE:
+      //.sort((a, b) => b[2] - a[2]); // Sortiert nach Gesamtpunkten, höchste zuerst
+      // NEUE ZEILE:
+      .sort((a, b) => a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" })); // Sortiert alphabetisch nach Namen
   }
 
   getWorstShooterId(team, competitionType) {
