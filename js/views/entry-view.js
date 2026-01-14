@@ -19,62 +19,30 @@ class EntryView {
   // MAIN RENDER METHOD
   // =================================================================
 
- render() {
-  const container = document.createElement("div");
-  
-  // Container für das gesamte Layout mit mehr padding-bottom
-  container.style.cssText = `
-    position: relative;
-    min-height: 100vh;
-    padding-bottom: 280px; /* Erhöht für vollständiges Grid */
-  `;
+  render() {
+    const container = document.createElement("div");
 
-  try {
-    this.setupNavButtons();
+    try {
+      this.setupNavButtons();
 
-    // Sichere Element-Erstellung für scrollbaren Inhalt
-    const selectionCard = this.createSelectionCard();
-    const shotsCard = this.createShotsCard();
+      // Sichere Element-Erstellung
+      const selectionCard = this.createSelectionCard();
+      const shotsCard = this.createShotsCard();
+      const controlsDiv = this.createControlsSection();
 
-    container.appendChild(selectionCard);
-    container.appendChild(shotsCard);
+      container.appendChild(selectionCard);
+      container.appendChild(shotsCard);
+      container.appendChild(controlsDiv);
 
-    // Fixer Controls-Bereich unten
-    const controlsDiv = this.createControlsSection();
-    
-    // Controls-Bereich mit Container-Wrapper für zentrierte Breite
-    const fixedWrapper = document.createElement("div");
-    fixedWrapper.style.cssText = `
-      position: fixed;
-      bottom: 40px;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      display: flex;
-      justify-content: center;
-      padding: 0 16px;
-    `;
+      // ÄNDERUNG: Keine automatische Initialisierung
+      this.resetSelection();
+    } catch (error) {
+      console.error("Error rendering entry view:", error);
+      this.showError(container, "Fehler beim Laden der Erfassen-Ansicht");
+    }
 
-    // Inner Container mit maximaler Breite
-    const innerContainer = document.createElement("div");
-    innerContainer.style.cssText = `
-      width: 100%;
-      max-width: 480px; /* Gleiche max-width wie andere Container */
-    `;
-
-    innerContainer.appendChild(controlsDiv);
-    fixedWrapper.appendChild(innerContainer);
-    container.appendChild(fixedWrapper);
-
-    // ÄNDERUNG: Keine automatische Initialisierung
-    this.resetSelection();
-  } catch (error) {
-    console.error("Error rendering entry view:", error);
-    this.showError(container, "Fehler beim Laden der Erfassen-Ansicht");
+    return container;
   }
-
-  return container;
-}
 
   // =================================================================
   // VERBESSERTE SELECTION MANAGEMENT
@@ -147,25 +115,25 @@ class EntryView {
     return card;
   }
 
-  createFormRow(labelText, inputElement) {
-    const row = document.createElement("div");
-    row.className = "form-row";
-    // Inline style für nebeneinander Layout
-    row.style.cssText = "display: flex; align-items: center; gap: 12px; margin-bottom: 12px;";
+   createFormRow(labelText, inputElement) {
+  const row = document.createElement("div");
+  row.className = "form-row";
+  // Inline style für nebeneinander Layout
+  row.style.cssText = "display: flex; align-items: center; gap: 12px; margin-bottom: 12px;";
 
-    const label = document.createElement("label");
-    label.className = "form-label";
-    label.textContent = labelText;
-    // Label mit fester Breite für einheitliches Aussehen
-    label.style.cssText = "min-width: 100px; flex-shrink: 0; font-weight: 500;";
+  const label = document.createElement("label");
+  label.className = "form-label";
+  label.textContent = labelText;
+  // Label mit fester Breite für einheitliches Aussehen
+  label.style.cssText = "min-width: 100px; flex-shrink: 0; font-weight: 500;";
 
-    // Container für das Eingabefeld um es flexibel zu machen
-    inputElement.style.cssText = "flex: 1; min-width: 0;";
+  // Container für das Eingabefeld um es flexibel zu machen
+  inputElement.style.cssText = "flex: 1; min-width: 0;";
 
-    row.appendChild(label);
-    row.appendChild(inputElement);
-    return row;
-  }
+  row.appendChild(label);
+  row.appendChild(inputElement);
+  return row;
+}
 
   createTeamSelect() {
     const select = document.createElement("select");
@@ -485,10 +453,9 @@ class EntryView {
   createControlsSection() {
     const controlsDiv = document.createElement("div");
 
-    // Card ohne margin-bottom für fixen Container
     const card = document.createElement("div");
     card.className = "card";
-    //card.style.cssText = "padding: 8px;"; // margin-bottom entfernt
+    card.style.cssText = "padding: 12px; margin-bottom: 30px;";
 
     const flexContainer = document.createElement("div");
     flexContainer.style.cssText =
@@ -505,7 +472,7 @@ class EntryView {
     buttonsContainer.style.cssText =
       "display: flex; flex-direction: column; gap: 8px; min-width: 100px;";
 
-    // Save Button - Original Farben
+    // Save Button
     const saveBtn = document.createElement("button");
     saveBtn.id = "saveBtn";
     saveBtn.className = "btn btn-primary";
@@ -513,7 +480,7 @@ class EntryView {
     saveBtn.textContent = "Speichern";
     buttonsContainer.appendChild(saveBtn);
 
-    // Clear Button - Original Farben
+    // Clear Button
     const clearBtn = document.createElement("button");
     clearBtn.id = "clearBtn";
     clearBtn.className = "btn btn-secondary";
