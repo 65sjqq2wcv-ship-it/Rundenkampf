@@ -594,28 +594,52 @@ class EntryView {
   }
 
   removeLastShot() {
-    try {
-      if (!this.selectedDiscipline) {
-        return;
-      }
-
-      const competitionType = getCompetitionType(this.selectedDiscipline);
-      const maxShots =
-        competitionType === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
-
-      // Find last filled slot and remove it
-      for (let i = maxShots - 1; i >= 0; i--) {
-        if (this.shots[i] !== null) {
-          this.shots[i] = null;
-          this.updateShotsDisplay();
-          return;
-        }
-      }
-    } catch (error) {
-      console.error("Error removing shot:", error);
-      UIUtils.showError("Fehler beim Entfernen des Schusses");
+  try {
+    if (!this.selectedDiscipline) {
+      return;
     }
+
+    const competitionType = getCompetitionType(this.selectedDiscipline);
+    const maxShots =
+      competitionType === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
+
+    // Finde letzten gefüllten Slot
+    let lastFilledIndex = -1;
+    for (let i = maxShots - 1; i >= 0; i--) {
+      if (this.shots[i] !== null) {
+        lastFilledIndex = i;
+        break;
+      }
+    }
+
+    if (lastFilledIndex !== -1) {
+      // Lösche den letzten Schuss
+      this.shots[lastFilledIndex] = null;
+      
+      // Setze Position für nächste Eingabe
+      this.currentShotIndex = lastFilledIndex;
+      
+      // Zeige Erfolg
+      if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
+        const series = Math.floor(lastFilledIndex / 8) + 1;
+        const position = (lastFilledIndex % 8) + 1;
+        UIUtils.showSuccessMessage(`Schuss aus Serie ${series}, Position ${position} gelöscht`);
+      } else {
+        UIUtils.showSuccessMessage(`Schuss ${lastFilledIndex + 1} gelöscht`);
+      }
+      
+      this.updateShotsDisplay();
+    } else {
+      // Keine Schüsse vorhanden
+      this.currentShotIndex = 0;
+      UIUtils.showSuccessMessage("Keine Schüsse zum Löschen vorhanden");
+    }
+    
+  } catch (error) {
+    console.error("Error removing shot:", error);
+    UIUtils.showError("Fehler beim Entfernen des Schusses");
   }
+}
 
   clear() {
     this.shots = new Array(40).fill(null);
@@ -716,127 +740,238 @@ class EntryView {
     );
     keypad.appendChild(deleteBtn);
 
-    // NEU: Return Button
-    const garageReturnBtn = document.createElement("button");
-    garageReturnBtn.className = "btn btn-secondary";
-    garageReturnBtn.style.cssText =
-      "aspect-ratio: 1; font-size: 16px; font-weight: 500; gap: 8px; padding: 12px; height: 50px;";
-    garageReturnBtn.textContent = "⏎";
+   // UMBENANNT: Carriage Return Button
+  const carriageReturnBtn = document.createElement("button");
+  carriageReturnBtn.className = "btn btn-secondary";
+  carriageReturnBtn.style.cssText =
+    "aspect-ratio: 1; font-size: 16px; font-weight: 500; gap: 8px; padding: 12px; height: 50px;";
+  carriageReturnBtn.textContent = "⏎";
 
-    this.eventRegistry.register(garageReturnBtn, "click", () =>
-      this.jumpToNextSeries()
-    );
-    keypad.appendChild(garageReturnBtn);
+  this.eventRegistry.register(carriageReturnBtn, "click", () =>
+    this.jumpToNextSeries()
+  );
+  keypad.appendChild(carriageReturnBtn);
+
 
     container.appendChild(keypad);
   }
 
   // NEU: Methode zum Springen zur nächsten Serie
   // In entry-view.js - jumpToNextSeries Methode überarbeiten:
-  // In entry-view.js - jumpToNextSeries Methode überarbeiten:
 
   jumpToNextSeries() {
-    try {
-      // Finde die aktuelle Position (letzter gefüllter Schuss)
-      let currentIndex = -1;
-      for (let i = 39; i >= 0; i--) { // Rückwärts suchen für letzten Eintrag
-        if (this.shots[i] !== null) {
-          currentIndex = i;
-          break;
-        }
+  try {
+    // Finde die letzte Serie mit Daten (nicht nur letzten Schuss)
+    let lastSeriesWithData = -1;
+    
+    // Durchsuche alle 5 Serien und finde die letzte mit Daten
+    for (let series = 0; series < 5; series++) {
+      const seriesStart = series * 8;
+      const seriesEnd = seriesStart + 8;
+      const seriesHasData = this.shots.slice(seriesStart, seriesEnd).some(shot => shot !== null);
+      
+      if (seriesHasData) {
+        lastSeriesWithData = series;
       }
-
-      // Bestimme aktuelle Serie
-      let currentSeries = currentIndex === -1 ? -1 : Math.floor(currentIndex / 8);
-
-      // Bestimme die Ziel-Serie (nächste Serie)
-      let targetSeries = currentSeries + 1;
-
-      // Falls noch keine Daten vorhanden sind, starte bei Serie 0
-      if (currentSeries === -1) {
-        targetSeries = 0;
-      }
-
-      // NEU: Zyklisches Springen - nach S5 wieder zu S1
-      if (targetSeries >= 5) {
-        targetSeries = 0; // Springe zurück zu Serie 1
-      }
-
-      // NEU: Setze Position IMMER auf den Anfang der Ziel-Serie (nicht erstes leeres!)
-      const targetIndex = targetSeries * 8; // Erstes Feld der Serie
-
-      // Setze currentShotIndex für die nächste Eingabe
-      this.currentShotIndex = targetIndex;
-
-      // Aktualisiere die Anzeige
-      this.updateShotsDisplay();
-
-      // Hervorhebung NACH dem Update der Anzeige
-      setTimeout(() => {
-        this.highlightNextShotPosition(targetIndex);
-      }, 150);
-
-      // Korrekte Anzeige der Position
-      UIUtils.showSuccessMessage(`Springe zu Serie ${targetSeries + 1} - Position 1`);
-
-    } catch (error) {
-      console.error("Error jumping to next series:", error);
-      UIUtils.showError("Fehler beim Springen zur nächsten Serie");
     }
-  }
 
-  // Korrigierte highlightNextShotPosition Methode:
+    console.log(`Last series with data: ${lastSeriesWithData}`);
+
+    // Bestimme die Ziel-Serie
+    let targetSeries;
+    
+    if (lastSeriesWithData === -1) {
+      // Keine Daten vorhanden - starte bei Serie 0 (S1)
+      targetSeries = 0;
+    } else {
+      // Springe zur nächsten Serie nach der letzten mit Daten
+      targetSeries = lastSeriesWithData + 1;
+    }
+
+    // Zyklisches Springen - nach S5 wieder zu S1
+    if (targetSeries >= 5) {
+      targetSeries = 0;
+    }
+
+    // Setze Position auf den Anfang der Ziel-Serie
+    const targetIndex = targetSeries * 8; // Erstes Feld der Serie
+
+    console.log(`Jumping to series ${targetSeries} (${targetSeries + 1}), index: ${targetIndex}`);
+
+    // Setze currentShotIndex für die nächste Eingabe
+    this.currentShotIndex = targetIndex;
+
+    // Aktualisiere die Anzeige
+    this.updateShotsDisplay();
+
+    // Hervorhebung NACH dem Update der Anzeige
+    setTimeout(() => {
+      this.highlightNextShotPosition(targetIndex);
+    }, 150);
+
+    // Korrekte Anzeige der Position
+    UIUtils.showSuccessMessage(`Springe zu Serie ${targetSeries + 1} - Position 1`);
+
+  } catch (error) {
+    console.error("Error jumping to next series:", error);
+    UIUtils.showError("Fehler beim Springen zur nächsten Serie");
+  }
+}
+
   highlightNextShotPosition(index) {
-    // Entferne vorherige Hervorhebungen
-    const previousHighlights = document.querySelectorAll('[style*="border: 2px solid #007bff"]');
-    previousHighlights.forEach(el => {
-      el.style.border = "1px solid #d1d1d6";
-      el.style.backgroundColor = "";
-      el.style.transform = "";
+  console.log(`=== HIGHLIGHT DEBUG START ===`);
+  console.log(`Input index: ${index}`);
+  
+  // Entferne vorherige Hervorhebungen
+  const previousHighlights = document.querySelectorAll('[style*="border: 2px solid #007bff"]');
+  previousHighlights.forEach(el => {
+    el.style.border = "1px solid #d1d1d6";
+    el.style.backgroundColor = "";
+    el.style.transform = "";
+  });
+
+  // Berechne Serie und Schuss KORREKT
+  const series = Math.floor(index / 8);        // Serie 0-4
+  const shotInSeries = (index % 8);            // Position 0-7
+  const displaySeries = series + 1;            // Serie 1-5 für Anzeige
+  const displayPosition = shotInSeries + 1;    // Position 1-8 für Anzeige
+
+  console.log(`Calculated: series=${series}, shotInSeries=${shotInSeries}`);
+  console.log(`Display: Serie ${displaySeries}, Position ${displayPosition}`);
+
+  // Warte bis DOM vollständig aktualisiert ist
+  setTimeout(() => {
+    const grid = document.getElementById("shotsGrid");
+    if (!grid) {
+      console.log("Grid not found");
+      return;
+    }
+
+    const gridWrapper = grid.querySelector('div[style*="overflow-x: auto"]');
+    if (!gridWrapper) {
+      console.log("GridWrapper not found");
+      return;
+    }
+
+    // KORRIGIERT: Alle Kinder des gridWrapper durchgehen
+    const allChildren = Array.from(gridWrapper.children);
+    console.log(`GridWrapper has ${allChildren.length} children`);
+
+    // WICHTIG: Durchsuche ALLE Kinder und finde die Serie-Rows
+    // Header ist das erste Kind, dann kommen die Serie-Rows
+    let seriesRows = [];
+    
+    allChildren.forEach((child, index) => {
+      if (index === 0) {
+        console.log(`Child ${index}: Header`);
+        return; // Überspringt Header
+      }
+      
+      // Prüfe ob es eine Serie-Row ist (hat CSS Grid Layout mit 40px + repeat)
+      const style = child.style.cssText || '';
+      if (style.includes('grid-template-columns') && 
+          style.includes('40px') && 
+          style.includes('30px')) {
+        seriesRows.push(child);
+        console.log(`Child ${index}: Series Row ${seriesRows.length - 1} (DOM children: ${child.children.length})`);
+      }
     });
 
-    // Berechne Serie und Schuss KORREKT
-    const series = Math.floor(index / 8);        // Serie 0-4
-    const shotInSeries = (index % 8);            // Position 0-7
-    const displaySeries = series + 1;            // Serie 1-5 für Anzeige
-    const displayPosition = shotInSeries + 1;    // Position 1-8 für Anzeige
+    console.log(`Found ${seriesRows.length} series rows`);
 
-    console.log(`Highlighting Serie ${displaySeries}, Position ${displayPosition} (Index: ${index})`);
+    // Jetzt haben wir die korrekten Serie-Rows
+    if (series < seriesRows.length) {
+      const targetRow = seriesRows[series];
+      const cells = targetRow.children;
+      
+      console.log(`Target row (series ${series}) has ${cells.length} cells`);
+      
+      // +1 wegen Serie-Label am Anfang jeder Row
+      const targetCellIndex = shotInSeries + 1;
+      
+      if (targetCellIndex < cells.length) {
+        const targetCell = cells[targetCellIndex];
+        
+        // Hervorhebung anwenden
+        targetCell.style.border = "2px solid #007bff";
+        targetCell.style.backgroundColor = "#e7f3ff";
+        targetCell.style.transform = "scale(1.1)";
+        targetCell.style.transition = "all 0.3s ease";
 
-    // Warte bis DOM vollständig aktualisiert ist
-    setTimeout(() => {
-      const grid = document.getElementById("shotsGrid");
-      if (!grid) return;
+        console.log(`SUCCESS: Highlighted Serie ${displaySeries}, Position ${displayPosition}`);
+        console.log(`DOM: seriesRows[${series}].children[${targetCellIndex}]`);
 
-      const gridWrapper = grid.querySelector('div[style*="overflow-x: auto"]');
-      if (!gridWrapper) return;
-
-      // Finde die spezifische Serie-Zeile
-      const rows = gridWrapper.querySelectorAll('div[style*="grid-template-columns: 40px repeat(8, 30px)"]');
-
-      if (rows[series]) {
-        const cells = rows[series].children;
-
-        // +1 weil das erste Element das Serie-Label ist
-        const targetCell = cells[shotInSeries + 1];
-        if (targetCell) {
-          targetCell.style.border = "2px solid #007bff";
-          targetCell.style.backgroundColor = "#e7f3ff";
-          targetCell.style.transform = "scale(1.1)";
-          targetCell.style.transition = "all 0.3s ease";
-
-          console.log(`Successfully highlighted Serie ${displaySeries}, Position ${displayPosition}`);
-
-          // Entferne Hervorhebung nach 3 Sekunden
-          setTimeout(() => {
-            targetCell.style.border = "1px solid #d1d1d6";
-            targetCell.style.backgroundColor = "";
-            targetCell.style.transform = "";
-          }, 3000);
-        }
+        // Entferne Hervorhebung nach 3 Sekunden
+        setTimeout(() => {
+          targetCell.style.border = "1px solid #d1d1d6";
+          targetCell.style.backgroundColor = "";
+          targetCell.style.transform = "";
+        }, 3000);
+      } else {
+        console.log(`ERROR: targetCellIndex ${targetCellIndex} >= cells.length ${cells.length}`);
       }
-    }, 200);
+    } else {
+      console.log(`ERROR: series ${series} >= seriesRows.length ${seriesRows.length}`);
+    }
+    
+    console.log(`=== HIGHLIGHT DEBUG END ===`);
+  }, 200);
+}
+
+jumpToNextSeries() {
+  try {
+    // Finde die aktuelle Position (letzter gefüllter Schuss)
+    let currentIndex = -1;
+    for (let i = 39; i >= 0; i--) { // Rückwärts suchen für letzten Eintrag
+      if (this.shots[i] !== null) {
+        currentIndex = i;
+        break;
+      }
+    }
+
+    console.log(`Current last shot index: ${currentIndex}`);
+
+    // Bestimme aktuelle Serie
+    let currentSeries = currentIndex === -1 ? -1 : Math.floor(currentIndex / 8);
+
+    // Bestimme die Ziel-Serie (nächste Serie)
+    let targetSeries = currentSeries + 1;
+
+    // Falls noch keine Daten vorhanden sind, starte bei Serie 0
+    if (currentSeries === -1) {
+      targetSeries = 0;
+    }
+
+    // NEU: Zyklisches Springen - nach S5 wieder zu S1
+    if (targetSeries >= 5) {
+      targetSeries = 0; // Springe zurück zu Serie 1
+    }
+
+    // NEU: Setze Position IMMER auf den Anfang der Ziel-Serie (nicht erstes leeres!)
+    const targetIndex = targetSeries * 8; // Erstes Feld der Serie
+
+    console.log(`Jumping from series ${currentSeries} to series ${targetSeries}`);
+    console.log(`Target index: ${targetIndex} (should be Serie ${targetSeries + 1}, Position 1)`);
+
+    // Setze currentShotIndex für die nächste Eingabe
+    this.currentShotIndex = targetIndex;
+
+    // Aktualisiere die Anzeige
+    this.updateShotsDisplay();
+
+    // Hervorhebung NACH dem Update der Anzeige
+    setTimeout(() => {
+      this.highlightNextShotPosition(targetIndex);
+    }, 150);
+
+    // Korrekte Anzeige der Position
+    UIUtils.showSuccessMessage(`Springe zu Serie ${targetSeries + 1} - Position 1`);
+
+  } catch (error) {
+    console.error("Error jumping to next series:", error);
+    UIUtils.showError("Fehler beim Springen zur nächsten Serie");
   }
+}
 
   // Zusätzlich: Bessere Initialisierung beim Laden von existierenden Ergebnissen
   loadExistingResults() {
@@ -1079,71 +1214,82 @@ class EntryView {
     container.appendChild(grid);
   }
 
-  createAnnexGrid(container) {
-    const gridWrapper = document.createElement("div");
-    gridWrapper.style.cssText = "overflow-x: auto;";
+createAnnexGrid(container) {
+  const gridWrapper = document.createElement("div");
+  gridWrapper.style.cssText = "overflow-x: auto;";
+  gridWrapper.setAttribute("data-grid-type", "annex"); // Debug-Attribut
 
-    // Header
-    const header = document.createElement("div");
-    header.style.cssText =
-      "display: grid; grid-template-columns: 40px repeat(8, 30px); gap: 4px; margin-bottom: 8px; font-size: 12px; color: #666;";
+  // Header
+  const header = document.createElement("div");
+  header.className = "annex-header";
+  header.setAttribute("data-row-type", "header"); // Debug-Attribut
+  header.style.cssText =
+    "display: grid; grid-template-columns: 40px repeat(8, 30px); gap: 4px; margin-bottom: 8px; font-size: 12px; color: #666;";
 
-    // Series/Round header
-    const seriesHeader = document.createElement("div");
-    seriesHeader.textContent = "Serie";
-    seriesHeader.style.cssText =
+  // Series/Round header
+  const seriesHeader = document.createElement("div");
+  seriesHeader.textContent = "Serie";
+  seriesHeader.style.cssText =
+    "display: flex; align-items: center; justify-content: center; font-weight: 500;";
+  header.appendChild(seriesHeader);
+
+  // Shot number headers
+  for (let i = 1; i <= 8; i++) {
+    const shotHeader = document.createElement("div");
+    shotHeader.textContent = i.toString();
+    shotHeader.style.cssText =
       "display: flex; align-items: center; justify-content: center; font-weight: 500;";
-    header.appendChild(seriesHeader);
-
-    // Shot number headers
-    for (let i = 1; i <= 8; i++) {
-      const shotHeader = document.createElement("div");
-      shotHeader.textContent = i.toString();
-      shotHeader.style.cssText =
-        "display: flex; align-items: center; justify-content: center; font-weight: 500;";
-      header.appendChild(shotHeader);
-    }
-
-    gridWrapper.appendChild(header);
-
-    // Grid rows
-    for (let series = 0; series < 5; series++) {
-      const rowDiv = document.createElement("div");
-      rowDiv.style.cssText =
-        "display: grid; grid-template-columns: 40px repeat(8, 30px); gap: 4px; margin-bottom: 4px;";
-
-      // Series number
-      const seriesLabel = document.createElement("div");
-      seriesLabel.textContent = `S${series + 1}`;
-      seriesLabel.style.cssText =
-        "display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500;";
-      rowDiv.appendChild(seriesLabel);
-
-      // Shot cells
-      for (let shot = 0; shot < 8; shot++) {
-        const cell = document.createElement("div");
-        cell.style.cssText = `
-          aspect-ratio: 1;
-          border: 1px solid #d1d1d6;
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 10px;
-          font-weight: 500;
-        `;
-        cell.textContent =
-          this.shots[series * 8 + shot] !== null
-            ? this.shots[series * 8 + shot].toString()
-            : "—";
-        rowDiv.appendChild(cell);
-      }
-
-      gridWrapper.appendChild(rowDiv);
-    }
-
-    container.appendChild(gridWrapper);
+    header.appendChild(shotHeader);
   }
+
+  gridWrapper.appendChild(header);
+
+  // Data rows
+  for (let series = 0; series < 5; series++) {
+    const row = document.createElement("div");
+    row.className = `annex-series-row`;
+    row.setAttribute("data-series", series.toString()); // Eindeutiges Attribut!
+    row.setAttribute("data-row-type", "data"); // Debug-Attribut
+    row.style.cssText =
+      "display: grid; grid-template-columns: 40px repeat(8, 30px); gap: 4px; margin-bottom: 4px;";
+
+    // Series label
+    const seriesLabel = document.createElement("div");
+    seriesLabel.textContent = `S${series + 1}`;
+    seriesLabel.className = "series-label";
+    seriesLabel.style.cssText =
+      "display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 11px; color: #666;";
+    row.appendChild(seriesLabel);
+
+    // Shot cells
+    for (let shot = 0; shot < 8; shot++) {
+      const shotIndex = series * 8 + shot;
+      const cell = document.createElement("div");
+      cell.className = `shot-cell`;
+      cell.setAttribute("data-series", series.toString());
+      cell.setAttribute("data-shot", shot.toString());
+      cell.setAttribute("data-index", shotIndex.toString()); // Eindeutiger Index!
+      cell.style.cssText = `
+        aspect-ratio: 1;
+        border: 1px solid #d1d1d6;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        font-weight: 500;
+        min-height: 20px;
+      `;
+      cell.textContent =
+        this.shots[shotIndex] !== null ? this.shots[shotIndex].toString() : "—";
+      row.appendChild(cell);
+    }
+
+    gridWrapper.appendChild(row);
+  }
+
+  container.appendChild(gridWrapper);
+}
 
   // In entry-view.js - updateShotsStats erweitern:
   updateShotsStats() {
