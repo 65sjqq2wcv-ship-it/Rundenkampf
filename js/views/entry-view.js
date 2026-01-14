@@ -115,25 +115,25 @@ class EntryView {
     return card;
   }
 
-   createFormRow(labelText, inputElement) {
-  const row = document.createElement("div");
-  row.className = "form-row";
-  // Inline style für nebeneinander Layout
-  row.style.cssText = "display: flex; align-items: center; gap: 12px; margin-bottom: 12px;";
+  createFormRow(labelText, inputElement) {
+    const row = document.createElement("div");
+    row.className = "form-row";
+    // Inline style für nebeneinander Layout
+    row.style.cssText = "display: flex; align-items: center; gap: 12px; margin-bottom: 12px;";
 
-  const label = document.createElement("label");
-  label.className = "form-label";
-  label.textContent = labelText;
-  // Label mit fester Breite für einheitliches Aussehen
-  label.style.cssText = "min-width: 100px; flex-shrink: 0; font-weight: 500;";
+    const label = document.createElement("label");
+    label.className = "form-label";
+    label.textContent = labelText;
+    // Label mit fester Breite für einheitliches Aussehen
+    label.style.cssText = "min-width: 100px; flex-shrink: 0; font-weight: 500;";
 
-  // Container für das Eingabefeld um es flexibel zu machen
-  inputElement.style.cssText = "flex: 1; min-width: 0;";
+    // Container für das Eingabefeld um es flexibel zu machen
+    inputElement.style.cssText = "flex: 1; min-width: 0;";
 
-  row.appendChild(label);
-  row.appendChild(inputElement);
-  return row;
-}
+    row.appendChild(label);
+    row.appendChild(inputElement);
+    return row;
+  }
 
   createTeamSelect() {
     const select = document.createElement("select");
