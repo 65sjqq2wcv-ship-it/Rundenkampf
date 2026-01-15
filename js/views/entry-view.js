@@ -2187,100 +2187,111 @@ class EntryView {
     );
   }
 
+  function normalizeGermanChars(str) {
+  const charMap = {
+    'ä': 'ae', 'Ä': 'Ae',
+    'ö': 'oe', 'Ö': 'Oe',
+    'ü': 'ue', 'Ü': 'Ue',
+    'ß': 'ss'
+  };
+
+  return str.replace(/[äÄöÖüÜß]/g, char => charMap[char]);
+}
   async downloadPhoto(canvas, shooterInfo) {
-    try {
-      const now = new Date();
-      const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
-      const shooterName = shooterInfo.name.replace(/[^\w]/g, "_");
-      const disciplineName = shooterInfo.discipline.replace(/[^\w]/g, "_");
+  try {
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    const shooterName = normalizeGermanChars(shooterInfo.name).replace(/[^\w]/g, "_");
+    const disciplineName = normalizeGermanChars(shooterInfo.discipline).replace(/[^\w]/g, "_");
 
-      const fileName = `Scheibe_${timestamp}_${shooterName}_${disciplineName}.jpg`;
+    //const fileName = `Scheibe_${timestamp}_${shooterName}_${disciplineName}.jpg`;
+    const fileName = `Scheibe_${timestamp}_${shooterName}.jpg`;
 
-      // Canvas zu Blob konvertieren
-      const blob = await new Promise(resolve => {
-        canvas.toBlob(resolve, 'image/jpeg', 0.9);
-      });
+    // Canvas zu Blob konvertieren
+    const blob = await new Promise(resolve => {
+      canvas.toBlob(resolve, 'image/jpeg', 0.9);
+    });
 
-      // Download starten
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      link.style.display = "none";
+    // Download starten
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.style.display = "none";
 
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-      console.log(`Photo saved as: ${fileName}`);
+    console.log(`Photo saved as: ${fileName}`);
 
-    } catch (error) {
-      console.error("Error downloading photo:", error);
-      throw error;
-    }
+  } catch (error) {
+    console.error("Error downloading photo:", error);
+    throw error;
+  }
+}
+
+// =================================================================
+// ERROR HANDLING
+// =================================================================
+
+showError(container, message) {
+  const errorCard = document.createElement("div");
+  errorCard.className = "card";
+
+  const errorText = document.createElement("p");
+  errorText.style.color = "red";
+  errorText.textContent = UIUtils.sanitizeText(message);
+
+  errorCard.appendChild(errorText);
+  container.appendChild(errorCard);
+}
+
+handleCameraError(error) {
+  let userMessage = "Kamera konnte nicht gestartet werden";
+  let suggestions = [];
+
+  console.error("Camera error details:", error);
+
+  if (error.name === "NotAllowedError" || error.message.includes("Permission")) {
+    userMessage = "Kamera-Berechtigung verweigert";
+    suggestions = [
+      "Erlauben Sie der App den Kamerazugriff",
+      "Überprüfen Sie die Browser-Einstellungen",
+      "Laden Sie die Seite neu und versuchen Sie es erneut"
+    ];
+  } else if (error.name === "NotFoundError" || error.message.includes("not found")) {
+    userMessage = "Keine Kamera gefunden";
+    suggestions = [
+      "Stellen Sie sicher, dass eine Kamera angeschlossen ist",
+      "Schließen Sie andere Apps, die die Kamera verwenden",
+      "Versuchen Sie es mit einem anderen Gerät"
+    ];
+  } else if (error.name === "NotReadableError") {
+    userMessage = "Kamera ist nicht verfügbar";
+    suggestions = [
+      "Die Kamera wird möglicherweise von einer anderen App verwendet",
+      "Starten Sie das Gerät neu",
+      "Überprüfen Sie die Kamera-Hardware"
+    ];
+  } else if (error.message.includes("timeout")) {
+    userMessage = "Kamera-Start dauerte zu lange";
+    suggestions = [
+      "Versuchen Sie es erneut",
+      "Überprüfen Sie Ihre Internetverbindung",
+      "Laden Sie die Seite neu"
+    ];
   }
 
-  // =================================================================
-  // ERROR HANDLING
-  // =================================================================
+  // Detaillierte Fehlermeldung im Modal anzeigen
+  this.showCameraErrorModal(userMessage, suggestions, error);
+}
 
-  showError(container, message) {
-    const errorCard = document.createElement("div");
-    errorCard.className = "card";
-
-    const errorText = document.createElement("p");
-    errorText.style.color = "red";
-    errorText.textContent = UIUtils.sanitizeText(message);
-
-    errorCard.appendChild(errorText);
-    container.appendChild(errorCard);
-  }
-
-  handleCameraError(error) {
-    let userMessage = "Kamera konnte nicht gestartet werden";
-    let suggestions = [];
-
-    console.error("Camera error details:", error);
-
-    if (error.name === "NotAllowedError" || error.message.includes("Permission")) {
-      userMessage = "Kamera-Berechtigung verweigert";
-      suggestions = [
-        "Erlauben Sie der App den Kamerazugriff",
-        "Überprüfen Sie die Browser-Einstellungen",
-        "Laden Sie die Seite neu und versuchen Sie es erneut"
-      ];
-    } else if (error.name === "NotFoundError" || error.message.includes("not found")) {
-      userMessage = "Keine Kamera gefunden";
-      suggestions = [
-        "Stellen Sie sicher, dass eine Kamera angeschlossen ist",
-        "Schließen Sie andere Apps, die die Kamera verwenden",
-        "Versuchen Sie es mit einem anderen Gerät"
-      ];
-    } else if (error.name === "NotReadableError") {
-      userMessage = "Kamera ist nicht verfügbar";
-      suggestions = [
-        "Die Kamera wird möglicherweise von einer anderen App verwendet",
-        "Starten Sie das Gerät neu",
-        "Überprüfen Sie die Kamera-Hardware"
-      ];
-    } else if (error.message.includes("timeout")) {
-      userMessage = "Kamera-Start dauerte zu lange";
-      suggestions = [
-        "Versuchen Sie es erneut",
-        "Überprüfen Sie Ihre Internetverbindung",
-        "Laden Sie die Seite neu"
-      ];
-    }
-
-    // Detaillierte Fehlermeldung im Modal anzeigen
-    this.showCameraErrorModal(userMessage, suggestions, error);
-  }
-
-  showCameraErrorModal(userMessage, suggestions, originalError) {
-    const errorContent = document.createElement("div");
-    errorContent.innerHTML = `
+showCameraErrorModal(userMessage, suggestions, originalError) {
+  const errorContent = document.createElement("div");
+  errorContent.innerHTML = `
     <div style="text-align: center; padding: 20px;">
       <div style="font-size: 48px; margin-bottom: 16px;">📷❌</div>
       <h3 style="color: #ff3b30; margin-bottom: 16px;">${userMessage}</h3>
@@ -2301,62 +2312,62 @@ class EntryView {
     </div>
   `;
 
-    const modal = new ModalComponent("Kamera-Fehler", errorContent);
+  const modal = new ModalComponent("Kamera-Fehler", errorContent);
 
-    modal.addAction("Erneut versuchen", () => {
-      // Versuche Kamera erneut zu starten
-      setTimeout(() => {
-        const shooterInfo = this.getShooterInfo();
-        if (shooterInfo) {
-          this.showCameraModal(shooterInfo);
-        }
-      }, 500);
-    }, true, false);
+  modal.addAction("Erneut versuchen", () => {
+    // Versuche Kamera erneut zu starten
+    setTimeout(() => {
+      const shooterInfo = this.getShooterInfo();
+      if (shooterInfo) {
+        this.showCameraModal(shooterInfo);
+      }
+    }, 500);
+  }, true, false);
 
-    modal.addAction("Abbrechen", () => {
-      // Nichts tun, Modal schließt sich
-    }, false, false);
+  modal.addAction("Abbrechen", () => {
+    // Nichts tun, Modal schließt sich
+  }, false, false);
 
-    modal.show();
-  }
+  modal.show();
+}
 
   // =================================================================
   // NEU: EXISTIERENDE FOTO-BEARBEITUNG
   // =================================================================
 
   async processExistingPhoto() {
-    try {
-      // Validierung
-      if (!this.selectedShooterId) {
-        UIUtils.showError("Bitte wählen Sie zuerst einen Schützen aus.");
-        return;
-      }
-
-      // Schützen-Informationen ermitteln
-      const shooterInfo = this.getShooterInfo();
-      if (!shooterInfo) {
-        UIUtils.showError("Schützeninformationen nicht verfügbar.");
-        return;
-      }
-
-      // Foto-Bearbeitungs-Modal anzeigen
-      this.showPhotoEditModal(shooterInfo);
-    } catch (error) {
-      console.error("Error starting photo editing:", error);
-      UIUtils.showError("Fehler beim Starten der Foto-Bearbeitung: " + error.message);
+  try {
+    // Validierung
+    if (!this.selectedShooterId) {
+      UIUtils.showError("Bitte wählen Sie zuerst einen Schützen aus.");
+      return;
     }
+
+    // Schützen-Informationen ermitteln
+    const shooterInfo = this.getShooterInfo();
+    if (!shooterInfo) {
+      UIUtils.showError("Schützeninformationen nicht verfügbar.");
+      return;
+    }
+
+    // Foto-Bearbeitungs-Modal anzeigen
+    this.showPhotoEditModal(shooterInfo);
+  } catch (error) {
+    console.error("Error starting photo editing:", error);
+    UIUtils.showError("Fehler beim Starten der Foto-Bearbeitung: " + error.message);
   }
+}
 
-  showPhotoEditModal(shooterInfo) {
-    // Modal Container
-    const modalContent = document.createElement("div");
-    modalContent.style.cssText = "width: 100%; max-width: 500px;";
+showPhotoEditModal(shooterInfo) {
+  // Modal Container
+  const modalContent = document.createElement("div");
+  modalContent.style.cssText = "width: 100%; max-width: 500px;";
 
-    // Info-Bereich (gleich wie bei Kamera)
-    const infoDiv = document.createElement("div");
-    infoDiv.style.cssText =
-      "margin-bottom: 16px; padding: 12px; background: #f8f9fa; border-radius: 8px;";
-    infoDiv.innerHTML = `
+  // Info-Bereich (gleich wie bei Kamera)
+  const infoDiv = document.createElement("div");
+  infoDiv.style.cssText =
+    "margin-bottom: 16px; padding: 12px; background: #f8f9fa; border-radius: 8px;";
+  infoDiv.innerHTML = `
     <div style="font-weight: 600; margin-bottom: 4px;">${shooterInfo.name}</div>
     <div style="font-size: 14px; color: #666;">
       Disziplin: ${shooterInfo.currentDiscipline}<br>
@@ -2365,181 +2376,181 @@ class EntryView {
     </div>
   `;
 
-    // Datums-Auswahl
-    const dateDiv = document.createElement("div");
-    dateDiv.style.cssText = "margin-bottom: 16px;";
+  // Datums-Auswahl
+  const dateDiv = document.createElement("div");
+  dateDiv.style.cssText = "margin-bottom: 16px;";
 
-    const dateLabel = document.createElement("label");
-    dateLabel.textContent = "Datum für Overlay:";
-    dateLabel.style.cssText = "display: block; font-weight: 600; margin-bottom: 8px;";
+  const dateLabel = document.createElement("label");
+  dateLabel.textContent = "Datum für Overlay:";
+  dateLabel.style.cssText = "display: block; font-weight: 600; margin-bottom: 8px;";
 
-    const dateInput = document.createElement("input");
-    dateInput.type = "date";
-    dateInput.id = "overlayDate";
-    dateInput.style.cssText = "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;";
+  const dateInput = document.createElement("input");
+  dateInput.type = "date";
+  dateInput.id = "overlayDate";
+  dateInput.style.cssText = "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;";
 
-    // Aktuelles Datum als Standard
-    const today = new Date();
-    dateInput.value = today.toISOString().split('T')[0];
+  // Aktuelles Datum als Standard
+  const today = new Date();
+  dateInput.value = today.toISOString().split('T')[0];
 
-    // Event-Listener für Datums-Änderung
-    dateInput.addEventListener('change', () => {
+  // Event-Listener für Datums-Änderung
+  dateInput.addEventListener('change', () => {
+    const selectedDate = new Date(dateInput.value);
+    const formattedDate = selectedDate.toLocaleDateString("de-DE");
+    document.getElementById("selectedDate").textContent = formattedDate;
+  });
+
+  dateDiv.appendChild(dateLabel);
+  dateDiv.appendChild(dateInput);
+
+  // Foto-Auswahl
+  const fileDiv = document.createElement("div");
+  fileDiv.style.cssText = "margin-bottom: 16px;";
+
+  const fileLabel = document.createElement("label");
+  fileLabel.textContent = "Foto auswählen:";
+  fileLabel.style.cssText = "display: block; font-weight: 600; margin-bottom: 8px;";
+
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.id = "photoFile";
+  fileInput.accept = "image/*";
+  fileInput.style.cssText = "width: 100%; padding: 8px;";
+
+  fileDiv.appendChild(fileLabel);
+  fileDiv.appendChild(fileInput);
+
+  // Vorschau-Container
+  const previewDiv = document.createElement("div");
+  previewDiv.id = "photoPreview";
+  previewDiv.style.cssText = "margin-bottom: 16px; text-align: center;";
+
+  // File-Input Event-Listener für Vorschau
+  fileInput.addEventListener('change', (e) => {
+    this.showPhotoPreview(e.target.files[0], previewDiv);
+  });
+
+  modalContent.appendChild(infoDiv);
+  modalContent.appendChild(dateDiv);
+  modalContent.appendChild(fileDiv);
+  modalContent.appendChild(previewDiv);
+
+  const modal = new ModalComponent("Foto mit Overlay versehen", modalContent);
+
+  modal.addAction(
+    "Abbrechen",
+    () => { },
+    false,
+    false
+  );
+
+  modal.addAction(
+    "Overlay hinzufügen",
+    () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        UIUtils.showError("Bitte wählen Sie ein Foto aus.");
+        return;
+      }
+
+      // Aktualisiere shooterInfo mit gewähltem Datum
       const selectedDate = new Date(dateInput.value);
-      const formattedDate = selectedDate.toLocaleDateString("de-DE");
-      document.getElementById("selectedDate").textContent = formattedDate;
-    });
-
-    dateDiv.appendChild(dateLabel);
-    dateDiv.appendChild(dateInput);
-
-    // Foto-Auswahl
-    const fileDiv = document.createElement("div");
-    fileDiv.style.cssText = "margin-bottom: 16px;";
-
-    const fileLabel = document.createElement("label");
-    fileLabel.textContent = "Foto auswählen:";
-    fileLabel.style.cssText = "display: block; font-weight: 600; margin-bottom: 8px;";
-
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.id = "photoFile";
-    fileInput.accept = "image/*";
-    fileInput.style.cssText = "width: 100%; padding: 8px;";
-
-    fileDiv.appendChild(fileLabel);
-    fileDiv.appendChild(fileInput);
-
-    // Vorschau-Container
-    const previewDiv = document.createElement("div");
-    previewDiv.id = "photoPreview";
-    previewDiv.style.cssText = "margin-bottom: 16px; text-align: center;";
-
-    // File-Input Event-Listener für Vorschau
-    fileInput.addEventListener('change', (e) => {
-      this.showPhotoPreview(e.target.files[0], previewDiv);
-    });
-
-    modalContent.appendChild(infoDiv);
-    modalContent.appendChild(dateDiv);
-    modalContent.appendChild(fileDiv);
-    modalContent.appendChild(previewDiv);
-
-    const modal = new ModalComponent("Foto mit Overlay versehen", modalContent);
-
-    modal.addAction(
-      "Abbrechen",
-      () => { },
-      false,
-      false
-    );
-
-    modal.addAction(
-      "Overlay hinzufügen",
-      () => {
-        const file = fileInput.files[0];
-        if (!file) {
-          UIUtils.showError("Bitte wählen Sie ein Foto aus.");
-          return;
-        }
-
-        // Aktualisiere shooterInfo mit gewähltem Datum
-        const selectedDate = new Date(dateInput.value);
-        const updatedShooterInfo = {
-          ...shooterInfo,
-          date: selectedDate.toLocaleDateString("de-DE")
-        };
-
-        this.addOverlayToPhoto(file, updatedShooterInfo);
-      },
-      true,
-      false
-    );
-
-    modal.show();
-  }
-
-  showPhotoPreview(file, previewContainer) {
-    previewContainer.innerHTML = "";
-
-    if (!file || !file.type.startsWith('image/')) {
-      return;
-    }
-
-    const img = document.createElement("img");
-    img.style.cssText = "max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid #ddd;";
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-
-    previewContainer.appendChild(img);
-  }
-
-  addOverlayToPhoto(file, shooterInfo) {
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      const img = new Image();
-
-      img.onload = () => {
-        // Canvas erstellen
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-
-        const ctx = canvas.getContext("2d");
-
-        // Originalbild zeichnen
-        ctx.drawImage(img, 0, 0);
-
-        // Overlay hinzufügen - verwende aktuelle Schuss-Daten falls vorhanden
-        // Für Präzision/Duell: Nur wenn Schüsse eingegeben wurden, sonst leeres Overlay
-        const competitionType = getCompetitionType(this.selectedDiscipline);
-        let shotsToUse = null;
-
-        if (competitionType !== CompetitionType.ANNEX_SCHEIBE) {
-          // Bei Präzision/Duell: Verwende aktuelle Schüsse falls vorhanden
-          const hasShots = this.shots.some((shot) => shot !== null);
-          if (hasShots) {
-            shotsToUse = [...this.shots]; // Kopie der aktuellen Schüsse
-          }
-        } else {
-          // Bei Annex: Verwende aktuelle Schüsse falls vorhanden
-          const hasShots = this.shots.some((shot) => shot !== null);
-          if (hasShots) {
-            shotsToUse = [...this.shots]; // Kopie der aktuellen Schüsse
-          }
-        }
-
-        this.addOverlayToCanvas(ctx, canvas.width, canvas.height, shooterInfo, shotsToUse);
-
-        // Download
-        this.downloadPhoto(canvas, shooterInfo);
-
-        UIUtils.showSuccessMessage("Foto mit Overlay wurde gespeichert!");
+      const updatedShooterInfo = {
+        ...shooterInfo,
+        date: selectedDate.toLocaleDateString("de-DE")
       };
 
-      img.src = e.target.result;
-    };
+      this.addOverlayToPhoto(file, updatedShooterInfo);
+    },
+    true,
+    false
+  );
 
-    reader.onerror = () => {
-      UIUtils.showError("Fehler beim Laden des Fotos.");
-    };
+  modal.show();
+}
 
-    reader.readAsDataURL(file);
+showPhotoPreview(file, previewContainer) {
+  previewContainer.innerHTML = "";
+
+  if (!file || !file.type.startsWith('image/')) {
+    return;
   }
 
+  const img = document.createElement("img");
+  img.style.cssText = "max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid #ddd;";
 
-  // =================================================================
-  // ERWEITERTE KAMERA-GUIDES MIT WASSERWAGE
-  // =================================================================
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 
-  createCameraGuides(cameraContainer) {
-    // Guides Container
-    const guidesOverlay = document.createElement("div");
-    guidesOverlay.style.cssText = `
+  previewContainer.appendChild(img);
+}
+
+addOverlayToPhoto(file, shooterInfo) {
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    const img = new Image();
+
+    img.onload = () => {
+      // Canvas erstellen
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      const ctx = canvas.getContext("2d");
+
+      // Originalbild zeichnen
+      ctx.drawImage(img, 0, 0);
+
+      // Overlay hinzufügen - verwende aktuelle Schuss-Daten falls vorhanden
+      // Für Präzision/Duell: Nur wenn Schüsse eingegeben wurden, sonst leeres Overlay
+      const competitionType = getCompetitionType(this.selectedDiscipline);
+      let shotsToUse = null;
+
+      if (competitionType !== CompetitionType.ANNEX_SCHEIBE) {
+        // Bei Präzision/Duell: Verwende aktuelle Schüsse falls vorhanden
+        const hasShots = this.shots.some((shot) => shot !== null);
+        if (hasShots) {
+          shotsToUse = [...this.shots]; // Kopie der aktuellen Schüsse
+        }
+      } else {
+        // Bei Annex: Verwende aktuelle Schüsse falls vorhanden
+        const hasShots = this.shots.some((shot) => shot !== null);
+        if (hasShots) {
+          shotsToUse = [...this.shots]; // Kopie der aktuellen Schüsse
+        }
+      }
+
+      this.addOverlayToCanvas(ctx, canvas.width, canvas.height, shooterInfo, shotsToUse);
+
+      // Download
+      this.downloadPhoto(canvas, shooterInfo);
+
+      UIUtils.showSuccessMessage("Foto mit Overlay wurde gespeichert!");
+    };
+
+    img.src = e.target.result;
+  };
+
+  reader.onerror = () => {
+    UIUtils.showError("Fehler beim Laden des Fotos.");
+  };
+
+  reader.readAsDataURL(file);
+}
+
+
+// =================================================================
+// ERWEITERTE KAMERA-GUIDES MIT WASSERWAGE
+// =================================================================
+
+createCameraGuides(cameraContainer) {
+  // Guides Container
+  const guidesOverlay = document.createElement("div");
+  guidesOverlay.style.cssText = `
     position: absolute;
     top: 0;
     left: 0;
@@ -2549,9 +2560,9 @@ class EntryView {
     z-index: 10;
   `;
 
-    // Mittlere Kreuzlinien (horizontal und vertikal durch die Mitte)
-    const centerLineV = document.createElement("div");
-    centerLineV.style.cssText = `
+  // Mittlere Kreuzlinien (horizontal und vertikal durch die Mitte)
+  const centerLineV = document.createElement("div");
+  centerLineV.style.cssText = `
     position: absolute;
     top: 10%;
     left: 50%;
@@ -2560,10 +2571,10 @@ class EntryView {
     height: 80%;
     background: linear-gradient(to bottom, transparent, rgba(0, 255, 0, 0.8) 20%, rgba(0, 255, 0, 0.8) 80%, transparent);
   `;
-    guidesOverlay.appendChild(centerLineV);
+  guidesOverlay.appendChild(centerLineV);
 
-    const centerLineH = document.createElement("div");
-    centerLineH.style.cssText = `
+  const centerLineH = document.createElement("div");
+  centerLineH.style.cssText = `
     position: absolute;
     top: 50%;
     left: 10%;
@@ -2572,20 +2583,20 @@ class EntryView {
     height: 2px;
     background: linear-gradient(to right, transparent, rgba(0, 255, 0, 0.8) 20%, rgba(0, 255, 0, 0.8) 80%, transparent);
   `;
-    guidesOverlay.appendChild(centerLineH);
+  guidesOverlay.appendChild(centerLineH);
 
-    // Drittel-Linien (Rule of thirds) - kompakter und grün
-    const thirdLines = [
-      { pos: '33.33%', direction: 'vertical' },
-      { pos: '66.67%', direction: 'vertical' },
-      { pos: '33.33%', direction: 'horizontal' },
-      { pos: '66.67%', direction: 'horizontal' }
-    ];
+  // Drittel-Linien (Rule of thirds) - kompakter und grün
+  const thirdLines = [
+    { pos: '33.33%', direction: 'vertical' },
+    { pos: '66.67%', direction: 'vertical' },
+    { pos: '33.33%', direction: 'horizontal' },
+    { pos: '66.67%', direction: 'horizontal' }
+  ];
 
-    thirdLines.forEach(line => {
-      const element = document.createElement("div");
-      if (line.direction === 'vertical') {
-        element.style.cssText = `
+  thirdLines.forEach(line => {
+    const element = document.createElement("div");
+    if (line.direction === 'vertical') {
+      element.style.cssText = `
         position: absolute;
         top: 20%;
         left: ${line.pos};
@@ -2594,8 +2605,8 @@ class EntryView {
         height: 60%;
         background-color: rgba(0, 200, 0, 0.4);
       `;
-      } else {
-        element.style.cssText = `
+    } else {
+      element.style.cssText = `
         position: absolute;
         top: ${line.pos};
         left: 20%;
@@ -2604,13 +2615,13 @@ class EntryView {
         height: 1px;
         background-color: rgba(0, 200, 0, 0.4);
       `;
-      }
-      guidesOverlay.appendChild(element);
-    });
+    }
+    guidesOverlay.appendChild(element);
+  });
 
-    // Verbessertes mittleres Fadenkreuz - grün
-    const crosshair = document.createElement("div");
-    crosshair.style.cssText = `
+  // Verbessertes mittleres Fadenkreuz - grün
+  const crosshair = document.createElement("div");
+  crosshair.style.cssText = `
     position: absolute;
     top: 50%;
     left: 50%;
@@ -2622,8 +2633,8 @@ class EntryView {
     box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
   `;
 
-    const crosshairV = document.createElement("div");
-    crosshairV.style.cssText = `
+  const crosshairV = document.createElement("div");
+  crosshairV.style.cssText = `
     position: absolute;
     top: -20px;
     left: 50%;
@@ -2633,8 +2644,8 @@ class EntryView {
     background: linear-gradient(to bottom, transparent, rgba(0, 255, 0, 1) 25%, rgba(0, 255, 0, 1) 75%, transparent);
   `;
 
-    const crosshairH = document.createElement("div");
-    crosshairH.style.cssText = `
+  const crosshairH = document.createElement("div");
+  crosshairH.style.cssText = `
     position: absolute;
     top: 50%;
     left: -20px;
@@ -2644,13 +2655,13 @@ class EntryView {
     background: linear-gradient(to right, transparent, rgba(0, 255, 0, 1) 25%, rgba(0, 255, 0, 1) 75%, transparent);
   `;
 
-    crosshair.appendChild(crosshairV);
-    crosshair.appendChild(crosshairH);
-    guidesOverlay.appendChild(crosshair);
+  crosshair.appendChild(crosshairV);
+  crosshair.appendChild(crosshairH);
+  guidesOverlay.appendChild(crosshair);
 
-    // Zusätzlicher Zielkreis für Scheibenzentrierung
-    const targetCircle = document.createElement("div");
-    targetCircle.style.cssText = `
+  // Zusätzlicher Zielkreis für Scheibenzentrierung
+  const targetCircle = document.createElement("div");
+  targetCircle.style.cssText = `
     position: absolute;
     top: 50%;
     left: 50%;
@@ -2661,31 +2672,31 @@ class EntryView {
     border-radius: 50%;
     border-style: dashed;
   `;
-    guidesOverlay.appendChild(targetCircle);
+  guidesOverlay.appendChild(targetCircle);
 
-    // NEU: WASSERWAGE
-    this.createLevelIndicator(guidesOverlay);
+  // NEU: WASSERWAGE
+  this.createLevelIndicator(guidesOverlay);
 
-    // NEU: ECKEN-MARKIERUNGEN für bessere Ausrichtung
-    this.createCornerMarkers(guidesOverlay);
+  // NEU: ECKEN-MARKIERUNGEN für bessere Ausrichtung
+  this.createCornerMarkers(guidesOverlay);
 
-    // NEU: GITTER-OPTION (optional)
-    if (this.showGrid) {
-      this.createGrid(guidesOverlay);
-    }
-
-    cameraContainer.appendChild(guidesOverlay);
+  // NEU: GITTER-OPTION (optional)
+  if (this.showGrid) {
+    this.createGrid(guidesOverlay);
   }
 
-  // =================================================================
-  // NEU: WASSERWAGE-INDIKATOR
-  // =================================================================
+  cameraContainer.appendChild(guidesOverlay);
+}
 
-  createLevelIndicator(container) {
-    // Wasserwage Container
-    const levelContainer = document.createElement("div");
-    levelContainer.id = "levelIndicator";
-    levelContainer.style.cssText = `
+// =================================================================
+// NEU: WASSERWAGE-INDIKATOR
+// =================================================================
+
+createLevelIndicator(container) {
+  // Wasserwage Container
+  const levelContainer = document.createElement("div");
+  levelContainer.id = "levelIndicator";
+  levelContainer.style.cssText = `
     position: absolute;
     top: 20px;
     left: 50%;
@@ -2700,9 +2711,9 @@ class EntryView {
     z-index: 20;
   `;
 
-    // Wasserwage Hintergrund
-    const levelTrack = document.createElement("div");
-    levelTrack.style.cssText = `
+  // Wasserwage Hintergrund
+  const levelTrack = document.createElement("div");
+  levelTrack.style.cssText = `
     width: 180px;
     height: 8px;
     background: rgba(255, 255, 255, 0.3);
@@ -2711,9 +2722,9 @@ class EntryView {
     overflow: hidden;
   `;
 
-    // Zentrale Markierung (Ideal-Position)
-    const centerMark = document.createElement("div");
-    centerMark.style.cssText = `
+  // Zentrale Markierung (Ideal-Position)
+  const centerMark = document.createElement("div");
+  centerMark.style.cssText = `
     position: absolute;
     top: -4px;
     left: 50%;
@@ -2724,10 +2735,10 @@ class EntryView {
     border-radius: 1px;
   `;
 
-    // Wasserwage Blase (beweglicher Indikator)
-    const levelBubble = document.createElement("div");
-    levelBubble.id = "levelBubble";
-    levelBubble.style.cssText = `
+  // Wasserwage Blase (beweglicher Indikator)
+  const levelBubble = document.createElement("div");
+  levelBubble.id = "levelBubble";
+  levelBubble.style.cssText = `
     position: absolute;
     top: -8px;
     left: 50%;
@@ -2741,14 +2752,14 @@ class EntryView {
     box-shadow: 0 0 10px rgba(255, 255, 0, 0.6);
   `;
 
-    levelTrack.appendChild(centerMark);
-    levelTrack.appendChild(levelBubble);
-    levelContainer.appendChild(levelTrack);
+  levelTrack.appendChild(centerMark);
+  levelTrack.appendChild(levelBubble);
+  levelContainer.appendChild(levelTrack);
 
-    // Status Text
-    const levelStatus = document.createElement("div");
-    levelStatus.id = "levelStatus";
-    levelStatus.style.cssText = `
+  // Status Text
+  const levelStatus = document.createElement("div");
+  levelStatus.id = "levelStatus";
+  levelStatus.style.cssText = `
     position: absolute;
     bottom: -25px;
     left: 50%;
@@ -2759,125 +2770,125 @@ class EntryView {
     text-align: center;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
   `;
-    levelStatus.textContent = "Gerät ausrichten...";
+  levelStatus.textContent = "Gerät ausrichten...";
 
-    levelContainer.appendChild(levelStatus);
-    container.appendChild(levelContainer);
+  levelContainer.appendChild(levelStatus);
+  container.appendChild(levelContainer);
 
-    // Starte Orientierungserkennung
-    this.startDeviceOrientation();
-  }
+  // Starte Orientierungserkennung
+  this.startDeviceOrientation();
+}
 
-  // =================================================================
-  // NEU: GERÄTE-ORIENTIERUNG
-  // =================================================================
+// =================================================================
+// NEU: GERÄTE-ORIENTIERUNG
+// =================================================================
 
-  startDeviceOrientation() {
-    // Prüfe ob DeviceOrientationEvent verfügbar ist
-    if (!window.DeviceOrientationEvent) {
-      console.warn("Device orientation not supported");
-      const status = document.getElementById("levelStatus");
-      if (status) status.textContent = "Wasserwage nicht verfügbar";
-      return;
-    }
-
-    // iOS 13+ Permission Request
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission()
-        .then(response => {
-          if (response === 'granted') {
-            this.setupOrientationListener();
-          } else {
-            console.warn("Device orientation permission denied");
-            const status = document.getElementById("levelStatus");
-            if (status) status.textContent = "Berechtigung erforderlich";
-          }
-        })
-        .catch(console.error);
-    } else {
-      // Für andere Browser
-      this.setupOrientationListener();
-    }
-  }
-
-  updateLevelIndicator(event) {
-    const bubble = document.getElementById("levelBubble");
+startDeviceOrientation() {
+  // Prüfe ob DeviceOrientationEvent verfügbar ist
+  if (!window.DeviceOrientationEvent) {
+    console.warn("Device orientation not supported");
     const status = document.getElementById("levelStatus");
-
-    if (!bubble || !status) return;
-
-    // Verwende gamma für Roll (links/rechts Neigung)
-    let roll = event.gamma || 0;
-
-    // Begrenze den Wert auf ±45 Grad für bessere Darstellung
-    roll = Math.max(-45, Math.min(45, roll));
-
-    // Berechne Position der Blase (0-180px Bereich)
-    const bubblePosition = 90 + (roll * 2); // 90 ist Mitte, ±2px pro Grad
-    bubble.style.left = `${bubblePosition}px`;
-    bubble.style.transform = 'translateX(-50%)';
-
-    // Farbe basierend auf Genauigkeit
-    const absRoll = Math.abs(roll);
-    let color, statusText, isLevel = false;
-
-    if (absRoll <= 1) {
-      color = '#00ff00'; // Grün - perfekt ausgerichtet
-      statusText = '✓ Perfekt ausgerichtet';
-      isLevel = true;
-    } else if (absRoll <= 3) {
-      color = '#90ff00'; // Hell-grün - sehr gut
-      statusText = '✓ Sehr gut ausgerichtet';
-      isLevel = true;
-    } else if (absRoll <= 5) {
-      color = '#ffff00'; // Gelb - gut
-      statusText = 'Gut ausgerichtet';
-    } else if (absRoll <= 10) {
-      color = '#ff9000'; // Orange - mäßig
-      statusText = `${roll > 0 ? 'Nach rechts' : 'Nach links'} neigen`;
-    } else {
-      color = '#ff3000'; // Rot - schlecht
-      statusText = `${roll > 0 ? 'Stark nach links' : 'Stark nach rechts'} neigen`;
-    }
-
-    // Update Bubble Farbe
-    bubble.style.background = `radial-gradient(circle, ${color}99 0%, ${color}bb 70%, ${color}77 100%)`;
-    bubble.style.boxShadow = `0 0 ${isLevel ? '15' : '8'}px ${color}99`;
-
-    // Update Status
-    status.textContent = statusText;
-    status.style.color = color;
-
-    // Vibriere bei perfekter Ausrichtung (einmalig)
-    if (isLevel && !this.wasLevel && navigator.vibrate) {
-      navigator.vibrate(50);
-    }
-    this.wasLevel = isLevel;
+    if (status) status.textContent = "Wasserwage nicht verfügbar";
+    return;
   }
 
-  setupOrientationListener() {
-    this.orientationHandler = (event) => {
-      this.updateLevelIndicator(event);
-    };
+  // iOS 13+ Permission Request
+  if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission()
+      .then(response => {
+        if (response === 'granted') {
+          this.setupOrientationListener();
+        } else {
+          console.warn("Device orientation permission denied");
+          const status = document.getElementById("levelStatus");
+          if (status) status.textContent = "Berechtigung erforderlich";
+        }
+      })
+      .catch(console.error);
+  } else {
+    // Für andere Browser
+    this.setupOrientationListener();
+  }
+}
 
-    window.addEventListener('deviceorientation', this.orientationHandler);
+updateLevelIndicator(event) {
+  const bubble = document.getElementById("levelBubble");
+  const status = document.getElementById("levelStatus");
+
+  if (!bubble || !status) return;
+
+  // Verwende gamma für Roll (links/rechts Neigung)
+  let roll = event.gamma || 0;
+
+  // Begrenze den Wert auf ±45 Grad für bessere Darstellung
+  roll = Math.max(-45, Math.min(45, roll));
+
+  // Berechne Position der Blase (0-180px Bereich)
+  const bubblePosition = 90 + (roll * 2); // 90 ist Mitte, ±2px pro Grad
+  bubble.style.left = `${bubblePosition}px`;
+  bubble.style.transform = 'translateX(-50%)';
+
+  // Farbe basierend auf Genauigkeit
+  const absRoll = Math.abs(roll);
+  let color, statusText, isLevel = false;
+
+  if (absRoll <= 1) {
+    color = '#00ff00'; // Grün - perfekt ausgerichtet
+    statusText = '✓ Perfekt ausgerichtet';
+    isLevel = true;
+  } else if (absRoll <= 3) {
+    color = '#90ff00'; // Hell-grün - sehr gut
+    statusText = '✓ Sehr gut ausgerichtet';
+    isLevel = true;
+  } else if (absRoll <= 5) {
+    color = '#ffff00'; // Gelb - gut
+    statusText = 'Gut ausgerichtet';
+  } else if (absRoll <= 10) {
+    color = '#ff9000'; // Orange - mäßig
+    statusText = `${roll > 0 ? 'Nach rechts' : 'Nach links'} neigen`;
+  } else {
+    color = '#ff3000'; // Rot - schlecht
+    statusText = `${roll > 0 ? 'Stark nach links' : 'Stark nach rechts'} neigen`;
   }
 
-  // =================================================================
-  // NEU: ECKEN-MARKIERUNGEN
-  // =================================================================
+  // Update Bubble Farbe
+  bubble.style.background = `radial-gradient(circle, ${color}99 0%, ${color}bb 70%, ${color}77 100%)`;
+  bubble.style.boxShadow = `0 0 ${isLevel ? '15' : '8'}px ${color}99`;
 
-  createCornerMarkers(container) {
-    const corners = [
-      { top: '10px', left: '10px' },
-      { top: '10px', right: '10px' },
-      { bottom: '10px', left: '10px' },
-      { bottom: '10px', right: '10px' }
-    ];
+  // Update Status
+  status.textContent = statusText;
+  status.style.color = color;
 
-    corners.forEach(corner => {
-      const marker = document.createElement("div");
-      marker.style.cssText = `
+  // Vibriere bei perfekter Ausrichtung (einmalig)
+  if (isLevel && !this.wasLevel && navigator.vibrate) {
+    navigator.vibrate(50);
+  }
+  this.wasLevel = isLevel;
+}
+
+setupOrientationListener() {
+  this.orientationHandler = (event) => {
+    this.updateLevelIndicator(event);
+  };
+
+  window.addEventListener('deviceorientation', this.orientationHandler);
+}
+
+// =================================================================
+// NEU: ECKEN-MARKIERUNGEN
+// =================================================================
+
+createCornerMarkers(container) {
+  const corners = [
+    { top: '10px', left: '10px' },
+    { top: '10px', right: '10px' },
+    { bottom: '10px', left: '10px' },
+    { bottom: '10px', right: '10px' }
+  ];
+
+  corners.forEach(corner => {
+    const marker = document.createElement("div");
+    marker.style.cssText = `
       position: absolute;
       width: 20px;
       height: 20px;
@@ -2891,17 +2902,17 @@ class EntryView {
       ${corner.bottom && corner.left ? 'border-top: none; border-right: none;' : ''}
       ${corner.bottom && corner.right ? 'border-top: none; border-left: none;' : ''}
     `;
-      container.appendChild(marker);
-    });
-  }
+    container.appendChild(marker);
+  });
+}
 
-  createGrid(container) {
-    const gridSize = 6; // 6x6 Gitter
+createGrid(container) {
+  const gridSize = 6; // 6x6 Gitter
 
-    // Horizontale Linien
-    for (let i = 1; i < gridSize; i++) {
-      const line = document.createElement("div");
-      line.style.cssText = `
+  // Horizontale Linien
+  for (let i = 1; i < gridSize; i++) {
+    const line = document.createElement("div");
+    line.style.cssText = `
       position: absolute;
       top: ${(i / gridSize) * 100}%;
       left: 10%;
@@ -2909,13 +2920,13 @@ class EntryView {
       height: 1px;
       background: rgba(0, 200, 0, 0.2);
     `;
-      container.appendChild(line);
-    }
+    container.appendChild(line);
+  }
 
-    // Vertikale Linien
-    for (let i = 1; i < gridSize; i++) {
-      const line = document.createElement("div");
-      line.style.cssText = `
+  // Vertikale Linien
+  for (let i = 1; i < gridSize; i++) {
+    const line = document.createElement("div");
+    line.style.cssText = `
       position: absolute;
       top: 10%;
       left: ${(i / gridSize) * 100}%;
@@ -2923,22 +2934,22 @@ class EntryView {
       height: 80%;
       background: rgba(0, 200, 0, 0.2);
     `;
-      container.appendChild(line);
-    }
+    container.appendChild(line);
   }
+}
 
-  // =================================================================
-  // ERWEITERTE CLEANUP-METHODE
-  // =================================================================
-  destroy() {
-    this.isDestroyed = true;
-    this.stopCamera();
-    this.eventRegistry.cleanupAll();
-    this.selectedTeamId = null;
-    this.selectedShooterId = null;
-    this.selectedDiscipline = null;
-    this.shots = new Array(40).fill(null);
-    this.showGrid = false;
-    this.wasLevel = false;
-  }
+// =================================================================
+// ERWEITERTE CLEANUP-METHODE
+// =================================================================
+destroy() {
+  this.isDestroyed = true;
+  this.stopCamera();
+  this.eventRegistry.cleanupAll();
+  this.selectedTeamId = null;
+  this.selectedShooterId = null;
+  this.selectedDiscipline = null;
+  this.shots = new Array(40).fill(null);
+  this.showGrid = false;
+  this.wasLevel = false;
+}
 }

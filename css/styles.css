@@ -50,7 +50,7 @@ body {
   --border-radius-large: 12px;
   --app-max-width: 480px;
   --navbar-height: 60px; /* Definierte Navbar-Höhe */
-  --tab-bar-height: 80px;
+  --tab-bar-height: 70px;
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
 }
 
