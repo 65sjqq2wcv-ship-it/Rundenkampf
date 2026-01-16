@@ -1,5 +1,5 @@
 // Erweiterte Service Worker Version für vollständige Offline-Funktionalität
-// sw.js - am Anfang der Datei
+const APP_VERSION = "1.72"
 const CACHE_NAME = `rundenkampf-v${APP_VERSION}`;
 const STATIC_CACHE = `rundenkampf-static-v${APP_VERSION}`;
 const DYNAMIC_CACHE = `rundenkampf-dynamic-v${APP_VERSION}`;
@@ -9,6 +9,7 @@ const STATIC_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
+  "./js/version.js",
   "./css/styles.css",
   "./css/pdf-styles.css",
   "./js/models.js",
