@@ -516,6 +516,7 @@ class EntryView {
 
     flexContainer.appendChild(buttonsContainer);
     card.appendChild(flexContainer);
+    card.style.marginBottom = "24px";
     controlsDiv.appendChild(card);
 
     // Setup controls after DOM insertion
