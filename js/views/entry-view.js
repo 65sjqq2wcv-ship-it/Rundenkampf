@@ -488,23 +488,31 @@ class EntryView {
     clearBtn.textContent = "Leeren";
     buttonsContainer.appendChild(clearBtn);
 
-    // NEU: Kamera Button für Scheibendokumentation
+    // NEU: Container für die beiden Spiegel-Buttons nebeneinander
+    const mirrorButtonsContainer = document.createElement("div");
+    mirrorButtonsContainer.style.cssText =
+      "display: grid; grid-template-columns: 1fr 1fr; gap: 8px;";
+
+    // NEU: Kamera Button für Scheibendokumentation - NUR ICON
     const cameraBtn = document.createElement("button");
     cameraBtn.id = "cameraBtn";
-    cameraBtn.className = "btn btn-secondary";
+    cameraBtn.className = "btn";
     cameraBtn.style.cssText =
-      "height: 50px; background-color: #34c759; color: white;";
-    cameraBtn.textContent = "📷 Spiegel";
-    buttonsContainer.appendChild(cameraBtn);
+      "aspect-ratio: 1; height: 50px; background-color: #34c759; color: white; border: none; font-size: 20px; vertical-align: middle;";
+    cameraBtn.textContent = "📸";
+    mirrorButtonsContainer.appendChild(cameraBtn);
 
-    // NEU: Button für Foto-Bearbeitung
+    // NEU: Button für Foto-Bearbeitung - NUR ICON
     const photoEditBtn = document.createElement("button");
     photoEditBtn.id = "photoEditBtn";
-    photoEditBtn.className = "btn btn-secondary";
+    photoEditBtn.className = "btn";
     photoEditBtn.style.cssText =
-      "height: 50px; background-color: #ff9500; color: white;";
-    photoEditBtn.textContent = "📂 Spiegel";
-    buttonsContainer.appendChild(photoEditBtn);
+      "aspect-ratio: 1; height: 50px; background-color: #ff9500; color: white; border: none; font-size: 20px;";
+    photoEditBtn.textContent = "📂";
+    mirrorButtonsContainer.appendChild(photoEditBtn);
+
+    // Spiegel-Buttons Container zum Haupt-Container hinzufügen
+    buttonsContainer.appendChild(mirrorButtonsContainer);
 
     flexContainer.appendChild(buttonsContainer);
     card.appendChild(flexContainer);
@@ -686,7 +694,7 @@ class EntryView {
     const keypad = document.createElement("div");
     keypad.className = "keypad";
     keypad.style.cssText =
-      "display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 200px; margin-bottom: 20px;";
+      "display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 160px; margin-bottom: 0px;";
 
     const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0];
 
@@ -694,7 +702,7 @@ class EntryView {
       const btn = document.createElement("button");
       btn.className = "btn btn-secondary";
       btn.style.cssText =
-        "aspect-ratio: 1; font-size: 16px; font-weight: 500; padding: 12px; height: 60px;";
+        "aspect-ratio: 1; font-size: 16px; font-weight: 500; padding: 12px; height: 50px;";
       btn.textContent = num.toString();
 
       this.eventRegistry.register(btn, "click", () => this.addShot(num));
@@ -705,7 +713,7 @@ class EntryView {
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "btn btn-secondary";
     deleteBtn.style.cssText =
-      "aspect-ratio: 1; font-size: 16px; font-weight: 500; padding: 12px; height: 60px;";
+      "aspect-ratio: 1; font-size: 16px; font-weight: 500; padding: 12px; height: 50px;";
     deleteBtn.textContent = "⌫";
 
     this.eventRegistry.register(deleteBtn, "click", () =>
@@ -722,7 +730,7 @@ class EntryView {
     const keypad = document.createElement("div");
     keypad.className = "keypad";
     keypad.style.cssText =
-      "display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 100px; margin-bottom: 20px;";
+      "display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 100px; margin-bottom: 0px;";
 
     [0, 1, 2, 3].forEach((num) => {
       const btn = document.createElement("button");
