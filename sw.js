@@ -1,5 +1,5 @@
 // Erweiterte Service Worker Version für vollständige Offline-Funktionalität
-const APP_VERSION = "1.72"
+const APP_VERSION = "1.73";
 const CACHE_NAME = `rundenkampf-v${APP_VERSION}`;
 const STATIC_CACHE = `rundenkampf-static-v${APP_VERSION}`;
 const DYNAMIC_CACHE = `rundenkampf-dynamic-v${APP_VERSION}`;
@@ -23,12 +23,12 @@ const STATIC_ASSETS = [
   "./js/views/settings-view.js",
   "./js/pdf-exporter.js",
   "./icons/icon-192x192.png",
-  "./icons/icon-512x512.png"
+  "./icons/icon-512x512.png",
 ];
 
 // Externe CDN-Ressourcen
 const CDN_ASSETS = [
-  "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+  "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js",
 ];
 
 // =================================================================
@@ -50,20 +50,22 @@ self.addEventListener("install", (event) => {
       caches.open(DYNAMIC_CACHE).then((cache) => {
         console.log("Service Worker: Caching CDN assets");
         return Promise.all(
-          CDN_ASSETS.map(url =>
-            cache.add(url).catch(err => {
+          CDN_ASSETS.map((url) =>
+            cache.add(url).catch((err) => {
               console.warn(`Failed to cache CDN asset: ${url}`, err);
               return Promise.resolve(); // Fortfahren auch wenn CDN nicht verfügbar
-            })
-          )
+            }),
+          ),
         );
+      }),
+    ])
+      .then(() => {
+        console.log("Service Worker: Installation completed");
+        return self.skipWaiting(); // Sofort aktivieren
       })
-    ]).then(() => {
-      console.log("Service Worker: Installation completed");
-      return self.skipWaiting(); // Sofort aktivieren
-    }).catch(error => {
-      console.error("Service Worker: Installation failed", error);
-    })
+      .catch((error) => {
+        console.error("Service Worker: Installation failed", error);
+      }),
   );
 });
 
@@ -80,31 +82,34 @@ self.addEventListener("activate", (event) => {
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== STATIC_CACHE &&
+            if (
+              cacheName !== STATIC_CACHE &&
               cacheName !== DYNAMIC_CACHE &&
-              cacheName !== CACHE_NAME) {
+              cacheName !== CACHE_NAME
+            ) {
               console.log("Service Worker: Deleting old cache:", cacheName);
               return caches.delete(cacheName);
             }
-          })
+          }),
         );
       }),
 
       // Sofort alle Clients übernehmen
-      self.clients.claim()
+      self.clients.claim(),
     ]).then(() => {
       console.log("Service Worker: Activation completed");
 
       // Notification an alle Clients über Update
-      self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
+      self.clients.matchAll().then((clients) => {
+        clients.forEach((client) => {
           client.postMessage({
-            type: 'SW_UPDATED',
-            message: 'Service Worker aktualisiert - App ist jetzt offline verfügbar'
+            type: "SW_UPDATED",
+            message:
+              "Service Worker aktualisiert - App ist jetzt offline verfügbar",
           });
         });
       });
-    })
+    }),
   );
 });
 
@@ -161,7 +166,7 @@ async function cacheFirst(request, cacheName = STATIC_CACHE) {
     // Für andere Ressourcen einen einfachen Offline-Response zurückgeben
     return new Response("Offline", {
       status: 503,
-      statusText: "Service Unavailable"
+      statusText: "Service Unavailable",
     });
   }
 }
@@ -192,7 +197,7 @@ async function networkFirst(request) {
 
     return new Response("Offline", {
       status: 503,
-      statusText: "Service Unavailable"
+      statusText: "Service Unavailable",
     });
   }
 }
@@ -202,21 +207,27 @@ async function staleWhileRevalidate(request) {
   const cache = await caches.open(DYNAMIC_CACHE);
   const cachedResponse = await cache.match(request);
 
-  const fetchPromise = fetch(request).then((networkResponse) => {
-    if (networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  }).catch(() => {
-    // Bei Netzwerkfehler nichts tun, cachedResponse wird zurückgegeben
-    return null;
-  });
+  const fetchPromise = fetch(request)
+    .then((networkResponse) => {
+      if (networkResponse.ok) {
+        cache.put(request, networkResponse.clone());
+      }
+      return networkResponse;
+    })
+    .catch(() => {
+      // Bei Netzwerkfehler nichts tun, cachedResponse wird zurückgegeben
+      return null;
+    });
 
   // Cached response sofort zurückgeben, Update im Hintergrund
-  return cachedResponse || await fetchPromise || new Response("Offline", {
-    status: 503,
-    statusText: "Service Unavailable"
-  });
+  return (
+    cachedResponse ||
+    (await fetchPromise) ||
+    new Response("Offline", {
+      status: 503,
+      statusText: "Service Unavailable",
+    })
+  );
 }
 
 // =================================================================
@@ -225,7 +236,7 @@ async function staleWhileRevalidate(request) {
 
 function isStaticAsset(request) {
   const url = new URL(request.url);
-  return STATIC_ASSETS.some(asset => {
+  return STATIC_ASSETS.some((asset) => {
     const assetUrl = new URL(asset, self.location.origin);
     return url.pathname === assetUrl.pathname;
   });
@@ -233,33 +244,40 @@ function isStaticAsset(request) {
 
 function isCDNAsset(request) {
   const url = new URL(request.url);
-  return CDN_ASSETS.some(asset => request.url.includes(asset)) ||
-    url.hostname.includes('cdnjs.cloudflare.com');
+  return (
+    CDN_ASSETS.some((asset) => request.url.includes(asset)) ||
+    url.hostname.includes("cdnjs.cloudflare.com")
+  );
 }
 
 function isImageRequest(request) {
-  return request.destination === 'image' ||
-    /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(request.url);
+  return (
+    request.destination === "image" ||
+    /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(request.url)
+  );
 }
 
 function isNavigationRequest(request) {
-  return request.mode === 'navigate' ||
-    request.destination === 'document' ||
-    (request.method === 'GET' && request.headers.get('accept').includes('text/html'));
+  return (
+    request.mode === "navigate" ||
+    request.destination === "document" ||
+    (request.method === "GET" &&
+      request.headers.get("accept").includes("text/html"))
+  );
 }
 
 // =================================================================
 // BACKGROUND SYNC (für zukünftige Erweiterungen)
 // =================================================================
 
-self.addEventListener('sync', event => {
-  if (event.tag === 'background-sync') {
+self.addEventListener("sync", (event) => {
+  if (event.tag === "background-sync") {
     event.waitUntil(doBackgroundSync());
   }
 });
 
 async function doBackgroundSync() {
-  console.log('Service Worker: Background sync triggered');
+  console.log("Service Worker: Background sync triggered");
   // Hier könnte später Synchronisation implementiert werden
 }
 
@@ -267,23 +285,21 @@ async function doBackgroundSync() {
 // PUSH NOTIFICATIONS (für zukünftige Erweiterungen)
 // =================================================================
 
-self.addEventListener('push', event => {
+self.addEventListener("push", (event) => {
   if (event.data) {
     const data = event.data.json();
     const options = {
       body: data.body,
-      icon: './icons/icon-192x192.png',
-      badge: './icons/icon-192x192.png',
+      icon: "./icons/icon-192x192.png",
+      badge: "./icons/icon-192x192.png",
       vibrate: [100, 50, 100],
       data: {
         dateOfArrival: Date.now(),
-        primaryKey: data.primaryKey
-      }
+        primaryKey: data.primaryKey,
+      },
     };
 
-    event.waitUntil(
-      self.registration.showNotification(data.title, options)
-    );
+    event.waitUntil(self.registration.showNotification(data.title, options));
   }
 });
 
@@ -291,16 +307,16 @@ self.addEventListener('push', event => {
 // MESSAGE HANDLING
 // =================================================================
 
-self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 
-  if (event.data && event.data.type === 'GET_VERSION') {
+  if (event.data && event.data.type === "GET_VERSION") {
     event.ports[0].postMessage({
-      type: 'VERSION_INFO',
+      type: "VERSION_INFO",
       version: CACHE_NAME,
-      cached: true
+      cached: true,
     });
   }
 });
@@ -316,7 +332,7 @@ async function limitCacheSize(cacheName, maxItems) {
 
   if (keys.length > maxItems) {
     const keysToDelete = keys.slice(0, keys.length - maxItems);
-    await Promise.all(keysToDelete.map(key => cache.delete(key)));
+    await Promise.all(keysToDelete.map((key) => cache.delete(key)));
   }
 }
 

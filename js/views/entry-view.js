@@ -97,11 +97,11 @@ class EntryView {
     const teamRow = this.createFormRow("Mannschaft", this.createTeamSelect());
     const shooterRow = this.createFormRow(
       "Schütze",
-      this.createShooterSelect()
+      this.createShooterSelect(),
     );
     const disciplineRow = this.createFormRow(
       "Disziplin",
-      this.createDisciplineSelect()
+      this.createDisciplineSelect(),
     );
 
     formContainer.appendChild(teamRow);
@@ -119,7 +119,8 @@ class EntryView {
     const row = document.createElement("div");
     row.className = "form-row";
     // Inline style für nebeneinander Layout
-    row.style.cssText = "display: flex; align-items: center; gap: 12px; margin-bottom: 12px;";
+    row.style.cssText =
+      "display: flex; align-items: center; gap: 12px; margin-bottom: 12px;";
 
     const label = document.createElement("label");
     label.className = "form-label";
@@ -247,7 +248,7 @@ class EntryView {
       (r) =>
         r.shooterId === this.selectedShooterId &&
         r.discipline === this.selectedDiscipline &&
-        r.teamId === this.selectedTeamId
+        r.teamId === this.selectedTeamId,
     );
 
     if (existingResult) {
@@ -255,7 +256,11 @@ class EntryView {
 
       // NEU: Setze currentShotIndex auf die Position nach dem letzten Eintrag
       this.currentShotIndex = -1;
-      const maxShots = getCompetitionType(this.selectedDiscipline) === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
+      const maxShots =
+        getCompetitionType(this.selectedDiscipline) ===
+        CompetitionType.ANNEX_SCHEIBE
+          ? 40
+          : 20;
 
       // Finde letzten Eintrag
       for (let i = maxShots - 1; i >= 0; i--) {
@@ -270,7 +275,10 @@ class EntryView {
         this.currentShotIndex = 0;
       }
 
-      console.log("Loaded existing results, next position:", this.currentShotIndex);
+      console.log(
+        "Loaded existing results, next position:",
+        this.currentShotIndex,
+      );
     } else {
       this.shots = new Array(40).fill(null);
       this.currentShotIndex = 0;
@@ -303,7 +311,10 @@ class EntryView {
 
     // Teams hinzufügen
     const sortedTeams = [...storage.teams].sort((a, b) =>
-      a.name.localeCompare(b.name, "de", { numeric: true, sensitivity: "base" })
+      a.name.localeCompare(b.name, "de", {
+        numeric: true,
+        sensitivity: "base",
+      }),
     );
 
     sortedTeams.forEach((team) => {
@@ -340,7 +351,7 @@ class EntryView {
           a.name.localeCompare(b.name, "de", {
             numeric: true,
             sensitivity: "base",
-          })
+          }),
       );
 
       sortedStandaloneShooters.forEach((shooter) => {
@@ -358,7 +369,7 @@ class EntryView {
           a.name.localeCompare(b.name, "de", {
             numeric: true,
             sensitivity: "base",
-          })
+          }),
         );
 
         sortedShooters.forEach((shooter) => {
@@ -545,7 +556,7 @@ class EntryView {
     // NEU: Kamera Button Event Listener
     if (cameraBtn) {
       this.eventRegistry.register(cameraBtn, "click", () =>
-        this.documentTarget()
+        this.documentTarget(),
       );
     }
 
@@ -553,7 +564,7 @@ class EntryView {
     const photoEditBtn = document.getElementById("photoEditBtn");
     if (photoEditBtn) {
       this.eventRegistry.register(photoEditBtn, "click", () =>
-        this.processExistingPhoto()
+        this.processExistingPhoto(),
       );
     }
   }
@@ -571,7 +582,7 @@ class EntryView {
 
       const validatedValue = InputValidator.validateShotValue(
         value,
-        this.selectedDiscipline
+        this.selectedDiscipline,
       );
       const competitionType = getCompetitionType(this.selectedDiscipline);
       const maxShots =
@@ -580,7 +591,11 @@ class EntryView {
       // Verwende currentShotIndex falls gesetzt, sonst finde ersten freien Platz
       let targetIndex = this.currentShotIndex || -1;
 
-      if (targetIndex === -1 || targetIndex >= maxShots || this.shots[targetIndex] !== null) {
+      if (
+        targetIndex === -1 ||
+        targetIndex >= maxShots ||
+        this.shots[targetIndex] !== null
+      ) {
         // Finde ersten freien Platz
         for (let i = 0; i < maxShots; i++) {
           if (this.shots[i] === null) {
@@ -639,7 +654,9 @@ class EntryView {
         if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
           const series = Math.floor(lastFilledIndex / 8) + 1;
           const position = (lastFilledIndex % 8) + 1;
-          UIUtils.showSuccessMessage(`Schuss aus Serie ${series}, Position ${position} gelöscht`);
+          UIUtils.showSuccessMessage(
+            `Schuss aus Serie ${series}, Position ${position} gelöscht`,
+          );
         } else {
           UIUtils.showSuccessMessage(`Schuss ${lastFilledIndex + 1} gelöscht`);
         }
@@ -650,7 +667,6 @@ class EntryView {
         this.currentShotIndex = 0;
         UIUtils.showSuccessMessage("Keine Schüsse zum Löschen vorhanden");
       }
-
     } catch (error) {
       console.error("Error removing shot:", error);
       UIUtils.showError("Fehler beim Entfernen des Schusses");
@@ -718,7 +734,7 @@ class EntryView {
     deleteBtn.textContent = "⌫";
 
     this.eventRegistry.register(deleteBtn, "click", () =>
-      this.removeLastShot()
+      this.removeLastShot(),
     );
     keypad.appendChild(deleteBtn);
 
@@ -752,7 +768,7 @@ class EntryView {
     deleteBtn.textContent = "⌫";
 
     this.eventRegistry.register(deleteBtn, "click", () =>
-      this.removeLastShot()
+      this.removeLastShot(),
     );
     keypad.appendChild(deleteBtn);
 
@@ -764,10 +780,9 @@ class EntryView {
     carriageReturnBtn.textContent = "⏎";
 
     this.eventRegistry.register(carriageReturnBtn, "click", () =>
-      this.jumpToNextSeries()
+      this.jumpToNextSeries(),
     );
     keypad.appendChild(carriageReturnBtn);
-
 
     container.appendChild(keypad);
   }
@@ -784,7 +799,9 @@ class EntryView {
       for (let series = 0; series < 5; series++) {
         const seriesStart = series * 8;
         const seriesEnd = seriesStart + 8;
-        const seriesHasData = this.shots.slice(seriesStart, seriesEnd).some(shot => shot !== null);
+        const seriesHasData = this.shots
+          .slice(seriesStart, seriesEnd)
+          .some((shot) => shot !== null);
 
         if (seriesHasData) {
           lastSeriesWithData = series;
@@ -812,7 +829,9 @@ class EntryView {
       // Setze Position auf den Anfang der Ziel-Serie
       const targetIndex = targetSeries * 8; // Erstes Feld der Serie
 
-      console.log(`Jumping to series ${targetSeries} (${targetSeries + 1}), index: ${targetIndex}`);
+      console.log(
+        `Jumping to series ${targetSeries} (${targetSeries + 1}), index: ${targetIndex}`,
+      );
 
       // Setze currentShotIndex für die nächste Eingabe
       this.currentShotIndex = targetIndex;
@@ -826,8 +845,9 @@ class EntryView {
       }, 150);
 
       // Korrekte Anzeige der Position
-      UIUtils.showSuccessMessage(`Springe zu Serie ${targetSeries + 1} - Position 1`);
-
+      UIUtils.showSuccessMessage(
+        `Springe zu Serie ${targetSeries + 1} - Position 1`,
+      );
     } catch (error) {
       console.error("Error jumping to next series:", error);
       UIUtils.showError("Fehler beim Springen zur nächsten Serie");
@@ -839,18 +859,20 @@ class EntryView {
     console.log(`Input index: ${index}`);
 
     // Entferne vorherige Hervorhebungen
-    const previousHighlights = document.querySelectorAll('[style*="border: 2px solid #007bff"]');
-    previousHighlights.forEach(el => {
+    const previousHighlights = document.querySelectorAll(
+      '[style*="border: 2px solid #007bff"]',
+    );
+    previousHighlights.forEach((el) => {
       el.style.border = "1px solid #d1d1d6";
       el.style.backgroundColor = "";
       el.style.transform = "";
     });
 
     // Berechne Serie und Schuss KORREKT
-    const series = Math.floor(index / 8);        // Serie 0-4
-    const shotInSeries = (index % 8);            // Position 0-7
-    const displaySeries = series + 1;            // Serie 1-5 für Anzeige
-    const displayPosition = shotInSeries + 1;    // Position 1-8 für Anzeige
+    const series = Math.floor(index / 8); // Serie 0-4
+    const shotInSeries = index % 8; // Position 0-7
+    const displaySeries = series + 1; // Serie 1-5 für Anzeige
+    const displayPosition = shotInSeries + 1; // Position 1-8 für Anzeige
 
     console.log(`Calculated: series=${series}, shotInSeries=${shotInSeries}`);
     console.log(`Display: Serie ${displaySeries}, Position ${displayPosition}`);
@@ -884,12 +906,16 @@ class EntryView {
         }
 
         // Prüfe ob es eine Serie-Row ist (hat CSS Grid Layout mit 40px + repeat)
-        const style = child.style.cssText || '';
-        if (style.includes('grid-template-columns') &&
-          style.includes('40px') &&
-          style.includes('30px')) {
+        const style = child.style.cssText || "";
+        if (
+          style.includes("grid-template-columns") &&
+          style.includes("40px") &&
+          style.includes("30px")
+        ) {
           seriesRows.push(child);
-          console.log(`Child ${index}: Series Row ${seriesRows.length - 1} (DOM children: ${child.children.length})`);
+          console.log(
+            `Child ${index}: Series Row ${seriesRows.length - 1} (DOM children: ${child.children.length})`,
+          );
         }
       });
 
@@ -914,8 +940,12 @@ class EntryView {
           targetCell.style.transform = "scale(1.1)";
           targetCell.style.transition = "all 0.3s ease";
 
-          console.log(`SUCCESS: Highlighted Serie ${displaySeries}, Position ${displayPosition}`);
-          console.log(`DOM: seriesRows[${series}].children[${targetCellIndex}]`);
+          console.log(
+            `SUCCESS: Highlighted Serie ${displaySeries}, Position ${displayPosition}`,
+          );
+          console.log(
+            `DOM: seriesRows[${series}].children[${targetCellIndex}]`,
+          );
 
           // Entferne Hervorhebung nach 3 Sekunden
           setTimeout(() => {
@@ -924,10 +954,14 @@ class EntryView {
             targetCell.style.transform = "";
           }, 3000);
         } else {
-          console.log(`ERROR: targetCellIndex ${targetCellIndex} >= cells.length ${cells.length}`);
+          console.log(
+            `ERROR: targetCellIndex ${targetCellIndex} >= cells.length ${cells.length}`,
+          );
         }
       } else {
-        console.log(`ERROR: series ${series} >= seriesRows.length ${seriesRows.length}`);
+        console.log(
+          `ERROR: series ${series} >= seriesRows.length ${seriesRows.length}`,
+        );
       }
 
       console.log(`=== HIGHLIGHT DEBUG END ===`);
@@ -938,7 +972,8 @@ class EntryView {
     try {
       // Finde die aktuelle Position (letzter gefüllter Schuss)
       let currentIndex = -1;
-      for (let i = 39; i >= 0; i--) { // Rückwärts suchen für letzten Eintrag
+      for (let i = 39; i >= 0; i--) {
+        // Rückwärts suchen für letzten Eintrag
         if (this.shots[i] !== null) {
           currentIndex = i;
           break;
@@ -948,7 +983,8 @@ class EntryView {
       console.log(`Current last shot index: ${currentIndex}`);
 
       // Bestimme aktuelle Serie
-      let currentSeries = currentIndex === -1 ? -1 : Math.floor(currentIndex / 8);
+      let currentSeries =
+        currentIndex === -1 ? -1 : Math.floor(currentIndex / 8);
 
       // Bestimme die Ziel-Serie (nächste Serie)
       let targetSeries = currentSeries + 1;
@@ -966,8 +1002,12 @@ class EntryView {
       // NEU: Setze Position IMMER auf den Anfang der Ziel-Serie (nicht erstes leeres!)
       const targetIndex = targetSeries * 8; // Erstes Feld der Serie
 
-      console.log(`Jumping from series ${currentSeries} to series ${targetSeries}`);
-      console.log(`Target index: ${targetIndex} (should be Serie ${targetSeries + 1}, Position 1)`);
+      console.log(
+        `Jumping from series ${currentSeries} to series ${targetSeries}`,
+      );
+      console.log(
+        `Target index: ${targetIndex} (should be Serie ${targetSeries + 1}, Position 1)`,
+      );
 
       // Setze currentShotIndex für die nächste Eingabe
       this.currentShotIndex = targetIndex;
@@ -981,8 +1021,9 @@ class EntryView {
       }, 150);
 
       // Korrekte Anzeige der Position
-      UIUtils.showSuccessMessage(`Springe zu Serie ${targetSeries + 1} - Position 1`);
-
+      UIUtils.showSuccessMessage(
+        `Springe zu Serie ${targetSeries + 1} - Position 1`,
+      );
     } catch (error) {
       console.error("Error jumping to next series:", error);
       UIUtils.showError("Fehler beim Springen zur nächsten Serie");
@@ -1002,7 +1043,7 @@ class EntryView {
       (r) =>
         r.shooterId === this.selectedShooterId &&
         r.discipline === this.selectedDiscipline &&
-        r.teamId === this.selectedTeamId
+        r.teamId === this.selectedTeamId,
     );
 
     if (existingResult) {
@@ -1011,7 +1052,11 @@ class EntryView {
 
       // NEU: Setze currentShotIndex auf nächste freie Position
       this.currentShotIndex = -1;
-      const maxShots = getCompetitionType(this.selectedDiscipline) === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
+      const maxShots =
+        getCompetitionType(this.selectedDiscipline) ===
+        CompetitionType.ANNEX_SCHEIBE
+          ? 40
+          : 20;
       for (let i = 0; i < maxShots; i++) {
         if (this.shots[i] === null) {
           this.currentShotIndex = i;
@@ -1019,7 +1064,10 @@ class EntryView {
         }
       }
 
-      console.log("Loaded existing results for shooter:", this.selectedShooterId);
+      console.log(
+        "Loaded existing results for shooter:",
+        this.selectedShooterId,
+      );
     } else {
       // Keine Ergebnisse vorhanden - leeres Array
       this.shots = new Array(40).fill(null);
@@ -1027,7 +1075,6 @@ class EntryView {
       console.log("No existing results found - starting fresh");
     }
   }
-
 
   // Verbesserte addShot Methode:
   addShot(value) {
@@ -1039,10 +1086,11 @@ class EntryView {
 
       const validatedValue = InputValidator.validateShotValue(
         value,
-        this.selectedDiscipline
+        this.selectedDiscipline,
       );
       const competitionType = getCompetitionType(this.selectedDiscipline);
-      const maxShots = competitionType === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
+      const maxShots =
+        competitionType === CompetitionType.ANNEX_SCHEIBE ? 40 : 20;
 
       let targetIndex = -1;
 
@@ -1107,8 +1155,12 @@ class EntryView {
   // NEU: Methode zum Hervorheben der nächsten Position
   highlightNextShotPosition(index) {
     // Entferne vorherige Hervorhebungen
-    const previousHighlights = document.querySelectorAll('.next-shot-highlight');
-    previousHighlights.forEach(el => el.classList.remove('next-shot-highlight'));
+    const previousHighlights = document.querySelectorAll(
+      ".next-shot-highlight",
+    );
+    previousHighlights.forEach((el) =>
+      el.classList.remove("next-shot-highlight"),
+    );
 
     // Berechne Serie und Schuss
     const series = Math.floor(index / 8);
@@ -1118,7 +1170,9 @@ class EntryView {
     setTimeout(() => {
       const grid = document.getElementById("shotsGrid");
       if (grid) {
-        const rows = grid.querySelectorAll('[style*="grid-template-columns: 40px repeat(8, 30px)"]');
+        const rows = grid.querySelectorAll(
+          '[style*="grid-template-columns: 40px repeat(8, 30px)"]',
+        );
         if (rows[series]) {
           const cells = rows[series].children;
           // +1 weil das erste Element das Serie-Label ist
@@ -1175,13 +1229,25 @@ class EntryView {
     const title = document.getElementById("shotsTitle");
     if (title) {
       const shooterInfo = this.getSelectedShooterInfo();
-      const shooterText = shooterInfo ? ` - ${shooterInfo}` : "";
-      title.textContent =
+      const shooterText = shooterInfo ? `${shooterInfo}` : "";
+
+      // Leere zuerst den Container
+      title.innerHTML = "";
+
+      // Haupttitel
+      const mainTitle = document.createElement("div");
+      mainTitle.textContent =
         competitionType === CompetitionType.ANNEX_SCHEIBE
-          ? //? `Serien (8 × 5 Schuss)${shooterText}`
-          //: `Serie (20 Schuss)${shooterText}`;
-          `Serien (8 × 5 Schuss)`
-          : `Serie (20 Schuss)`;
+          ? `Serien (8 × 5 Schuss) - ${this.selectedDiscipline}`
+          : `20 Schuss - ${this.selectedDiscipline}`;
+      title.appendChild(mainTitle);
+
+      // IHRE Schützerinformations-Zeile
+      const subtitle = document.createElement("div");
+      subtitle.textContent = `${shooterText}`;
+      subtitle.style.cssText =
+        "font-size: 14px; font-weight: normal; color: #666; margin-top: 4px;";
+      title.appendChild(subtitle);
     }
 
     this.updateShotsGrid();
@@ -1207,7 +1273,7 @@ class EntryView {
   createStandardGrid(container) {
     const grid = document.createElement("div");
     grid.style.cssText =
-      "display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-width: 250px; margin: 0 auto;";
+      "display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; max-width: 200px; margin: 0 auto;";
 
     for (let i = 0; i < 20; i++) {
       const cell = document.createElement("div");
@@ -1220,7 +1286,7 @@ class EntryView {
         justify-content: center;
         font-size: 10px;
         font-weight: 500;
-        min-height: 20px;
+        min-height: 15px;
       `;
       cell.textContent =
         this.shots[i] !== null ? this.shots[i].toString() : "—";
@@ -1297,7 +1363,9 @@ class EntryView {
         min-height: 20px;
       `;
         cell.textContent =
-          this.shots[shotIndex] !== null ? this.shots[shotIndex].toString() : "—";
+          this.shots[shotIndex] !== null
+            ? this.shots[shotIndex].toString()
+            : "—";
         row.appendChild(cell);
       }
 
@@ -1336,7 +1404,8 @@ class EntryView {
 
     // Erste Zeile: Schüsse und Ringe (horizontal)
     const firstLineDiv = document.createElement("div");
-    firstLineDiv.style.cssText = "display: flex; justify-content: space-between; margin-bottom: 4px;";
+    firstLineDiv.style.cssText =
+      "display: flex; justify-content: space-between; margin-bottom: 4px;";
 
     const shotCountSpan = document.createElement("span");
     shotCountSpan.textContent = `Schüsse: ${filledShots.length}/${shotCount}`;
@@ -1349,11 +1418,15 @@ class EntryView {
     stats.appendChild(firstLineDiv);
 
     // Zweite Zeile: Schuss-Gruppierung (nur für Präzision/Duell)
-    if (competitionType !== CompetitionType.ANNEX_SCHEIBE && filledShots.length > 0) {
+    if (
+      competitionType !== CompetitionType.ANNEX_SCHEIBE &&
+      filledShots.length > 0
+    ) {
       const shotDistribution = this.calculateShotDistribution(filledShots);
       if (shotDistribution) {
         const distributionDiv = document.createElement("div");
-        distributionDiv.style.cssText = "font-size: 12px; color: #666; text-align: center; margin-top: 4px;";
+        distributionDiv.style.cssText =
+          "font-size: 12px; color: #666; text-align: center; margin-top: 4px;";
         distributionDiv.textContent = shotDistribution;
         stats.appendChild(distributionDiv);
       }
@@ -1366,14 +1439,14 @@ class EntryView {
 
     // Zähle jede Ringzahl
     const counts = {};
-    shots.forEach(shot => {
+    shots.forEach((shot) => {
       counts[shot] = (counts[shot] || 0) + 1;
     });
 
     // Sortiere nach Ringzahl (absteigend) und erstelle Text
     const distribution = Object.entries(counts)
       .map(([rings, count]) => {
-        if (rings === '0') {
+        if (rings === "0") {
           return `${count}×-`;
         }
         return `${count}×${rings}`;
@@ -1381,12 +1454,12 @@ class EntryView {
       .sort((a, b) => {
         // Sortiere nach Ringzahl (extrahiere Zahl aus "2×10" Format)
         const getRingValue = (str) => {
-          if (str.includes('×-')) return 0;
-          return parseInt(str.split('×')[1]) || 0;
+          if (str.includes("×-")) return 0;
+          return parseInt(str.split("×")[1]) || 0;
         };
         return getRingValue(b) - getRingValue(a);
       })
-      .join('  ');
+      .join("  ");
 
     return distribution;
   }
@@ -1425,15 +1498,15 @@ class EntryView {
     summaryCard.style.cssText =
       "background: #f8f9fa; border-radius: 8px; padding: 12px;";
 
-    const summaryTitle = document.createElement("div");
+    /*const summaryTitle = document.createElement("div");
     summaryTitle.style.cssText =
       "font-weight: 600; margin-bottom: 8px; text-align: center;";
     summaryTitle.textContent = "Serien-Ergebnisse";
-    summaryCard.appendChild(summaryTitle);
+    summaryCard.appendChild(summaryTitle);*/
 
     const summaryGrid = document.createElement("div");
     summaryGrid.style.cssText =
-      "display: flex; justify-content: space-around; margin-bottom: 8px;";
+      "display: flex; justify-content: space-around; margin-bottom: 0px;";
 
     seriesSums.forEach((sum, i) => {
       const seriesDiv = document.createElement("div");
@@ -1475,7 +1548,7 @@ class EntryView {
       }
     } else {
       shooter = storage.standaloneShooters.find(
-        (s) => s.id === this.selectedShooterId
+        (s) => s.id === this.selectedShooterId,
       );
       return shooter?.name || null;
     }
@@ -1516,7 +1589,7 @@ class EntryView {
         this.selectedTeamId,
         this.selectedShooterId,
         this.selectedDiscipline,
-        [...this.shots]
+        [...this.shots],
       );
 
       storage.saveResult(entry);
@@ -1525,7 +1598,7 @@ class EntryView {
       const total = entry.total();
 
       UIUtils.showSuccessMessage(
-        `Ergebnis gespeichert für ${shooterInfo}: ${total} Ringe`
+        `Ergebnis gespeichert für ${shooterInfo}: ${total} Ringe`,
       );
 
       console.log("Entry saved successfully:", entry);
@@ -1579,7 +1652,7 @@ class EntryView {
         }
       } else {
         shooter = storage.standaloneShooters.find(
-          (s) => s.id === this.selectedShooterId
+          (s) => s.id === this.selectedShooterId,
         );
         // Einzelschütze: nur Name
         displayName = shooter ? shooter.name : "";
@@ -1646,10 +1719,11 @@ class EntryView {
 
     // Guide-Optionen
     const guidesOptions = document.createElement("div");
-    guidesOptions.style.cssText = "margin-bottom: 16px; display: flex; gap: 12px; font-size: 14px;";
+    guidesOptions.style.cssText =
+      "margin-bottom: 16px; display: flex; gap: 12px; font-size: 14px;";
     guidesOptions.innerHTML = `
     <label style="display: flex; align-items: center; gap: 4px;">
-      <input type="checkbox" id="toggleGrid" ${this.showGrid ? 'checked' : ''}>
+      <input type="checkbox" id="toggleGrid" ${this.showGrid ? "checked" : ""}>
       <span>Gitter anzeigen</span>
     </label>
     <label style="display: flex; align-items: center; gap: 4px;">
@@ -1664,13 +1738,23 @@ class EntryView {
 
     const modal = new ModalComponent("📸 Scheibe dokumentieren", modalContent);
 
-    modal.addAction("Abbrechen", () => {
-      this.stopCamera();
-    }, false, false);
+    modal.addAction(
+      "Abbrechen",
+      () => {
+        this.stopCamera();
+      },
+      false,
+      false,
+    );
 
-    modal.addAction("Foto aufnehmen", () => {
-      this.capturePhoto(shooterInfo);
-    }, true, false);
+    modal.addAction(
+      "Foto aufnehmen",
+      () => {
+        this.capturePhoto(shooterInfo);
+      },
+      true,
+      false,
+    );
 
     modal.onCloseHandler(() => {
       this.stopCamera();
@@ -1684,7 +1768,7 @@ class EntryView {
       const levelToggle = document.getElementById("toggleLevel");
 
       if (gridToggle) {
-        gridToggle.addEventListener('change', (e) => {
+        gridToggle.addEventListener("change", (e) => {
           this.showGrid = e.target.checked;
           // Aktualisiere Guides
           const container = document.getElementById("cameraContainer");
@@ -1697,10 +1781,10 @@ class EntryView {
       }
 
       if (levelToggle) {
-        levelToggle.addEventListener('change', (e) => {
+        levelToggle.addEventListener("change", (e) => {
           const levelIndicator = document.getElementById("levelIndicator");
           if (levelIndicator) {
-            levelIndicator.style.display = e.target.checked ? 'flex' : 'none';
+            levelIndicator.style.display = e.target.checked ? "flex" : "none";
           }
         });
       }
@@ -1720,7 +1804,7 @@ class EntryView {
 
       // Stoppe eventuell laufende Streams
       if (this.stream) {
-        this.stream.getTracks().forEach(track => track.stop());
+        this.stream.getTracks().forEach((track) => track.stop());
       }
 
       // Kamera-Constraints mit Fallback-Optionen
@@ -1729,9 +1813,9 @@ class EntryView {
           facingMode: { ideal: "environment" }, // Rückkamera bevorzugen
           width: { ideal: 1920, min: 640 },
           height: { ideal: 1920, min: 480 },
-          aspectRatio: { ideal: 1.0 } // Quadratisch bevorzugen
+          aspectRatio: { ideal: 1.0 }, // Quadratisch bevorzugen
         },
-        audio: false
+        audio: false,
       };
 
       console.log("Requesting camera access...");
@@ -1743,9 +1827,7 @@ class EntryView {
       await new Promise((resolve, reject) => {
         video.onloadedmetadata = () => {
           console.log("Video metadata loaded, starting playback...");
-          video.play()
-            .then(resolve)
-            .catch(reject);
+          video.play().then(resolve).catch(reject);
         };
 
         video.onerror = (error) => {
@@ -1767,7 +1849,6 @@ class EntryView {
       if (status && !status.textContent.includes("nicht verfügbar")) {
         status.textContent = "Kamera bereit - Gerät ausrichten";
       }
-
     } catch (error) {
       console.error("Error starting camera:", error);
       this.handleCameraError(error);
@@ -1806,7 +1887,13 @@ class EntryView {
         shotsToUse = [...this.shots]; // Kopie der aktuellen Schüsse
       }
 
-      this.addOverlayToCanvas(ctx, canvas.width, canvas.height, shooterInfo, shotsToUse);
+      this.addOverlayToCanvas(
+        ctx,
+        canvas.width,
+        canvas.height,
+        shooterInfo,
+        shotsToUse,
+      );
 
       // Foto herunterladen
       await this.downloadPhoto(canvas, shooterInfo);
@@ -1823,7 +1910,6 @@ class EntryView {
       }
 
       console.log("Photo captured successfully");
-
     } catch (error) {
       console.error("Error capturing photo:", error);
       UIUtils.showError("Fehler beim Aufnehmen des Fotos: " + error.message);
@@ -1845,21 +1931,25 @@ class EntryView {
       if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
         this.drawAnnexMatrix(ctx, startX, startY + 30 * scale, boxWidth, scale);
       } else {
-        this.drawStandardMatrix(ctx, startX, startY + 30 * scale, boxWidth, scale);
+        this.drawStandardMatrix(
+          ctx,
+          startX,
+          startY + 30 * scale,
+          boxWidth,
+          scale,
+        );
       }
-
     } catch (error) {
       console.error("Error adding shots matrix:", error);
     }
   }
-
 
   stopCamera() {
     console.log("Stopping camera...");
 
     // Stream stoppen
     if (this.stream) {
-      this.stream.getTracks().forEach(track => {
+      this.stream.getTracks().forEach((track) => {
         track.stop();
         console.log(`Stopped ${track.kind} track`);
       });
@@ -1874,7 +1964,7 @@ class EntryView {
 
     // Orientierungs-Listener stoppen
     if (this.orientationHandler) {
-      window.removeEventListener('deviceorientation', this.orientationHandler);
+      window.removeEventListener("deviceorientation", this.orientationHandler);
       this.orientationHandler = null;
     }
 
@@ -1893,14 +1983,14 @@ class EntryView {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       return {
         supported: false,
-        reason: "Browser unterstützt keine Kamera-API"
+        reason: "Browser unterstützt keine Kamera-API",
       };
     }
 
-    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    if (location.protocol !== "https:" && location.hostname !== "localhost") {
       return {
         supported: false,
-        reason: "Kamera benötigt HTTPS-Verbindung"
+        reason: "Kamera benötigt HTTPS-Verbindung",
       };
     }
 
@@ -1931,7 +2021,6 @@ class EntryView {
 
       // Kamera-Modal anzeigen
       this.showCameraModal(shooterInfo);
-
     } catch (error) {
       console.error("Error starting camera process:", error);
       UIUtils.showError("Fehler beim Starten der Kamera: " + error.message);
@@ -2003,10 +2092,22 @@ class EntryView {
     const matrixStartY = y + 100;
 
     if (isAnnex) {
-      this.drawAnnexMatrix(ctx, x + 10, matrixStartY, boxWidth - 20, customShots);
+      this.drawAnnexMatrix(
+        ctx,
+        x + 10,
+        matrixStartY,
+        boxWidth - 20,
+        customShots,
+      );
     } else {
       // STANDARD MATRIX
-      this.drawStandardMatrix(ctx, x + 10, matrixStartY, boxWidth - 20, customShots);
+      this.drawStandardMatrix(
+        ctx,
+        x + 10,
+        matrixStartY,
+        boxWidth - 20,
+        customShots,
+      );
     }
   }
 
@@ -2040,7 +2141,7 @@ class EntryView {
           ctx.fillText(
             shotValue.toString(),
             cellX + cellSize / 2,
-            cellY + cellSize / 2 + 4
+            cellY + cellSize / 2 + 4,
           );
         } else {
           ctx.fillStyle = "#ccc";
@@ -2061,7 +2162,7 @@ class EntryView {
     ctx.fillText(
       `Schüsse: ${filledShots.length}/20  |  Ringe: ${total}`,
       startX,
-      startY + 4 * (cellSize + gap) + 25
+      startY + 4 * (cellSize + gap) + 25,
     );
 
     // Zweite Zeile: Schuss-Gruppierung (nur wenn Schüsse vorhanden sind)
@@ -2073,7 +2174,7 @@ class EntryView {
         ctx.fillText(
           shotDistribution,
           startX,
-          startY + 4 * (cellSize + gap) + 45 // 20 Pixel unter der ersten Zeile
+          startY + 4 * (cellSize + gap) + 45, // 20 Pixel unter der ersten Zeile
         );
       }
     }
@@ -2085,14 +2186,14 @@ class EntryView {
 
     // Zähle jede Ringzahl
     const counts = {};
-    shots.forEach(shot => {
+    shots.forEach((shot) => {
       counts[shot] = (counts[shot] || 0) + 1;
     });
 
     // Sortiere nach Ringzahl (absteigend) und erstelle Text
     const distribution = Object.entries(counts)
       .map(([rings, count]) => {
-        if (rings === '0') {
+        if (rings === "0") {
           return `${count}×-`;
         }
         return `${count}×${rings}`;
@@ -2100,12 +2201,12 @@ class EntryView {
       .sort((a, b) => {
         // Sortiere nach Ringzahl (extrahiere Zahl aus "2×10" Format)
         const getRingValue = (str) => {
-          if (str.includes('×-')) return 0;
-          return parseInt(str.split('×')[1]) || 0;
+          if (str.includes("×-")) return 0;
+          return parseInt(str.split("×")[1]) || 0;
         };
         return getRingValue(b) - getRingValue(a);
       })
-      .join(' ');
+      .join(" ");
 
     return distribution;
   }
@@ -2160,7 +2261,7 @@ class EntryView {
           ctx.fillText(
             shotValue.toString(),
             cellX + cellSize / 2,
-            rowY + cellSize / 2 + 3
+            rowY + cellSize / 2 + 3,
           );
           seriesSum += shotValue;
         } else {
@@ -2192,18 +2293,21 @@ class EntryView {
     ctx.fillText(
       `Schüsse: ${filledShots.length}/40  |  Gesamt: ${total}`,
       startX,
-      summaryY + 18
+      summaryY + 18,
     );
   }
 
   normalizeGermanChars(str) {
     const charMap = {
-      'ä': 'ae', 'Ä': 'Ae',
-      'ö': 'oe', 'Ö': 'Oe',
-      'ü': 'ue', 'Ü': 'Ue',
-      'ß': 'ss'
+      ä: "ae",
+      Ä: "Ae",
+      ö: "oe",
+      Ö: "Oe",
+      ü: "ue",
+      Ü: "Ue",
+      ß: "ss",
     };
-    return str.replace(/[äÄöÖüÜß]/g, char => charMap[char]);
+    return str.replace(/[äÄöÖüÜß]/g, (char) => charMap[char]);
   }
 
   async downloadPhoto(canvas, shooterInfo) {
@@ -2212,15 +2316,17 @@ class EntryView {
       const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
       const shooterName = this.normalizeGermanChars(shooterInfo.name)
         .replace(/[^\w]/g, "_")
-        .replace(/_+/g, "_")         // Mehrfache Unterstriche zu einem
-        .replace(/^_|_$/g, "");      // Optional: Entfernt führende/nachfolgende Unterstriche
-      const disciplineName = this.normalizeGermanChars(shooterInfo.discipline).replace(/[^\w]/g, "_");
+        .replace(/_+/g, "_") // Mehrfache Unterstriche zu einem
+        .replace(/^_|_$/g, ""); // Optional: Entfernt führende/nachfolgende Unterstriche
+      const disciplineName = this.normalizeGermanChars(
+        shooterInfo.discipline,
+      ).replace(/[^\w]/g, "_");
 
       const fileName = `Scheibe_${timestamp}_${shooterName}_${disciplineName}.jpg`;
 
       // Canvas zu Blob konvertieren
-      const blob = await new Promise(resolve => {
-        canvas.toBlob(resolve, 'image/jpeg', 0.9);
+      const blob = await new Promise((resolve) => {
+        canvas.toBlob(resolve, "image/jpeg", 0.9);
       });
 
       // Download starten
@@ -2237,7 +2343,6 @@ class EntryView {
       setTimeout(() => URL.revokeObjectURL(url), 1000);
 
       console.log(`Photo saved as: ${fileName}`);
-
     } catch (error) {
       console.error("Error downloading photo:", error);
       throw error;
@@ -2266,33 +2371,39 @@ class EntryView {
 
     console.error("Camera error details:", error);
 
-    if (error.name === "NotAllowedError" || error.message.includes("Permission")) {
+    if (
+      error.name === "NotAllowedError" ||
+      error.message.includes("Permission")
+    ) {
       userMessage = "Kamera-Berechtigung verweigert";
       suggestions = [
         "Erlauben Sie der App den Kamerazugriff",
         "Überprüfen Sie die Browser-Einstellungen",
-        "Laden Sie die Seite neu und versuchen Sie es erneut"
+        "Laden Sie die Seite neu und versuchen Sie es erneut",
       ];
-    } else if (error.name === "NotFoundError" || error.message.includes("not found")) {
+    } else if (
+      error.name === "NotFoundError" ||
+      error.message.includes("not found")
+    ) {
       userMessage = "Keine Kamera gefunden";
       suggestions = [
         "Stellen Sie sicher, dass eine Kamera angeschlossen ist",
         "Schließen Sie andere Apps, die die Kamera verwenden",
-        "Versuchen Sie es mit einem anderen Gerät"
+        "Versuchen Sie es mit einem anderen Gerät",
       ];
     } else if (error.name === "NotReadableError") {
       userMessage = "Kamera ist nicht verfügbar";
       suggestions = [
         "Die Kamera wird möglicherweise von einer anderen App verwendet",
         "Starten Sie das Gerät neu",
-        "Überprüfen Sie die Kamera-Hardware"
+        "Überprüfen Sie die Kamera-Hardware",
       ];
     } else if (error.message.includes("timeout")) {
       userMessage = "Kamera-Start dauerte zu lange";
       suggestions = [
         "Versuchen Sie es erneut",
         "Überprüfen Sie Ihre Internetverbindung",
-        "Laden Sie die Seite neu"
+        "Laden Sie die Seite neu",
       ];
     }
 
@@ -2307,37 +2418,51 @@ class EntryView {
       <div style="font-size: 48px; margin-bottom: 16px;">📷❌</div>
       <h3 style="color: #ff3b30; margin-bottom: 16px;">${userMessage}</h3>
       
-      ${suggestions.length > 0 ? `
+      ${
+        suggestions.length > 0
+          ? `
         <div style="text-align: left; margin: 20px 0;">
           <h4 style="margin-bottom: 8px;">Lösungsvorschläge:</h4>
           <ul style="margin-left: 20px;">
-            ${suggestions.map(s => `<li style="margin: 4px 0;">${s}</li>`).join('')}
+            ${suggestions.map((s) => `<li style="margin: 4px 0;">${s}</li>`).join("")}
           </ul>
         </div>
-      ` : ''}
+      `
+          : ""
+      }
       
       <div style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 12px; color: #666;">
         <strong>Technische Details:</strong><br>
-        ${originalError.name || 'Unknown'}: ${originalError.message}
+        ${originalError.name || "Unknown"}: ${originalError.message}
       </div>
     </div>
   `;
 
     const modal = new ModalComponent("Kamera-Fehler", errorContent);
 
-    modal.addAction("Erneut versuchen", () => {
-      // Versuche Kamera erneut zu starten
-      setTimeout(() => {
-        const shooterInfo = this.getShooterInfo();
-        if (shooterInfo) {
-          this.showCameraModal(shooterInfo);
-        }
-      }, 500);
-    }, true, false);
+    modal.addAction(
+      "Erneut versuchen",
+      () => {
+        // Versuche Kamera erneut zu starten
+        setTimeout(() => {
+          const shooterInfo = this.getShooterInfo();
+          if (shooterInfo) {
+            this.showCameraModal(shooterInfo);
+          }
+        }, 500);
+      },
+      true,
+      false,
+    );
 
-    modal.addAction("Abbrechen", () => {
-      // Nichts tun, Modal schließt sich
-    }, false, false);
+    modal.addAction(
+      "Abbrechen",
+      () => {
+        // Nichts tun, Modal schließt sich
+      },
+      false,
+      false,
+    );
 
     modal.show();
   }
@@ -2365,7 +2490,9 @@ class EntryView {
       this.showPhotoEditModal(shooterInfo);
     } catch (error) {
       console.error("Error starting photo editing:", error);
-      UIUtils.showError("Fehler beim Starten der Foto-Bearbeitung: " + error.message);
+      UIUtils.showError(
+        "Fehler beim Starten der Foto-Bearbeitung: " + error.message,
+      );
     }
   }
 
@@ -2393,19 +2520,21 @@ class EntryView {
 
     const dateLabel = document.createElement("label");
     dateLabel.textContent = "Datum für Overlay:";
-    dateLabel.style.cssText = "display: block; font-weight: 600; margin-bottom: 8px;";
+    dateLabel.style.cssText =
+      "display: block; font-weight: 600; margin-bottom: 8px;";
 
     const dateInput = document.createElement("input");
     dateInput.type = "date";
     dateInput.id = "overlayDate";
-    dateInput.style.cssText = "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;";
+    dateInput.style.cssText =
+      "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;";
 
     // Aktuelles Datum als Standard
     const today = new Date();
-    dateInput.value = today.toISOString().split('T')[0];
+    dateInput.value = today.toISOString().split("T")[0];
 
     // Event-Listener für Datums-Änderung
-    dateInput.addEventListener('change', () => {
+    dateInput.addEventListener("change", () => {
       const selectedDate = new Date(dateInput.value);
       const formattedDate = selectedDate.toLocaleDateString("de-DE");
       document.getElementById("selectedDate").textContent = formattedDate;
@@ -2420,7 +2549,8 @@ class EntryView {
 
     const fileLabel = document.createElement("label");
     fileLabel.textContent = "Foto auswählen:";
-    fileLabel.style.cssText = "display: block; font-weight: 600; margin-bottom: 8px;";
+    fileLabel.style.cssText =
+      "display: block; font-weight: 600; margin-bottom: 8px;";
 
     const fileInput = document.createElement("input");
     fileInput.type = "file";
@@ -2437,7 +2567,7 @@ class EntryView {
     previewDiv.style.cssText = "margin-bottom: 16px; text-align: center;";
 
     // File-Input Event-Listener für Vorschau
-    fileInput.addEventListener('change', (e) => {
+    fileInput.addEventListener("change", (e) => {
       this.showPhotoPreview(e.target.files[0], previewDiv);
     });
 
@@ -2448,12 +2578,7 @@ class EntryView {
 
     const modal = new ModalComponent("Foto mit Overlay versehen", modalContent);
 
-    modal.addAction(
-      "Abbrechen",
-      () => { },
-      false,
-      false
-    );
+    modal.addAction("Abbrechen", () => {}, false, false);
 
     modal.addAction(
       "Overlay hinzufügen",
@@ -2468,13 +2593,13 @@ class EntryView {
         const selectedDate = new Date(dateInput.value);
         const updatedShooterInfo = {
           ...shooterInfo,
-          date: selectedDate.toLocaleDateString("de-DE")
+          date: selectedDate.toLocaleDateString("de-DE"),
         };
 
         this.addOverlayToPhoto(file, updatedShooterInfo);
       },
       true,
-      false
+      false,
     );
 
     modal.show();
@@ -2483,12 +2608,13 @@ class EntryView {
   showPhotoPreview(file, previewContainer) {
     previewContainer.innerHTML = "";
 
-    if (!file || !file.type.startsWith('image/')) {
+    if (!file || !file.type.startsWith("image/")) {
       return;
     }
 
     const img = document.createElement("img");
-    img.style.cssText = "max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid #ddd;";
+    img.style.cssText =
+      "max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid #ddd;";
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -2535,7 +2661,13 @@ class EntryView {
           }
         }
 
-        this.addOverlayToCanvas(ctx, canvas.width, canvas.height, shooterInfo, shotsToUse);
+        this.addOverlayToCanvas(
+          ctx,
+          canvas.width,
+          canvas.height,
+          shooterInfo,
+          shotsToUse,
+        );
 
         // Download
         this.downloadPhoto(canvas, shooterInfo);
@@ -2552,7 +2684,6 @@ class EntryView {
 
     reader.readAsDataURL(file);
   }
-
 
   // =================================================================
   // ERWEITERTE KAMERA-GUIDES MIT WASSERWAGE
@@ -2598,15 +2729,15 @@ class EntryView {
 
     // Drittel-Linien (Rule of thirds) - kompakter und grün
     const thirdLines = [
-      { pos: '33.33%', direction: 'vertical' },
-      { pos: '66.67%', direction: 'vertical' },
-      { pos: '33.33%', direction: 'horizontal' },
-      { pos: '66.67%', direction: 'horizontal' }
+      { pos: "33.33%", direction: "vertical" },
+      { pos: "66.67%", direction: "vertical" },
+      { pos: "33.33%", direction: "horizontal" },
+      { pos: "66.67%", direction: "horizontal" },
     ];
 
-    thirdLines.forEach(line => {
+    thirdLines.forEach((line) => {
       const element = document.createElement("div");
-      if (line.direction === 'vertical') {
+      if (line.direction === "vertical") {
         element.style.cssText = `
         position: absolute;
         top: 20%;
@@ -2804,10 +2935,10 @@ class EntryView {
     }
 
     // iOS 13+ Permission Request
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+    if (typeof DeviceOrientationEvent.requestPermission === "function") {
       DeviceOrientationEvent.requestPermission()
-        .then(response => {
-          if (response === 'granted') {
+        .then((response) => {
+          if (response === "granted") {
             this.setupOrientationListener();
           } else {
             console.warn("Device orientation permission denied");
@@ -2835,36 +2966,38 @@ class EntryView {
     roll = Math.max(-45, Math.min(45, roll));
 
     // Berechne Position der Blase (0-180px Bereich)
-    const bubblePosition = 90 + (roll * 2); // 90 ist Mitte, ±2px pro Grad
+    const bubblePosition = 90 + roll * 2; // 90 ist Mitte, ±2px pro Grad
     bubble.style.left = `${bubblePosition}px`;
-    bubble.style.transform = 'translateX(-50%)';
+    bubble.style.transform = "translateX(-50%)";
 
     // Farbe basierend auf Genauigkeit
     const absRoll = Math.abs(roll);
-    let color, statusText, isLevel = false;
+    let color,
+      statusText,
+      isLevel = false;
 
     if (absRoll <= 1) {
-      color = '#00ff00'; // Grün - perfekt ausgerichtet
-      statusText = '✓ Perfekt ausgerichtet';
+      color = "#00ff00"; // Grün - perfekt ausgerichtet
+      statusText = "✓ Perfekt ausgerichtet";
       isLevel = true;
     } else if (absRoll <= 3) {
-      color = '#90ff00'; // Hell-grün - sehr gut
-      statusText = '✓ Sehr gut ausgerichtet';
+      color = "#90ff00"; // Hell-grün - sehr gut
+      statusText = "✓ Sehr gut ausgerichtet";
       isLevel = true;
     } else if (absRoll <= 5) {
-      color = '#ffff00'; // Gelb - gut
-      statusText = 'Gut ausgerichtet';
+      color = "#ffff00"; // Gelb - gut
+      statusText = "Gut ausgerichtet";
     } else if (absRoll <= 10) {
-      color = '#ff9000'; // Orange - mäßig
-      statusText = `${roll > 0 ? 'Nach rechts' : 'Nach links'} neigen`;
+      color = "#ff9000"; // Orange - mäßig
+      statusText = `${roll > 0 ? "Nach rechts" : "Nach links"} neigen`;
     } else {
-      color = '#ff3000'; // Rot - schlecht
-      statusText = `${roll > 0 ? 'Stark nach links' : 'Stark nach rechts'} neigen`;
+      color = "#ff3000"; // Rot - schlecht
+      statusText = `${roll > 0 ? "Stark nach links" : "Stark nach rechts"} neigen`;
     }
 
     // Update Bubble Farbe
     bubble.style.background = `radial-gradient(circle, ${color}99 0%, ${color}bb 70%, ${color}77 100%)`;
-    bubble.style.boxShadow = `0 0 ${isLevel ? '15' : '8'}px ${color}99`;
+    bubble.style.boxShadow = `0 0 ${isLevel ? "15" : "8"}px ${color}99`;
 
     // Update Status
     status.textContent = statusText;
@@ -2882,7 +3015,7 @@ class EntryView {
       this.updateLevelIndicator(event);
     };
 
-    window.addEventListener('deviceorientation', this.orientationHandler);
+    window.addEventListener("deviceorientation", this.orientationHandler);
   }
 
   // =================================================================
@@ -2891,27 +3024,27 @@ class EntryView {
 
   createCornerMarkers(container) {
     const corners = [
-      { top: '10px', left: '10px' },
-      { top: '10px', right: '10px' },
-      { bottom: '10px', left: '10px' },
-      { bottom: '10px', right: '10px' }
+      { top: "10px", left: "10px" },
+      { top: "10px", right: "10px" },
+      { bottom: "10px", left: "10px" },
+      { bottom: "10px", right: "10px" },
     ];
 
-    corners.forEach(corner => {
+    corners.forEach((corner) => {
       const marker = document.createElement("div");
       marker.style.cssText = `
       position: absolute;
       width: 20px;
       height: 20px;
       border: 2px solid rgba(0, 255, 0, 0.8);
-      ${corner.top ? `top: ${corner.top};` : ''}
-      ${corner.bottom ? `bottom: ${corner.bottom};` : ''}
-      ${corner.left ? `left: ${corner.left};` : ''}
-      ${corner.right ? `right: ${corner.right};` : ''}
-      ${corner.top && corner.left ? 'border-bottom: none; border-right: none;' : ''}
-      ${corner.top && corner.right ? 'border-bottom: none; border-left: none;' : ''}
-      ${corner.bottom && corner.left ? 'border-top: none; border-right: none;' : ''}
-      ${corner.bottom && corner.right ? 'border-top: none; border-left: none;' : ''}
+      ${corner.top ? `top: ${corner.top};` : ""}
+      ${corner.bottom ? `bottom: ${corner.bottom};` : ""}
+      ${corner.left ? `left: ${corner.left};` : ""}
+      ${corner.right ? `right: ${corner.right};` : ""}
+      ${corner.top && corner.left ? "border-bottom: none; border-right: none;" : ""}
+      ${corner.top && corner.right ? "border-bottom: none; border-left: none;" : ""}
+      ${corner.bottom && corner.left ? "border-top: none; border-right: none;" : ""}
+      ${corner.bottom && corner.right ? "border-top: none; border-left: none;" : ""}
     `;
       container.appendChild(marker);
     });
