@@ -306,7 +306,7 @@ class EntryView {
     // Einzelschütze Option
     const soloOption = document.createElement("option");
     soloOption.value = "standalone";
-    soloOption.textContent = "— Einzelschütze —";
+    soloOption.textContent = "Einzelschütze";
     select.appendChild(soloOption);
 
     // Teams hinzufügen
@@ -1238,7 +1238,7 @@ class EntryView {
       const mainTitle = document.createElement("div");
       mainTitle.textContent =
         competitionType === CompetitionType.ANNEX_SCHEIBE
-          ? `Serien (8 × 5 Schuss) - ${this.selectedDiscipline}`
+          ? `8 × 5 Schuss - ${this.selectedDiscipline}`
           : `20 Schuss - ${this.selectedDiscipline}`;
       title.appendChild(mainTitle);
 
