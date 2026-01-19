@@ -50,59 +50,64 @@ class App {
   }
 
   showView(viewName) {
-    if (!this.isInitialized) {
-      console.warn("App not initialized");
+  if (!this.isInitialized) {
+    console.warn("App not initialized");
+    return;
+  }
+
+  if (!this.views[viewName]) {
+    console.error("View not available:", viewName);
+    return;
+  }
+
+  try {
+    console.log("Showing view:", viewName);
+
+    // Update tab selection
+    document.querySelectorAll(".tab-item").forEach((item) => {
+      item.classList.remove("active");
+      if (item.getAttribute("data-tab") === viewName) {
+        item.classList.add("active");
+      }
+    });
+
+    // Clear navigation buttons UND verstecke Panel
+    const navButtons = document.getElementById("navButtons");
+    const buttonPanel = document.getElementById("buttonPanel");
+    
+    if (navButtons) {
+      navButtons.innerHTML = "";
+    }
+    if (buttonPanel) {
+      buttonPanel.style.display = 'none'; // Verstecken bis View es einblendet
+    }
+
+    // Update content
+    const mainContent = document.getElementById("mainContent");
+    if (!mainContent) {
+      console.error("Main content element not found");
       return;
     }
 
-    if (!this.views[viewName]) {
-      console.error("View not available:", viewName);
-      return;
+    mainContent.innerHTML = "";
+
+    const viewContent = this.views[viewName].render();
+    if (viewContent) {
+      mainContent.appendChild(viewContent);
+      this.currentView = viewName;
+      console.log("View loaded successfully:", viewName);
+    } else {
+      mainContent.innerHTML =
+        '<div class="card"><p>Ansicht konnte nicht geladen werden.</p></div>';
     }
-
-    try {
-      console.log("Showing view:", viewName);
-
-      // Update tab selection
-      document.querySelectorAll(".tab-item").forEach((item) => {
-        item.classList.remove("active");
-        if (item.getAttribute("data-tab") === viewName) {
-          item.classList.add("active");
-        }
-      });
-
-      // Clear navigation buttons
-      const navButtons = document.getElementById("navButtons");
-      if (navButtons) {
-        navButtons.innerHTML = "";
-      }
-
-      // Update content
-      const mainContent = document.getElementById("mainContent");
-      if (!mainContent) {
-        console.error("Main content element not found");
-        return;
-      }
-
-      mainContent.innerHTML = "";
-
-      const viewContent = this.views[viewName].render();
-      if (viewContent) {
-        mainContent.appendChild(viewContent);
-        this.currentView = viewName;
-        console.log("View loaded successfully:", viewName);
-      } else {
-        mainContent.innerHTML =
-          '<div class="card"><p>Ansicht konnte nicht geladen werden.</p></div>';
-      }
-    } catch (error) {
-      console.error("Error showing view:", error);
-      const mainContent = document.getElementById("mainContent");
-      if (mainContent) {
-        mainContent.innerHTML = `<div class="card"><p style="color: red;">Fehler beim Laden der Ansicht: ${error.message}</p></div>`;
-      }
+  } catch (error) {
+    console.error("Error showing view:", error);
+    const mainContent = document.getElementById("mainContent");
+    if (mainContent) {
+      mainContent.innerHTML = `<div class="card"><p style="color: red;">Fehler beim Laden der Ansicht: ${error.message}</p></div>`;
     }
   }
+}
 
   showError(message) {
     const mainContent = document.getElementById("mainContent");
@@ -249,15 +254,18 @@ function showUpdateAvailable(newWorker) {
       top: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: #007AFF;
-      color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
+      background: #ff9500;
+      color: black;
+      padding: 16px 24px;
+      border-radius: 12px;
       z-index: 1000;
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 16px;
+      font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      min-width: 280px;
+      text-align: center;
+      max-width: 90vw;
     ">
       📱 App-Update verfügbar - Klicken zum Aktualisieren
     </div>
