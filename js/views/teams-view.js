@@ -61,13 +61,13 @@ class TeamsView {
       const navButtons = document.getElementById("navButtons");
       if (navButtons) {
         navButtons.innerHTML = "";
-        // Import Button (NEU)
-        const importBtn = document.createElement("button");
-        importBtn.className = "nav-btn";
-        importBtn.textContent = "📥";
-        importBtn.title = "CSV Import";
-        importBtn.addEventListener("click", () => this.showImportModal());
-        navButtons.appendChild(importBtn);
+        // JSON Import/Export Button
+        const jsonBtn = document.createElement("button");
+        jsonBtn.className = "nav-btn";
+        jsonBtn.textContent = "📦";
+        jsonBtn.title = "JSON Import/Export";
+        jsonBtn.addEventListener("click", () => this.showJsonModal());
+        navButtons.appendChild(jsonBtn);
 
         // Einzelschütze Button
         const shooterBtn = document.createElement("button");
@@ -724,5 +724,72 @@ class TeamsView {
     };
 
     reader.readAsText(file, "UTF-8");
+  }
+
+
+  showJsonModal() {
+    const content = document.createElement("div");
+    content.innerHTML = `
+      <div class="form-section">
+        <div class="form-section-header">JSON Import/Export</div>
+        <div class="form-row">
+          <button class="btn btn-primary" onclick="app.views.teams.exportData()">Export</button>
+          <button class="btn btn-secondary" onclick="app.views.teams.importData()">Import</button>
+        </div>
+        <div id="jsonPreview" style="max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; background: #f8f9fa; padding: 8px; border-radius: 4px;">
+          Keine Datei ausgewählt
+        </div>
+      </div>
+    `;
+
+    const modal = new ModalComponent("JSON Import/Export", content);
+    modal.addAction("Schließen", null, false, false);
+    modal.show();
+  }
+
+  exportData() {
+    try {
+      const data = storage.exportData();
+      const dataStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `rundenkampf-data-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      UIUtils.showSuccessMessage("Daten exportiert!");
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      alert("Fehler beim Exportieren der Daten: " + error.message);
+    }
+  }
+
+  importData() {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".json";
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const content = e.target.result;
+            const data = JSON.parse(content);
+            storage.importData(data);
+            UIUtils.showSuccessMessage("Daten importiert!");
+            app.showView("teams");
+          } catch (error) {
+            console.error("Error importing data:", error);
+            alert("Fehler beim Importieren der Daten: " + error.message);
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    fileInput.click();
   }
 }

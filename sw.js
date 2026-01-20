@@ -1,5 +1,5 @@
 // Erweiterte Service Worker Version für vollständige Offline-Funktionalität
-const APP_VERSION = "1.75";
+const APP_VERSION = "1.76";
 const CACHE_NAME = `rundenkampf-v${APP_VERSION}`;
 const STATIC_CACHE = `rundenkampf-static-v${APP_VERSION}`;
 const DYNAMIC_CACHE = `rundenkampf-dynamic-v${APP_VERSION}`;

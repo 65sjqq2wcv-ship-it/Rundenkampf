@@ -16,6 +16,10 @@ class SettingsView {
       const logoSection = this.createLogoUploadSection();
       container.appendChild(logoSection);
 
+      // NEU: Backup/Restore Section
+      const backupSection = this.createBackupRestoreSection();
+      container.appendChild(backupSection);
+
       // Available Disciplines Section
       const disciplinesSection = this.createDisciplinesSection();
       container.appendChild(disciplinesSection);
@@ -29,7 +33,7 @@ class SettingsView {
         this.setupEventListeners();
         this.updateCurrentDisciplineSelect();
         this.updateDisciplinesList();
-        this.updateLogoPreview(); // NEU
+        this.updateLogoPreview();
       }, 100);
     } catch (error) {
       console.error("Error rendering settings view:", error);
@@ -68,7 +72,6 @@ class SettingsView {
     return section;
   }
 
-  // NEU: Logo Upload Section
   // NEU: Verbesserte Logo Upload Section
   createLogoUploadSection() {
     const section = document.createElement("div");
@@ -112,6 +115,41 @@ class SettingsView {
 		</div>
 	</div>
 	`;
+    return section;
+  }
+
+  // NEU: Backup/Restore Section
+  createBackupRestoreSection() {
+    const section = document.createElement("div");
+    section.className = "card";
+    section.innerHTML = `
+		<h3>Einstellungen sichern</h3>
+		<div style="margin-top: 12px;">
+			<!-- Button Container -->
+			<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+				<button class="btn btn-primary" onclick="app.views.settings.exportSettings()" 
+						style="padding: 12px; font-weight: bold; height:45px;">
+					💾 Backup
+				</button>
+				<button class="btn btn-secondary" onclick="app.views.settings.showImportSettings()" 
+						style="padding: 12px; height:45px;">
+					📁 Restore
+				</button>
+			</div>
+			
+			<!-- Info Text -->
+			<div style="background-color: #f0f8ff; padding: 12px; border-radius: 6px; border-left: 4px solid #0066cc;">
+				<div style="font-size: 13px; color: #0066cc; margin-bottom: 4px; font-weight: 500;">
+					💡 Hinweis:
+				</div>
+				<div style="font-size: 12px; color: #4a5568; line-height: 1.4;">
+					• <strong>Backup:</strong> Exportiert alle Einstellungen, Disziplinen und Vereinslogo<br>
+					• <strong>Wiederherstellen:</strong> Lädt gespeicherte Einstellungen (Teams/Ergebnisse bleiben erhalten)<br>
+					• <strong>Dateiformat:</strong> JSON-Datei mit .settings.json Endung
+				</div>
+			</div>
+		</div>
+		`;
     return section;
   }
 
@@ -310,6 +348,197 @@ class SettingsView {
       console.error("Error deleting logo:", error);
       alert("Fehler beim Löschen des Logos: " + error.message);
     }
+  }
+
+  // NEU: Backup/Restore Methoden
+  exportSettings() {
+    try {
+      const settingsData = {
+        availableDisciplines: storage.availableDisciplines,
+        selectedDiscipline: storage.selectedDiscipline,
+        selectedCompetitionType: storage.selectedCompetitionType,
+        settings: storage.settings, // Enthält Logo
+        exportDate: new Date().toISOString(),
+        exportVersion: APP_VERSION || "1.0.0"
+      };
+
+      const dataStr = JSON.stringify(settingsData, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      
+      // Erstelle Download-Link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Dateiname mit Timestamp
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      link.download = `rundenkampf-settings-${timestamp}.json`;
+      
+      // Trigger Download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      UIUtils.showSuccessMessage("Einstellungen-Backup erstellt!");
+      
+    } catch (error) {
+      console.error("Error exporting settings:", error);
+      alert("Fehler beim Erstellen des Backups: " + error.message);
+    }
+  }
+
+  showImportSettings() {
+    const content = document.createElement("div");
+    content.innerHTML = `
+      <div class="form-section">
+        <div class="form-section-header">Einstellungen-Backup wiederherstellen</div>
+        <div class="form-row">
+          <p style="margin-bottom: 12px; font-size: 14px; color: #666;">
+            Wählen Sie eine zuvor exportierte Einstellungen-Datei aus.<br>
+            <strong>Achtung:</strong> Ihre aktuellen Einstellungen werden überschrieben!
+          </p>
+          <input type="file" id="settingsFileInput" accept=".json" class="form-input" style="padding: 8px;">
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <div class="form-section-header">Vorschau</div>
+        <div id="settingsPreview" style="max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; background: #f8f9fa; padding: 8px; border-radius: 4px;">
+          Keine Datei ausgewählt
+        </div>
+      </div>
+    `;
+
+    const modal = new ModalComponent("Einstellungen wiederherstellen", content);
+
+    modal.addAction("Abbrechen", null, false, false);
+    modal.addAction(
+      "Wiederherstellen",
+      () => {
+        this.processSettingsImport();
+      },
+      true,
+      false
+    );
+
+    modal.show();
+
+    // Setup file input handler
+    setTimeout(() => {
+      const fileInput = document.getElementById("settingsFileInput");
+      if (fileInput) {
+        fileInput.addEventListener("change", (e) => {
+          this.previewSettingsFile(e.target.files[0]);
+        });
+      }
+    }, 100);
+  }
+
+  previewSettingsFile(file) {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target.result;
+        const settingsData = JSON.parse(content);
+
+        let preview = "<strong>Einstellungen gefunden:</strong><br><br>";
+        
+        if (settingsData.exportDate) {
+          const exportDate = new Date(settingsData.exportDate).toLocaleString('de-DE');
+          preview += `📅 <strong>Export-Datum:</strong> ${exportDate}<br>`;
+        }
+        
+        if (settingsData.exportVersion) {
+          preview += `🏷️ <strong>Version:</strong> ${settingsData.exportVersion}<br><br>`;
+        }
+
+        if (settingsData.selectedCompetitionType) {
+          preview += `🎯 <strong>Wettbewerbsmodus:</strong> ${settingsData.selectedCompetitionType}<br>`;
+        }
+
+        if (settingsData.selectedDiscipline) {
+          preview += `📋 <strong>Aktuelle Disziplin:</strong> ${settingsData.selectedDiscipline}<br>`;
+        }
+
+        if (settingsData.availableDisciplines && settingsData.availableDisciplines.length > 0) {
+          preview += `📝 <strong>Disziplinen:</strong> ${settingsData.availableDisciplines.length} Einträge<br>`;
+        }
+
+        if (settingsData.settings && settingsData.settings.clubLogo) {
+          preview += `🖼️ <strong>Vereinslogo:</strong> Enthalten<br>`;
+        }
+
+        const previewDiv = document.getElementById("settingsPreview");
+        if (previewDiv) {
+          previewDiv.innerHTML = preview;
+        }
+      } catch (error) {
+        const previewDiv = document.getElementById("settingsPreview");
+        if (previewDiv) {
+          previewDiv.innerHTML = `<span style="color: red;">❌ Fehler: Ungültige JSON-Datei</span>`;
+        }
+      }
+    };
+
+    reader.readAsText(file, "UTF-8");
+  }
+
+  processSettingsImport() {
+    const fileInput = document.getElementById("settingsFileInput");
+    const file = fileInput?.files[0];
+
+    if (!file) {
+      alert("Bitte wählen Sie eine Einstellungen-Datei aus.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target.result;
+        const settingsData = JSON.parse(content);
+
+        // Validierung
+        if (!settingsData.availableDisciplines && !settingsData.selectedCompetitionType && !settingsData.settings) {
+          throw new Error("Ungültige Einstellungen-Datei");
+        }
+
+        // Importiere Einstellungen
+        if (settingsData.availableDisciplines) {
+          storage.availableDisciplines = settingsData.availableDisciplines;
+        }
+
+        if (settingsData.selectedDiscipline) {
+          storage.selectedDiscipline = settingsData.selectedDiscipline;
+        }
+
+        if (settingsData.selectedCompetitionType) {
+          storage.selectedCompetitionType = settingsData.selectedCompetitionType;
+        }
+
+        if (settingsData.settings) {
+          // Merge settings, keep existing if not in backup
+          storage.settings = { ...storage.settings, ...settingsData.settings };
+        }
+
+        // Speichern
+        storage.save();
+
+        UIUtils.showSuccessMessage("Einstellungen erfolgreich wiederhergestellt!");
+        
+        // Refresh the settings view
+        setTimeout(() => app.showView("settings"), 1000);
+
+      } catch (error) {
+        console.error("Settings import error:", error);
+        alert("Fehler beim Wiederherstellen der Einstellungen: " + error.message);
+      }
+    };
+
+    reader.readAsText(file, "UTF-8");
   }
 
   updateLogoPreview() {
