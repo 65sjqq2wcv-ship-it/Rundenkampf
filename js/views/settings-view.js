@@ -129,11 +129,11 @@ class SettingsView {
 			<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
 				<button class="btn btn-primary" onclick="app.views.settings.exportSettings()" 
 						style="padding: 12px; font-weight: bold; height:45px;">
-					💾 Backup
+					💾 Export
 				</button>
 				<button class="btn btn-secondary" onclick="app.views.settings.showImportSettings()" 
 						style="padding: 12px; height:45px;">
-					📁 Restore
+					📁 Import
 				</button>
 			</div>
 			
@@ -364,16 +364,16 @@ class SettingsView {
 
       const dataStr = JSON.stringify(settingsData, null, 2);
       const blob = new Blob([dataStr], { type: 'application/json' });
-      
+
       // Erstelle Download-Link
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      
+
       // Dateiname mit Timestamp
       const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
       link.download = `rundenkampf-settings-${timestamp}.json`;
-      
+
       // Trigger Download
       document.body.appendChild(link);
       link.click();
@@ -381,7 +381,7 @@ class SettingsView {
       URL.revokeObjectURL(url);
 
       UIUtils.showSuccessMessage("Einstellungen-Backup erstellt!");
-      
+
     } catch (error) {
       console.error("Error exporting settings:", error);
       alert("Fehler beim Erstellen des Backups: " + error.message);
@@ -445,12 +445,12 @@ class SettingsView {
         const settingsData = JSON.parse(content);
 
         let preview = "<strong>Einstellungen gefunden:</strong><br><br>";
-        
+
         if (settingsData.exportDate) {
           const exportDate = new Date(settingsData.exportDate).toLocaleString('de-DE');
           preview += `📅 <strong>Export-Datum:</strong> ${exportDate}<br>`;
         }
-        
+
         if (settingsData.exportVersion) {
           preview += `🏷️ <strong>Version:</strong> ${settingsData.exportVersion}<br><br>`;
         }
@@ -528,7 +528,7 @@ class SettingsView {
         storage.save();
 
         UIUtils.showSuccessMessage("Einstellungen erfolgreich wiederhergestellt!");
-        
+
         // Refresh the settings view
         setTimeout(() => app.showView("settings"), 1000);
 
