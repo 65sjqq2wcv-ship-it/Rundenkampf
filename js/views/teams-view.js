@@ -595,12 +595,13 @@ class TeamsView {
           try {
             const content = e.target.result;
             const data = JSON.parse(content);
-            storage.importData(data);
-            UIUtils.showSuccessMessage("Daten importiert!");
-            app.showView("teams");
+
+            // Zeige Vorschau der Daten
+            this.showDataPreview(data);
+
           } catch (error) {
-            console.error("Error importing data:", error);
-            alert("Fehler beim Importieren der Daten: " + error.message);
+            console.error("Error reading data:", error);
+            alert("Fehler beim Lesen der Daten: " + error.message);
           }
         };
         reader.readAsText(file);
@@ -608,4 +609,47 @@ class TeamsView {
     };
     fileInput.click();
   }
+
+  showDataPreview(data) {
+    const modal = new ModalComponent("Vorschau", this.createDataPreviewContent(data));
+    modal.addAction("Schließen", null, false, false);
+    modal.addAction("Importieren", () => this.confirmDataImport(data), true, false);
+    modal.show();
+  }
+
+  createDataPreviewContent(data) {
+    const content = document.createElement("div");
+    content.innerHTML = `
+    <div style="padding: 20px; border: 1px solid #ccc; border-radius: 8px; background-color: #f9f9f9; font-family: monospace;">
+      <p><strong>Einstellungen gefunden:</strong></p><br>
+      ${this.formatDataPreview(data)}
+    </div>
+  `;
+    return content;
+  }
+
+  formatDataPreview(data) {
+    let preview = "";
+    if (data.exportDate) {
+      const exportDate = new Date(data.exportDate).toLocaleString('de-DE');
+      preview += `<p>📅 <strong>Export-Datum:</strong> ${exportDate}</p><br>`;
+    }
+    if (data.teams && data.teams.length > 0) {
+      preview += `<p>👥 <strong>Teams:</strong> ${data.teams.length} Einträge</p>`;
+    }
+    if (data.standaloneShooters && data.standaloneShooters.length > 0) {
+      preview += `<p>👤 <strong>Einzelschützen:</strong> ${data.standaloneShooters.length} Einträge</p>`;
+    }
+    if (data.availableDisciplines && data.availableDisciplines.length > 0) {
+      preview += `<p>📝 <strong>Verfügbare Disziplinen:</strong> ${data.availableDisciplines.length} Einträge</p>`;
+    }
+    return preview;
+  }
+
+  confirmDataImport(data) {
+    storage.importData(data);
+    UIUtils.showSuccessMessage("Daten importiert!");
+    app.showView("teams");
+  }
+
 }

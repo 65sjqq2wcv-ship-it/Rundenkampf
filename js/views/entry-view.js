@@ -120,7 +120,7 @@ class EntryView {
     row.className = "form-row";
     // Inline style für nebeneinander Layout
     row.style.cssText =
-      "display: flex; align-items: center; gap: 12px; margin-bottom: 12px;";
+      "display: flex; align-items: center; gap: 12px; margin-bottom: 0px;";
 
     const label = document.createElement("label");
     label.className = "form-label";
@@ -258,7 +258,7 @@ class EntryView {
       this.currentShotIndex = -1;
       const maxShots =
         getCompetitionType(this.selectedDiscipline) ===
-        CompetitionType.ANNEX_SCHEIBE
+          CompetitionType.ANNEX_SCHEIBE
           ? 40
           : 20;
 
@@ -1054,7 +1054,7 @@ class EntryView {
       this.currentShotIndex = -1;
       const maxShots =
         getCompetitionType(this.selectedDiscipline) ===
-        CompetitionType.ANNEX_SCHEIBE
+          CompetitionType.ANNEX_SCHEIBE
           ? 40
           : 20;
       for (let i = 0; i < maxShots; i++) {
@@ -1229,7 +1229,7 @@ class EntryView {
     const title = document.getElementById("shotsTitle");
     if (title) {
       const shooterInfo = this.getSelectedShooterInfo();
-      const shooterText = shooterInfo ? `${shooterInfo}` : "";
+      const shooterText = shooterInfo ? `${shooterInfo}` : "noch kein Schütze ausgewählt";
 
       // Leere zuerst den Container
       title.innerHTML = "";
@@ -1418,50 +1418,20 @@ class EntryView {
     stats.appendChild(firstLineDiv);
 
     // Zweite Zeile: Schuss-Gruppierung (nur für Präzision/Duell)
-    if (
-      competitionType !== CompetitionType.ANNEX_SCHEIBE &&
-      filledShots.length > 0
-    ) {
-      const shotDistribution = this.calculateShotDistribution(filledShots);
-      if (shotDistribution) {
-        const distributionDiv = document.createElement("div");
-        distributionDiv.style.cssText =
-          "font-size: 12px; color: #666; text-align: center; margin-top: 4px;";
-        distributionDiv.textContent = shotDistribution;
-        stats.appendChild(distributionDiv);
+    if (competitionType !== CompetitionType.ANNEX_SCHEIBE) {
+      const distributionDiv = document.createElement("div");
+      distributionDiv.style.cssText =
+        "font-size: 12px; color: #666; text-align: center; background: #f8f9fa; border-radius: 8px; padding: 12px; margin-top: 12px; margin-bottom: 0px";
+
+      if (filledShots.length > 0) {
+        const shotDistribution = this.calculateShotDistribution(filledShots);
+        distributionDiv.textContent = shotDistribution || "noch nichts erfasst";
+      } else {
+        distributionDiv.textContent = "noch nichts erfasst";
       }
+
+      stats.appendChild(distributionDiv);
     }
-  }
-
-  // NEU: Methode zur Berechnung der Schuss-Verteilung
-  calculateShotDistribution(shots) {
-    if (!shots || shots.length === 0) return "";
-
-    // Zähle jede Ringzahl
-    const counts = {};
-    shots.forEach((shot) => {
-      counts[shot] = (counts[shot] || 0) + 1;
-    });
-
-    // Sortiere nach Ringzahl (absteigend) und erstelle Text
-    const distribution = Object.entries(counts)
-      .map(([rings, count]) => {
-        if (rings === "0") {
-          return `${count}×-`;
-        }
-        return `${count}×${rings}`;
-      })
-      .sort((a, b) => {
-        // Sortiere nach Ringzahl (extrahiere Zahl aus "2×10" Format)
-        const getRingValue = (str) => {
-          if (str.includes("×-")) return 0;
-          return parseInt(str.split("×")[1]) || 0;
-        };
-        return getRingValue(b) - getRingValue(a);
-      })
-      .join("  ");
-
-    return distribution;
   }
 
   updateSeriesSummary() {
@@ -1544,7 +1514,7 @@ class EntryView {
       if (team) {
         shooter = team.shooters.find((s) => s.id === this.selectedShooterId);
         teamName = team.name;
-        return `${shooter?.name} (${teamName})`;
+        return `${shooter?.name} - ${teamName}`;
       }
     } else {
       shooter = storage.standaloneShooters.find(
@@ -2193,15 +2163,11 @@ class EntryView {
     // Sortiere nach Ringzahl (absteigend) und erstelle Text
     const distribution = Object.entries(counts)
       .map(([rings, count]) => {
-        if (rings === "0") {
-          return `${count}×-`;
-        }
         return `${count}×${rings}`;
       })
       .sort((a, b) => {
         // Sortiere nach Ringzahl (extrahiere Zahl aus "2×10" Format)
         const getRingValue = (str) => {
-          if (str.includes("×-")) return 0;
           return parseInt(str.split("×")[1]) || 0;
         };
         return getRingValue(b) - getRingValue(a);
@@ -2418,9 +2384,8 @@ class EntryView {
       <div style="font-size: 48px; margin-bottom: 16px;">📷❌</div>
       <h3 style="color: #ff3b30; margin-bottom: 16px;">${userMessage}</h3>
       
-      ${
-        suggestions.length > 0
-          ? `
+      ${suggestions.length > 0
+        ? `
         <div style="text-align: left; margin: 20px 0;">
           <h4 style="margin-bottom: 8px;">Lösungsvorschläge:</h4>
           <ul style="margin-left: 20px;">
@@ -2428,7 +2393,7 @@ class EntryView {
           </ul>
         </div>
       `
-          : ""
+        : ""
       }
       
       <div style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 12px; color: #666;">
@@ -2578,7 +2543,7 @@ class EntryView {
 
     const modal = new ModalComponent("Foto mit Overlay versehen", modalContent);
 
-    modal.addAction("Abbrechen", () => {}, false, false);
+    modal.addAction("Abbrechen", () => { }, false, false);
 
     modal.addAction(
       "Overlay hinzufügen",
