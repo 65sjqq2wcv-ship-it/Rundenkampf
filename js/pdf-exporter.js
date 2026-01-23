@@ -52,8 +52,8 @@ class PDFExporter {
 
       this.logoBase64 = logoBase64;
 
-      const filteredTeams = this.getFilteredTeams();
-      const filteredStandaloneShooters = this.getFilteredStandaloneShooters(); // NEU
+      const filteredTeams = storage.getFilteredTeams();
+      const filteredStandaloneShooters = storage.getFilteredStandaloneShooters(); // NEU
       const competitionType = storage.selectedCompetitionType;
 
       // HTML-Content erstellen
@@ -522,25 +522,6 @@ class PDFExporter {
   // =================================================================
   // HILFSMETHODEN (erweitert)
   // =================================================================
-
-  getFilteredTeams() {
-    if (storage.visibleTeamIds) {
-      return storage.teams.filter((team) =>
-        storage.visibleTeamIds.has(team.id)
-      );
-    }
-    return storage.teams;
-  }
-
-  // NEU: Methode für gefilterte Einzelschützen
-  getFilteredStandaloneShooters() {
-    if (storage.visibleShooterIds) {
-      return storage.standaloneShooters.filter((shooter) =>
-        storage.visibleShooterIds.has(shooter.id)
-      );
-    }
-    return storage.standaloneShooters;
-  }
 
   prepareShooterData(team, competitionType) {
     if (competitionType === CompetitionType.ANNEX_SCHEIBE) {

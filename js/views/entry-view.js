@@ -403,7 +403,7 @@ class EntryView {
     const disciplines = [
       { value: Discipline.PRAEZISION, text: "Präzision" },
       { value: Discipline.DUELL, text: "Duell" },
-      { value: Discipline.ANNEX_SCHEIBE, text: "Annex Scheibe" },
+      { value: Discipline.ANNEX_SCHEIBE, text: "Annex" },
     ];
 
     disciplines.forEach((discipline) => {

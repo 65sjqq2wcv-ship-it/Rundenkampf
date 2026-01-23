@@ -18,7 +18,7 @@ class OverviewView {
       }
 
       // Teams overview
-      const filteredTeams = this.getFilteredTeams();
+      const filteredTeams = storage.getFilteredTeams();
 
       // Always show teams even without results
       if (filteredTeams.length > 0) {
@@ -29,7 +29,7 @@ class OverviewView {
       }
 
       // Standalone shooters overview - MIT FILTER
-      const filteredStandaloneShooters = this.getFilteredStandaloneShooters();
+      const filteredStandaloneShooters = storage.getFilteredStandaloneShooters();
       if (filteredStandaloneShooters.length > 0) {
         const soloCard = this.createSoloShootersCard();
         container.appendChild(soloCard);
@@ -353,7 +353,7 @@ class OverviewView {
     card.appendChild(header);
 
     // Use filtered shooters instead of all shooters
-    const filteredShooters = this.getFilteredStandaloneShooters();
+    const filteredShooters = storage.getFilteredStandaloneShooters();
 
     if (filteredShooters.length === 0) {
       const noShooters = document.createElement("div");
@@ -442,7 +442,7 @@ class OverviewView {
     card.appendChild(header);
 
     // Use filtered shooters instead of all shooters
-    const filteredShooters = this.getFilteredStandaloneShooters();
+    const filteredShooters = storage.getFilteredStandaloneShooters();
 
     if (filteredShooters.length === 0) {
       const noShooters = document.createElement("div");
@@ -623,25 +623,6 @@ class OverviewView {
     return sorted[0]?.id;
   }
 
-  getFilteredTeams() {
-    if (storage.visibleTeamIds) {
-      return storage.teams.filter((team) =>
-        storage.visibleTeamIds.has(team.id)
-      );
-    }
-    return storage.teams;
-  }
-
-  // Neue Methode für gefilterte Einzelschützen
-  getFilteredStandaloneShooters() {
-    if (storage.visibleShooterIds) {
-      return storage.standaloneShooters.filter((shooter) =>
-        storage.visibleShooterIds.has(shooter.id)
-      );
-    }
-    return storage.standaloneShooters;
-  }
-
   // Erweiterte showFilterModal Funktion
   showFilterModal() {
     const content = document.createElement("div");
@@ -798,16 +779,6 @@ class OverviewView {
 
     storage.save();
     UIUtils.showSuccessMessage("Filter aktualisiert");
-  }
-
-  // Neue Funktion für gefilterte Einzelschützen
-  getFilteredStandaloneShooters() {
-    if (storage.visibleShooterIds) {
-      return storage.standaloneShooters.filter((shooter) =>
-        storage.visibleShooterIds.has(shooter.id)
-      );
-    }
-    return storage.standaloneShooters;
   }
 
   exportToPDF() {

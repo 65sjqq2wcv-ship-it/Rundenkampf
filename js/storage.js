@@ -481,6 +481,15 @@ class Storage {
     return this.standaloneShooters;
   }
 
+  getFilteredTeams() {
+    if (this.visibleTeamIds) {
+      return this.teams.filter((team) =>
+        this.visibleTeamIds.has(team.id)
+      );
+    }
+    return this.teams;
+  }
+
   // Berechnungsmethoden
   calculateBestThreeSum(team) {
     if (!team || team.shooters.length === 0) return 0;

@@ -2,12 +2,12 @@
 const Discipline = {
   PRAEZISION: "Präzision",
   DUELL: "Duell",
-  ANNEX_SCHEIBE: "Annex Scheibe",
+  ANNEX_SCHEIBE: "Annex",
 };
 
 const CompetitionType = {
   PRAEZISION_DUELL: "Präzision/Duell",
-  ANNEX_SCHEIBE: "Annex Scheibe",
+  ANNEX_SCHEIBE: "Annex",
 };
 
 // Utility Functions
