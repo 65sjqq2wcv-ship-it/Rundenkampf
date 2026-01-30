@@ -188,6 +188,11 @@ class SettingsView {
              min="0.5" max="5.0" step="0.1" 
              value="${storage.settings.overlayScale || 3.0}"
              style="width: 100%; margin-bottom: 16px;">
+             <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-top: 4px; margin-bottom: 12px;">
+        <span>klein (0,5x)</span>
+        <span>Standard (3x)</span>
+        <span>groß (5x)</span>
+      </div>
       
       <!-- Transparenz -->
       <label style="display: block; font-weight: 600; margin-bottom: 8px;">
@@ -198,7 +203,7 @@ class SettingsView {
              value="${storage.settings.overlayOpacity || 0.8}"
              style="width: 100%;">
       <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-top: 4px;">
-        <span>Transparent (20%)</span>
+        <span>sehr Duchsichtig (20%)</span>
         <span>Standard (80%)</span>
         <span>Undurchsichtig (100%)</span>
       </div>
