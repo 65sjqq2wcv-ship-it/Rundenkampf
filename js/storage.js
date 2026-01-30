@@ -9,7 +9,9 @@ class Storage {
     this.availableDisciplines = [];
     this.selectedDiscipline = null;
     this.selectedCompetitionType = CompetitionType.PRAEZISION_DUELL;
-    this.settings = {};
+    this.settings = {
+      overlayScale: 3.0, // Default-Wert
+    };
 
     this.load();
   }

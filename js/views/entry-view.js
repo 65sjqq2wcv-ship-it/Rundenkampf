@@ -2025,25 +2025,29 @@ class EntryView {
   addOverlayToCanvas(ctx, width, height, shooterInfo, customShots = null) {
     const competitionType = getCompetitionType(this.selectedDiscipline);
 
-    // Angepasste Box-Größen - KOMPAKTER für Annex
+    // SKALIERUNGSFAKTOR
+    //const scale = 3;
+    const scale = storage.settings.overlayScale || 3.0;
+
+    // Angepasste Box-Größen - 3x größer
     const isAnnex = competitionType === CompetitionType.ANNEX_SCHEIBE;
-    const boxWidth = Math.min(width * 0.9, isAnnex ? 420 : 370);
-    const boxHeight = isAnnex ? 270 : 270;
-    const x = 20;
-    const y = 20;
+    const boxWidth = Math.min(width * 0.9, (isAnnex ? 420 : 370) * scale);
+    const boxHeight = (isAnnex ? 270 : 270) * scale;
+    const x = 20 * scale;
+    const y = 20 * scale;
 
     // Box zeichnen
     ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
     ctx.fillRect(x, y, boxWidth, boxHeight);
 
-    // Rahmen
+    // Rahmen - 3x dicker
     ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2 * scale;
     ctx.strokeRect(x, y, boxWidth, boxHeight);
 
-    // Text-Stil für Header-Infos
+    // Text-Stil für Header-Infos - 3x größer
     ctx.fillStyle = "black";
-    ctx.font = "bold 14px Arial";
+    ctx.font = `bold ${14 * scale}px Arial`;
     ctx.textAlign = "left";
 
     // Header-Informationen
@@ -2055,40 +2059,42 @@ class EntryView {
     ];
 
     info.forEach((line, index) => {
-      ctx.fillText(line, x + 10, y + 20 + index * 18);
+      ctx.fillText(line, x + (10 * scale), y + (20 * scale) + index * (18 * scale));
     });
 
     // Schuss-Matrix zeichnen
-    const matrixStartY = y + 100;
+    const matrixStartY = y + (100 * scale);
 
     if (isAnnex) {
       this.drawAnnexMatrix(
         ctx,
-        x + 10,
+        x + (10 * scale),
         matrixStartY,
-        boxWidth - 20,
+        boxWidth - (20 * scale),
         customShots,
+        scale  // Skalierung als Parameter übergeben
       );
     } else {
       // STANDARD MATRIX
       this.drawStandardMatrix(
         ctx,
-        x + 10,
+        x + (10 * scale),
         matrixStartY,
-        boxWidth - 20,
+        boxWidth - (20 * scale),
         customShots,
+        scale  // Skalierung als Parameter übergeben
       );
     }
   }
 
-  drawStandardMatrix(ctx, startX, startY, maxWidth, customShots = null) {
-    const cellSize = Math.min(25, (maxWidth - 40) / 5);
-    const gap = 3;
+  drawStandardMatrix(ctx, startX, startY, maxWidth, customShots = null, scale = 1) {
+    const cellSize = Math.min(25 * scale, (maxWidth - (40 * scale)) / 5);
+    const gap = 3 * scale;
 
     // Verwende entweder die übergebenen Schuss-Daten oder die aktuellen
     const shotsToUse = customShots || this.shots;
 
-    ctx.font = "bold 12px Arial";
+    ctx.font = `bold ${12 * scale}px Arial`;
     ctx.textAlign = "center";
     ctx.fillStyle = "black";
 
@@ -2101,7 +2107,7 @@ class EntryView {
 
         // Zelle zeichnen
         ctx.strokeStyle = "#666";
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1 * scale;
         ctx.strokeRect(cellX, cellY, cellSize, cellSize);
 
         // Schuss-Wert
@@ -2111,11 +2117,11 @@ class EntryView {
           ctx.fillText(
             shotValue.toString(),
             cellX + cellSize / 2,
-            cellY + cellSize / 2 + 4,
+            cellY + cellSize / 2 + (4 * scale),
           );
         } else {
           ctx.fillStyle = "#ccc";
-          ctx.fillText("—", cellX + cellSize / 2, cellY + cellSize / 2 + 4);
+          ctx.fillText("—", cellX + cellSize / 2, cellY + cellSize / 2 + (4 * scale));
         }
       }
     }
@@ -2124,7 +2130,7 @@ class EntryView {
     const filledShots = shotsToUse.slice(0, 20).filter((s) => s !== null);
     const total = filledShots.reduce((sum, shot) => sum + shot, 0);
 
-    ctx.font = "bold 14px Arial";
+    ctx.font = `bold ${14 * scale}px Arial`;
     ctx.fillStyle = "black";
     ctx.textAlign = "left";
 
@@ -2132,19 +2138,19 @@ class EntryView {
     ctx.fillText(
       `Schüsse: ${filledShots.length}/20  |  Ringe: ${total}`,
       startX,
-      startY + 4 * (cellSize + gap) + 25,
+      startY + 4 * (cellSize + gap) + (25 * scale),
     );
 
     // Zweite Zeile: Schuss-Gruppierung (nur wenn Schüsse vorhanden sind)
     if (filledShots.length > 0) {
       const shotDistribution = this.calculateShotDistribution(filledShots);
       if (shotDistribution) {
-        ctx.font = "12px Arial"; // Etwas kleiner für die Gruppierung
+        ctx.font = `${12 * scale}px Arial`; // Etwas kleiner für die Gruppierung
         ctx.fillStyle = "#666"; // Etwas heller
         ctx.fillText(
           shotDistribution,
           startX,
-          startY + 4 * (cellSize + gap) + 45, // 20 Pixel unter der ersten Zeile
+          startY + 4 * (cellSize + gap) + (45 * scale), // 20 Pixel unter der ersten Zeile
         );
       }
     }
@@ -2177,47 +2183,47 @@ class EntryView {
     return distribution;
   }
 
-  drawAnnexMatrix(ctx, startX, startY, maxWidth, customShots = null) {
-    const cellSize = Math.min(20, (maxWidth - 60) / 9);
-    const gap = 2;
+  drawAnnexMatrix(ctx, startX, startY, maxWidth, customShots = null, scale = 1) {
+    const cellSize = Math.min(20 * scale, (maxWidth - (60 * scale)) / 9);
+    const gap = 2 * scale;
 
     // Verwende entweder die übergebenen Schuss-Daten oder die aktuellen
     const shotsToUse = customShots || this.shots;
 
-    ctx.font = "10px Arial";
+    ctx.font = `${10 * scale}px Arial`;
     ctx.textAlign = "center";
     ctx.fillStyle = "black";
 
     // Header: Serie | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
-    const headerY = startY - 5;
-    ctx.font = "bold 10px Arial";
-    ctx.fillText("Serie", startX + 20, headerY);
+    const headerY = startY - (5 * scale);
+    ctx.font = `bold ${10 * scale}px Arial`;
+    ctx.fillText("Serie", startX + (20 * scale), headerY);
     for (let i = 1; i <= 8; i++) {
-      ctx.fillText(i.toString(), startX + 48 + i * (cellSize + gap), headerY);
+      ctx.fillText(i.toString(), startX + (48 * scale) + i * (cellSize + gap), headerY);
     }
 
     // 5 Serien × 8 Schüsse = 40 Schüsse
-    ctx.font = "10px Arial";
+    ctx.font = `${10 * scale}px Arial`;
     const seriesSums = [];
 
     for (let series = 0; series < 5; series++) {
       const rowY = startY + series * (cellSize + gap);
 
       // Serie-Label (S1, S2, etc.)
-      ctx.font = "bold 10px Arial";
+      ctx.font = `bold ${10 * scale}px Arial`;
       ctx.fillStyle = "black"; // EXPLIZIT SCHWARZ
-      ctx.fillText(`S${series + 1}`, startX + 20, rowY + cellSize / 2 + 3);
+      ctx.fillText(`S${series + 1}`, startX + (20 * scale), rowY + cellSize / 2 + (3 * scale));
 
-      ctx.font = "10px Arial";
+      ctx.font = `${10 * scale}px Arial`;
       let seriesSum = 0;
 
       for (let shot = 0; shot < 8; shot++) {
         const shotIndex = series * 8 + shot;
-        const cellX = startX + 40 + (shot + 1) * (cellSize + gap);
+        const cellX = startX + (40 * scale) + (shot + 1) * (cellSize + gap);
 
         // Zelle zeichnen
         ctx.strokeStyle = "#666";
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1 * scale;
         ctx.strokeRect(cellX, rowY, cellSize, cellSize);
 
         // Schuss-Wert
@@ -2227,12 +2233,12 @@ class EntryView {
           ctx.fillText(
             shotValue.toString(),
             cellX + cellSize / 2,
-            rowY + cellSize / 2 + 3,
+            rowY + cellSize / 2 + (3 * scale),
           );
           seriesSum += shotValue;
         } else {
           ctx.fillStyle = "#ccc";
-          ctx.fillText("—", cellX + cellSize / 2, rowY + cellSize / 2 + 3);
+          ctx.fillText("—", cellX + cellSize / 2, rowY + cellSize / 2 + (3 * scale));
         }
       }
 
@@ -2243,9 +2249,9 @@ class EntryView {
     const filledShots = shotsToUse.slice(0, 40).filter((s) => s !== null);
     const total = filledShots.reduce((sum, shot) => sum + shot, 0);
 
-    const summaryY = startY + 5 * (cellSize + gap) + 25;
+    const summaryY = startY + 5 * (cellSize + gap) + (25 * scale);
 
-    ctx.font = "bold 12px Arial";
+    ctx.font = `bold ${12 * scale}px Arial`;
     ctx.fillStyle = "black";
     ctx.textAlign = "left";
 
@@ -2255,11 +2261,11 @@ class EntryView {
       .join("  ");
     ctx.fillText(seriesText, startX, summaryY);
 
-    // Gesamtergebnis
+    // Gesamt
     ctx.fillText(
       `Schüsse: ${filledShots.length}/40  |  Gesamt: ${total}`,
       startX,
-      summaryY + 18,
+      summaryY + (20 * scale),
     );
   }
 

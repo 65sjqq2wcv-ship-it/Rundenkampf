@@ -12,6 +12,10 @@ class SettingsView {
       const currentDisciplineSection = this.createCurrentDisciplineSection();
       container.appendChild(currentDisciplineSection);
 
+      // NEU: Overlay Scale Section
+      const overlayScaleSection = this.createOverlayScaleSection();
+      container.appendChild(overlayScaleSection);
+
       // NEU: Logo Upload Section
       const logoSection = this.createLogoUploadSection();
       container.appendChild(logoSection);
@@ -170,6 +174,29 @@ class SettingsView {
     return section;
   }
 
+  createOverlayScaleSection() {
+    const section = document.createElement("div");
+    section.className = "card";
+    section.innerHTML = `
+    <h3>Foto-Overlay</h3>
+    <div style="margin-top: 12px;">
+      <label style="display: block; font-weight: 600; margin-bottom: 8px;">
+        Overlay-Größe: <span id="scaleValue">${storage.settings.overlayScale || 3.0}x</span>
+      </label>
+      <input type="range" id="overlayScaleSlider" 
+             min="0.5" max="5.0" step="0.1" 
+             value="${storage.settings.overlayScale || 3.0}"
+             style="width: 100%; margin-bottom: 8px;">
+      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666;">
+        <span>Klein (0.5x)</span>
+        <span>Normal (1x)</span>
+        <span>Groß (5x)</span>
+      </div>
+    </div>
+  `;
+    return section;
+  }
+
   createInfoSection() {
     const section = document.createElement("div");
     section.className = "card";
@@ -202,6 +229,18 @@ class SettingsView {
     const currentDisciplineSelect = document.getElementById(
       "currentDisciplineSelect"
     );
+
+    const scaleSlider = document.getElementById("overlayScaleSlider");
+    const scaleValue = document.getElementById("scaleValue");
+
+    if (scaleSlider && scaleValue) {
+      scaleSlider.addEventListener("input", (e) => {
+        const value = parseFloat(e.target.value);
+        scaleValue.textContent = `${value}x`;
+        storage.settings.overlayScale = value;
+        storage.save();
+      });
+    }
 
     if (competitionTypeSelect) {
       competitionTypeSelect.value = storage.selectedCompetitionType;
