@@ -178,19 +178,29 @@ class SettingsView {
     const section = document.createElement("div");
     section.className = "card";
     section.innerHTML = `
-    <h3>Foto-Overlay</h3>
+    <h3>Foto-Overlay Einstellungen</h3>
     <div style="margin-top: 12px;">
+      <!-- Größe -->
       <label style="display: block; font-weight: 600; margin-bottom: 8px;">
         Overlay-Größe: <span id="scaleValue">${storage.settings.overlayScale || 3.0}x</span>
       </label>
       <input type="range" id="overlayScaleSlider" 
              min="0.5" max="5.0" step="0.1" 
              value="${storage.settings.overlayScale || 3.0}"
-             style="width: 100%; margin-bottom: 8px;">
-      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666;">
-        <span>Klein (0.5x)</span>
-        <span>Normal (1x)</span>
-        <span>Groß (5x)</span>
+             style="width: 100%; margin-bottom: 16px;">
+      
+      <!-- Transparenz -->
+      <label style="display: block; font-weight: 600; margin-bottom: 8px;">
+        Transparenz: <span id="opacityValue">${Math.round((storage.settings.overlayOpacity || 0.8) * 100)}%</span>
+      </label>
+      <input type="range" id="overlayOpacitySlider" 
+             min="0.2" max="1.0" step="0.1" 
+             value="${storage.settings.overlayOpacity || 0.8}"
+             style="width: 100%;">
+      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-top: 4px;">
+        <span>Transparent (20%)</span>
+        <span>Standard (80%)</span>
+        <span>Undurchsichtig (100%)</span>
       </div>
     </div>
   `;
@@ -233,11 +243,25 @@ class SettingsView {
     const scaleSlider = document.getElementById("overlayScaleSlider");
     const scaleValue = document.getElementById("scaleValue");
 
+    // ✅ KORREKTUR: opacitySlider richtig definieren
+    const opacitySlider = document.getElementById("overlayOpacitySlider");
+    const opacityValue = document.getElementById("opacityValue");
+
     if (scaleSlider && scaleValue) {
       scaleSlider.addEventListener("input", (e) => {
         const value = parseFloat(e.target.value);
         scaleValue.textContent = `${value}x`;
         storage.settings.overlayScale = value;
+        storage.save();
+      });
+    }
+
+    // ✅ Jetzt funktioniert der Opacity Slider Event Listener
+    if (opacitySlider && opacityValue) {
+      opacitySlider.addEventListener("input", (e) => {
+        const value = parseFloat(e.target.value);
+        opacityValue.textContent = `${Math.round(value * 100)}%`;
+        storage.settings.overlayOpacity = value;
         storage.save();
       });
     }

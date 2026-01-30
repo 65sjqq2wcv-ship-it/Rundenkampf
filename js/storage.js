@@ -11,6 +11,7 @@ class Storage {
     this.selectedCompetitionType = CompetitionType.PRAEZISION_DUELL;
     this.settings = {
       overlayScale: 3.0, // Default-Wert
+      overlayOpacity: 0.8, // NEU: Default-Transparenz
     };
 
     this.load();
@@ -39,7 +40,10 @@ class Storage {
       this.availableDisciplines = this.defaultDisciplines();
       this.selectedDiscipline = this.availableDisciplines[0];
       this.selectedCompetitionType = CompetitionType.PRAEZISION_DUELL;
-      this.settings = {};
+      this.settings = {
+        overlayScale: 3.0,
+        overlayOpacity: 0.8, // NEU
+      };
       this.visibleTeamIds = null;
       this.visibleShooterIds = null; // NEU
     }

@@ -2028,6 +2028,7 @@ class EntryView {
     // SKALIERUNGSFAKTOR
     //const scale = 3;
     const scale = storage.settings.overlayScale || 3.0;
+    const opacity = storage.settings.overlayOpacity || 0.8; // NEU
 
     // Angepasste Box-Größen - 3x größer
     const isAnnex = competitionType === CompetitionType.ANNEX_SCHEIBE;
@@ -2036,8 +2037,8 @@ class EntryView {
     const x = 20 * scale;
     const y = 20 * scale;
 
-    // Box zeichnen
-    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    // Box zeichnen mit einstellbarer Transparenz
+     ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`; // GEÄNDERT
     ctx.fillRect(x, y, boxWidth, boxHeight);
 
     // Rahmen - 3x dicker
