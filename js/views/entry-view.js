@@ -2284,43 +2284,92 @@ class EntryView {
   }
 
   async downloadPhoto(canvas, shooterInfo) {
-    try {
-      const now = new Date();
-      const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
-      const shooterName = this.normalizeGermanChars(shooterInfo.name)
-        .replace(/[^\w]/g, "_")
-        .replace(/_+/g, "_") // Mehrfache Unterstriche zu einem
-        .replace(/^_|_$/g, ""); // Optional: Entfernt führende/nachfolgende Unterstriche
-      const disciplineName = this.normalizeGermanChars(
-        shooterInfo.discipline,
-      ).replace(/[^\w]/g, "_");
+  try {
+    // Canvas zu Blob konvertieren
+    canvas.toBlob(async (blob) => {
+      try {
+        // NEU: EXIF-Metadaten hinzufügen (auch offline)
+        const arrayBuffer = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = reject;
+          reader.readAsArrayBuffer(blob);
+        });
 
-      const fileName = `Scheibe_${timestamp}_${shooterName}_${disciplineName}.jpg`;
+        // EXIF-Metadaten hinzufügen
+        const imageWithExif = exifWriter.addMetadata(arrayBuffer, shooterInfo);
+        
+        // Blob für Download erstellen
+        const finalBlob = imageWithExif 
+          ? new Blob([imageWithExif], { type: 'image/jpeg' })
+          : blob; // Fallback bei EXIF-Fehlern
 
-      // Canvas zu Blob konvertieren
-      const blob = await new Promise((resolve) => {
-        canvas.toBlob(resolve, "image/jpeg", 0.9);
-      });
-
-      // Download starten
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      link.style.display = "none";
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-
-      console.log(`Photo saved as: ${fileName}`);
-    } catch (error) {
-      console.error("Error downloading photo:", error);
-      throw error;
-    }
+        // Download durchführen (bestehende Logik)
+        const url = URL.createObjectURL(finalBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        
+        // Dateiname erstellen
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+        const sanitizedName = (shooterInfo.shooterName || shooterInfo.name || 'shooter')
+          .replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
+        const sanitizedDiscipline = (shooterInfo.discipline || 'discipline')
+          .replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
+        
+        link.download = `${timestamp}_${sanitizedName}_${sanitizedDiscipline}.jpg`;
+        
+        // Download ausführen
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+      } catch (error) {
+        console.error('Error adding EXIF metadata:', error);
+        
+        // Fallback: Normaler Download ohne EXIF
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+        const sanitizedName = (shooterInfo.shooterName || shooterInfo.name || 'shooter')
+          .replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
+        const sanitizedDiscipline = (shooterInfo.discipline || 'discipline')
+          .replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
+        
+        link.download = `${timestamp}_${sanitizedName}_${sanitizedDiscipline}.jpg`;
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+    }, 'image/jpeg', 0.92);
+    
+  } catch (error) {
+    console.error('Error in downloadPhoto:', error);
+    UIUtils.showError('Fehler beim Speichern des Fotos: ' + error.message);
   }
+}
+
+  // NEU: Hilfsmethode für den Download (bestehende Logik)
+performDownload(blob, shooterInfo) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  
+  const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+  const sanitizedName = (shooterInfo.shooterName || shooterInfo.name || 'shooter').replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
+  const sanitizedDiscipline = (shooterInfo.discipline || 'discipline').replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
+  
+  link.download = `${timestamp}_${sanitizedName}_${sanitizedDiscipline}.jpg`;
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
 
   // =================================================================
   // ERROR HANDLING
