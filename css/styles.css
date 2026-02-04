@@ -1,5 +1,5 @@
 /* =================================================================
-   RUNDENKAMPFBERICHT - STYLES - VERBESSERT FÜR FESTE NAVIGATION
+   RUNDENKAMPFBERICHT - PROFESSIONELLE STYLES
    ================================================================= */
 
 /* =================================================================
@@ -20,65 +20,104 @@ html, body {
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #f2f2f7;
-  color: #000;
+  background-color: #f8fafb;
+  color: #1a202c;
 }
 
 /* =================================================================
-   2. CSS VARIABLEN (für bessere Wartbarkeit)
+   2. CSS VARIABLEN - PROFESSIONELLES FARBSCHEMA
    ================================================================= */
 
 :root {
-  --primary-color: #007aff;
-  --primary-hover: #0056cc;
-  --secondary-bg: #f2f2f7;
-  --secondary-hover: #e5e5ea;
-  --danger-color: #ff3b30;
-  --danger-hover: #d70015;
-  --success-color: #34c759;
-  --text-primary: #000;
-  --text-secondary: #8e8e93;
-  --text-muted: #666;
-  --border-color: #d1d1d6;
-  --border-light: #f0f0f0;
-  --background-white: white;
-  --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.1);
-  --shadow-heavy: 0 0 20px rgba(0, 0, 0, 0.1);
-  --shadow-modal: 0 10px 30px rgba(0, 0, 0, 0.3);
+  /* === PRIMÄRFARBEN === */
+  --primary-color: #2d3748;           /* Dunkelgrau-Blau - professionell */
+  --primary-hover: #1a202c;           /* Noch dunkler für Hover */
+  --primary-light: #4a5568;           /* Hellere Version */
+  
+  /* === AKZENTFARBEN === */
+  --accent-color: #3182ce;            /* Professionelles Blau für wichtige Actions */
+  --accent-hover: #2c5282;            /* Dunkleres Blau für Hover */
+  --accent-light: #90cdf4;            /* Helles Blau für Highlights */
+  
+  /* === HINTERGRUNDFARBEN === */
+  --background-primary: #f8fafb;      /* Sehr helles Grau - Haupthintergrund */
+  --background-white: #ffffff;        /* Reines Weiß für Karten */
+  --background-elevated: #f7fafc;     /* Leicht erhöhte Bereiche */
+  --secondary-bg: #edf2f7;            /* Sekundärer Hintergrund */
+  --secondary-hover: #e2e8f0;         /* Hover-Zustand */
+  
+  /* === TEXTFARBEN === */
+  --text-primary: #1a202c;            /* Primärer Text - sehr dunkel */
+  --text-secondary: #4a5568;          /* Sekundärer Text */
+  --text-muted: #718096;              /* Gedämpfter Text */
+  --text-light: #a0aec0;              /* Heller Text für Platzhalter */
+  
+  /* === STATUSFARBEN === */
+  --success-color: #38a169;           /* Grün für Erfolg */
+  --success-light: #68d391;           /* Helleres Grün */
+  --success-bg: #f0fff4;              /* Grüner Hintergrund */
+  
+  --danger-color: #e53e3e;            /* Rot für Gefahren/Löschen */
+  --danger-hover: #c53030;            /* Dunkleres Rot für Hover */
+  --danger-light: #fc8181;            /* Helleres Rot */
+  --danger-bg: #fed7d7;               /* Roter Hintergrund */
+  
+  --warning-color: #d69e2e;           /* Orange/Gelb für Warnungen */
+  --warning-light: #f6e05e;           /* Helles Gelb */
+  --warning-bg: #fffaf0;              /* Gelber Hintergrund */
+  
+  --info-color: #3182ce;              /* Blau für Informationen */
+  --info-light: #63b3ed;              /* Helles Info-Blau */
+  --info-bg: #ebf8ff;                 /* Blauer Hintergrund */
+  
+  /* === RAHMEN UND SCHATTEN === */
+  --border-color: #e2e8f0;            /* Hauptrahmenfarbe */
+  --border-light: #f7fafc;            /* Sehr helle Rahmen */
+  --border-dark: #cbd5e0;             /* Dunklere Rahmen */
+  
+  --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-heavy: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-modal: 0 20px 25px rgba(0, 0, 0, 0.25);
+  
+  /* === BORDER RADIUS === */
   --border-radius-small: 6px;
   --border-radius-medium: 8px;
   --border-radius-large: 12px;
+  --border-radius-xl: 16px;
+  
+  /* === LAYOUT === */
   --app-max-width: 480px;
-  --navbar-height: 60px; /* Definierte Navbar-Höhe */
+  --navbar-height: 60px;
   --tab-bar-height: 70px;
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* =================================================================
-   3. LAYOUT STRUKTUR - KOMPLETT ÜBERARBEITET
+   3. LAYOUT STRUKTUR
    ================================================================= */
 
 #app {
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Vollbildhöhe */
+  height: 100vh;
   max-width: var(--app-max-width);
   margin: 0 auto;
   background-color: var(--background-white);
   box-shadow: var(--shadow-heavy);
-  overflow: hidden; /* Verhindert Scroll auf App-Ebene */
+  overflow: hidden;
 }
 
-/* Navigation Bar - FEST FIXIERT */
+/* Navigation Bar */
 .navbar {
-  background-color: var(--primary-color);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
   color: var(--background-white);
   padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: var(--shadow-light);
-  position: fixed; /* Von sticky zu fixed geändert */
+  box-shadow: var(--shadow-medium);
+  position: fixed;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
@@ -86,50 +125,53 @@ body {
   max-width: var(--app-max-width);
   height: var(--navbar-height);
   z-index: 100;
-  flex-shrink: 0; /* Verhindert Verkleinerung */
+  flex-shrink: 0;
 }
 
 .nav-title {
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .nav-buttons {
   display: flex;
-  gap: 12px;
+  gap: 8px;
 }
 
 .nav-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: var(--background-white);
-  padding: 10px 10px;
+  padding: 8px 10px;
   border-radius: var(--border-radius-medium);
   cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.2s;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
 }
 
 .nav-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
 }
 
-/* Main Content - NUR HIER SCROLLT ES */
+/* Main Content */
 .main-content {
   flex: 1;
-  margin-top: var(--navbar-height); /* Platz für fixierte Navbar */
-  margin-bottom: var(--tab-bar-height); /* Platz für fixierte Tab-Bar */
+  margin-top: var(--navbar-height);
+  margin-bottom: var(--tab-bar-height);
   padding: 16px;
-  overflow-y: auto; /* NUR hier ist Scroll erlaubt */
+  overflow-y: auto;
   overflow-x: hidden;
-  background-color: #f2f2f7; /* Grauer Hintergrund für Inhalt */
-  /* Entfernt: padding-bottom, da durch margin-bottom ersetzt */
+  background-color: var(--background-primary);
 }
 
-/* Tab Bar - FEST FIXIERT */
+/* Tab Bar */
 .tab-bar {
   background-color: var(--background-white);
-  border-top: 1px solid #e5e5ea;
+  border-top: 1px solid var(--border-color);
   display: flex;
   padding: 8px 0;
   position: fixed;
@@ -140,7 +182,8 @@ body {
   max-width: var(--app-max-width);
   height: var(--tab-bar-height);
   z-index: 99;
-  flex-shrink: 0; /* Verhindert Verkleinerung */
+  flex-shrink: 0;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
 }
 
 .tab-item {
@@ -152,12 +195,21 @@ body {
   align-items: center;
   padding: 8px 4px;
   cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+  border-radius: var(--border-radius-medium);
+  margin: 0 2px;
+}
+
+.tab-item:hover {
+  background-color: var(--background-elevated);
   color: var(--text-secondary);
-  transition: color 0.2s;
 }
 
 .tab-item.active {
-  color: var(--primary-color);
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+  color: var(--background-white);
+  box-shadow: var(--shadow-light);
 }
 
 .tab-icon {
@@ -166,8 +218,8 @@ body {
 }
 
 .tab-label {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 /* =================================================================
@@ -176,14 +228,28 @@ body {
 
 .card {
   background: var(--background-white);
-  border-radius: var(--border-radius-large);
-  padding: 16px;
+  border-radius: var(--border-radius-xl);
+  padding: 20px;
   margin-bottom: 16px;
   box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-light);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-1px);
 }
 
 .card:last-child {
   margin-bottom: 30px;
+}
+
+.card h3 {
+  color: var(--primary-color);
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 18px;
 }
 
 /* =================================================================
@@ -191,95 +257,111 @@ body {
    ================================================================= */
 
 .btn {
-  padding: 12px 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 20px;
   border: none;
   border-radius: var(--border-radius-medium);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  min-height: 44px;
 }
 
 .btn-primary {
-  background-color: var(--primary-color);
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
   color: var(--background-white);
+  box-shadow: var(--shadow-light);
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
 }
 
 .btn-secondary {
-  background-color: var(--secondary-bg);
-  color: var(--primary-color);
+  background-color: var(--background-elevated);
+  color: var(--text-primary);
   border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover {
-  background-color: var(--secondary-hover);
+  background-color: var(--secondary-bg);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
 }
 
 .btn-danger {
-  background-color: var(--danger-color);
+  background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-hover) 100%);
   color: var(--background-white);
+  box-shadow: var(--shadow-light);
 }
 
 .btn-danger:hover {
-  background-color: var(--danger-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
 }
 
 .btn-small {
-  padding: 4px 8px;
-  font-size: 12px;
+  padding: 6px 12px;
+  font-size: 13px;
+  min-height: 32px;
 }
 
 /* Button-spezifische Abstände */
 .card button:last-child,
 .card .btn:last-child {
-  margin-bottom: 10px;
+  margin-bottom: 0;
 }
 
 /* =================================================================
    6. KOMPONENTEN - FORMULARE
    ================================================================= */
 
-/* Form Elements */
 .form-select,
 .form-input {
   width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border-color);
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
   border-radius: var(--border-radius-medium);
   font-size: 16px;
   background: var(--background-white);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
 }
 
 .form-select:focus,
 .form-input:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
 }
 
-/* Form Sections */
 .form-section {
   background: var(--background-white);
-  border-radius: var(--border-radius-large);
+  border-radius: var(--border-radius-xl);
   margin-bottom: 16px;
   overflow: hidden;
+  border: 1px solid var(--border-light);
 }
 
 .form-section-header {
-  background-color: #f8f9fa;
-  padding: 12px 16px;
+  background: linear-gradient(135deg, var(--background-elevated) 0%, var(--secondary-bg) 100%);
+  padding: 16px 20px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--primary-color);
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .form-row {
-  padding: 12px 16px;
+  padding: 16px 20px;
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -288,9 +370,9 @@ body {
 }
 
 .form-label {
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 8px;
-  color: #333;
+  color: var(--text-primary);
   display: block;
 }
 
@@ -300,16 +382,18 @@ body {
 
 .list {
   background: var(--background-white);
-  border-radius: var(--border-radius-large);
+  border-radius: var(--border-radius-xl);
   overflow: hidden;
   margin-bottom: 16px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-light);
 }
 
 .list-header {
-  background-color: #f8f9fa;
-  padding: 12px 16px;
+  background: linear-gradient(135deg, var(--background-elevated) 0%, var(--secondary-bg) 100%);
+  padding: 16px 20px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--primary-color);
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -317,13 +401,13 @@ body {
 }
 
 .list-item {
-  padding: 16px;
+  padding: 16px 20px;
   border-bottom: 1px solid var(--border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .list-item:last-child {
@@ -331,7 +415,7 @@ body {
 }
 
 .list-item:hover {
-  background-color: #f8f9fa;
+  background-color: var(--background-elevated);
 }
 
 .list-item-content {
@@ -339,9 +423,10 @@ body {
 }
 
 .list-item-title {
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 4px;
   font-size: 16px;
+  color: var(--text-primary);
 }
 
 .list-item-subtitle {
@@ -350,7 +435,7 @@ body {
 }
 
 .list-item-action {
-  color: var(--primary-color);
+  color: var(--accent-color);
   font-size: 18px;
   margin-left: 12px;
 }
@@ -363,54 +448,52 @@ body {
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid var(--primary-color);
+  border: 4px solid var(--border-light);
+  border-top: 4px solid var(--accent-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 20px auto;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Success Message */
 .success-message {
   position: fixed;
-  top: calc(var(--navbar-height) + 20px); /* Unterhalb der Navbar */
+  top: calc(var(--navbar-height) + 20px);
   left: 50%;
   transform: translateX(-50%);
-  background-color: var(--success-color);
+  background: linear-gradient(135deg, var(--success-color) 0%, var(--success-light) 100%);
   color: var(--background-white);
   padding: 12px 20px;
   border-radius: var(--border-radius-medium);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   z-index: 1000;
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s ease;
+  box-shadow: var(--shadow-medium);
 }
 
 /* Error Message */
 .error-message {
   position: fixed;
-  top: calc(var(--navbar-height) + 20px); /* Unterhalb der Navbar */
+  top: calc(var(--navbar-height) + 20px);
   left: 50%;
   transform: translateX(-50%);
-  background-color: var(--danger-color);
+  background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-light) 100%);
   color: var(--background-white);
   padding: 12px 20px;
   border-radius: var(--border-radius-medium);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   z-index: 1000;
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s ease;
+  box-shadow: var(--shadow-medium);
 }
 
 /* Empty State */
@@ -423,7 +506,7 @@ body {
 
 .empty-state h3 {
   margin-bottom: 8px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 /* =================================================================
@@ -455,17 +538,20 @@ body {
 }
 
 .remove-shooter-btn {
-  background-color: var(--danger-color);
+  background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-hover) 100%);
   color: var(--background-white);
   border: none;
   border-radius: var(--border-radius-small);
   padding: 6px 12px;
   font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .remove-shooter-btn:hover {
-  background-color: var(--danger-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-light);
 }
 
 .add-shooter-row {
@@ -482,16 +568,15 @@ body {
    11. RESPONSIVE DESIGN
    ================================================================= */
 
-/* Mobile Responsive */
 @media (max-width: 480px) {
   .main-content {
     padding: 12px;
-    /* margin-bottom bleibt unverändert für Tab-Bar */
   }
 
   .card {
-    padding: 12px;
+    padding: 16px;
     margin-bottom: 12px;
+    border-radius: var(--border-radius-large);
   }
 
   .keypad {
@@ -509,7 +594,7 @@ body {
 
 /* PWA-spezifische Anpassungen */
 @media (display-mode: standalone) {
-  /* Keine zusätzlichen padding-bottom Änderungen nötig */
+  /* Keine zusätzlichen Änderungen nötig */
 }
 
 /* Safe Area für iPhones mit Home Indicator */
@@ -528,40 +613,86 @@ body {
    12. UTILITY KLASSEN
    ================================================================= */
 
-.text-center {
-  text-align: center;
-}
-.text-left {
-  text-align: left;
-}
-.text-right {
-  text-align: right;
-}
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
 
-.mb-10 {
-  margin-bottom: 10px;
-}
-.mb-16 {
-  margin-bottom: 16px;
-}
-.mb-20 {
-  margin-bottom: 20px;
-}
-.mb-30 {
-  margin-bottom: 30px;
-}
+.mb-10 { margin-bottom: 10px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-20 { margin-bottom: 20px; }
+.mb-30 { margin-bottom: 30px; }
 
-.d-flex {
+.d-flex { display: flex; }
+.flex-1 { flex: 1; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+
+/* Textfarben */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.text-success { color: var(--success-color); }
+.text-danger { color: var(--danger-color); }
+.text-warning { color: var(--warning-color); }
+.text-info { color: var(--info-color); }
+
+/* Schriftgewichte */
+.fw-bold { font-weight: 600; }
+.fw-normal { font-weight: 400; }
+
+/* =================================================================
+   ENTRY-VIEW SPEZIFISCHE BUTTONS
+   ================================================================= */
+
+/* Kamera Button - Grüner Gradient */
+.btn-camera {
+  aspect-ratio: 1;
+  height: 50px;
+  background: linear-gradient(135deg, var(--success-color) 0%, var(--success-light) 100%);
+  color: var(--background-white);
+  border: none;
+  border-radius: var(--border-radius-medium);
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-light);
   display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.flex-1 {
-  flex: 1;
+
+.btn-camera:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
 }
-.gap-8 {
+
+/* Photo Edit Button - Orange Gradient */
+.btn-photo-edit {
+  aspect-ratio: 1;
+  height: 50px;
+  background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-light) 100%);
+  color: var(--background-white);
+  border: none;
+  border-radius: var(--border-radius-medium);
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-photo-edit:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Mirror Buttons Container */
+.mirror-buttons-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
-}
-.gap-12 {
-  gap: 12px;
 }
 
 /* =================================================================

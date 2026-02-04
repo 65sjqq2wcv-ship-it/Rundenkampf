@@ -501,26 +501,24 @@ class EntryView {
 
     // NEU: Container für die beiden Spiegel-Buttons nebeneinander
     const mirrorButtonsContainer = document.createElement("div");
-    mirrorButtonsContainer.style.cssText =
-      "display: grid; grid-template-columns: 1fr 1fr; gap: 8px;";
+    mirrorButtonsContainer.className = "mirror-buttons-container";
 
-    // NEU: Kamera Button für Scheibendokumentation - NUR ICON
+    // NEU: Kamera Button für Scheibendokumentation - mit CSS-Klasse
     const cameraBtn = document.createElement("button");
     cameraBtn.id = "cameraBtn";
-    cameraBtn.className = "btn";
-    cameraBtn.style.cssText =
-      "aspect-ratio: 1; height: 50px; background-color: #34c759; color: white; border: none; font-size: 20px; vertical-align: middle;";
+    cameraBtn.className = "btn btn-camera";
     cameraBtn.textContent = "📸";
     mirrorButtonsContainer.appendChild(cameraBtn);
 
-    // NEU: Button für Foto-Bearbeitung - NUR ICON
+    // NEU: Button für Foto-Bearbeitung - mit CSS-Klasse
     const photoEditBtn = document.createElement("button");
     photoEditBtn.id = "photoEditBtn";
-    photoEditBtn.className = "btn";
-    photoEditBtn.style.cssText =
-      "aspect-ratio: 1; height: 50px; background-color: #ff9500; color: white; border: none; font-size: 20px;";
+    photoEditBtn.className = "btn btn-photo-edit";
     photoEditBtn.textContent = "📂";
     mirrorButtonsContainer.appendChild(photoEditBtn);
+
+    // Spiegel-Buttons Container zum Haupt-Container hinzufügen
+    buttonsContainer.appendChild(mirrorButtonsContainer);
 
     // Spiegel-Buttons Container zum Haupt-Container hinzufügen
     buttonsContainer.appendChild(mirrorButtonsContainer);
@@ -2038,7 +2036,7 @@ class EntryView {
     const y = 20 * scale;
 
     // Box zeichnen mit einstellbarer Transparenz
-     ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`; // GEÄNDERT
+    ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`; // GEÄNDERT
     ctx.fillRect(x, y, boxWidth, boxHeight);
 
     // Rahmen - 3x dicker
