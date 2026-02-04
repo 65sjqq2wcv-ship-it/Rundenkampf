@@ -259,12 +259,12 @@ class OverviewView {
       "overflow-x: auto; border: 1px solid #f0f0f0; border-radius: 8px;";
 
     const table = document.createElement("div");
-    table.style.cssText = "min-width: 340px;";
+    table.style.cssText = "min-width: 330px;";
 
     // Table header - narrower columns for series, wider for Gesamt
     const tableHeader = document.createElement("div");
     tableHeader.style.cssText =
-      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 28px) 35px; gap: 4px; font-weight: 600; font-size: 12px;";
+      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 25px) 35px; gap: 4px; font-weight: 600; font-size: 12px;";
     tableHeader.innerHTML = `
 			<div>Name</div>
 			<div style="text-align: center;">S1</div>
@@ -286,7 +286,7 @@ class OverviewView {
       row.style.cssText = `
 				padding: 8px; 
 				display: grid; 
-				grid-template-columns: 1fr repeat(5, 28px) 35px; 
+				grid-template-columns: 1fr repeat(5, 25px) 35px; 
 				gap: 4px; 
 				font-size: 12px;
 				border-top: 1px solid #f0f0f0;
@@ -459,12 +459,12 @@ class OverviewView {
       "overflow-x: auto; border: 1px solid #f0f0f0; border-radius: 8px;";
 
     const table = document.createElement("div");
-    table.style.cssText = "min-width: 340px;";
+    table.style.cssText = "min-width: 330px;";
 
     // Table header
     const tableHeader = document.createElement("div");
     tableHeader.style.cssText =
-      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 28px) 35px; gap: 4px; font-weight: 600; font-size: 12px;";
+      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 25px) 35px; gap: 4px; font-weight: 600; font-size: 12px;";
     tableHeader.innerHTML = `
 			<div>Name</div>
 			<div style="text-align: center;">S1</div>
@@ -502,7 +502,7 @@ class OverviewView {
         row.style.cssText = `
 				padding: 8px; 
 				display: grid; 
-				grid-template-columns: 1fr repeat(5, 28px) 35px; 
+				grid-template-columns: 1fr repeat(5, 25px) 35px; 
 				gap: 4px; 
 				font-size: 12px;
 				border-top: 1px solid #f0f0f0;
