@@ -10,6 +10,7 @@ const STATIC_ASSETS = [
   "./index.html",
   "./manifest.json",
   "./js/version.js",
+  "./js/exif-writer.js", // NEU - nur diese eine Zeile hinzufügen
   "./css/styles.css",
   "./css/pdf-styles.css",
   "./js/models.js",
