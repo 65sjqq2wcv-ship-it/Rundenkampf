@@ -13,6 +13,7 @@ class EntryView {
     this.isDestroyed = false;
     this.cameraStream = null;
     this.isCapturing = false;
+    this.selectedWeapon = null;
   }
 
   // =================================================================
@@ -54,6 +55,7 @@ class EntryView {
     this.selectedShooterId = null;
     this.selectedDiscipline = null;
     this.shots = new Array(40).fill(null);
+    this.selectedWeapon = null;
 
     setTimeout(() => {
       this.updateTeamSelect();
@@ -107,12 +109,58 @@ class EntryView {
     formContainer.appendChild(teamRow);
     formContainer.appendChild(shooterRow);
     formContainer.appendChild(disciplineRow);
+
+    // NEU: Waffen-Zeile hinzufügen
+    const weaponRow = this.createFormRow("Waffe", this.createWeaponSelect());
+    formContainer.appendChild(weaponRow); // ← HIER einfügen
+
     card.appendChild(formContainer);
 
     // Sichere Event-Registrierung nach DOM-Insertion
     setTimeout(() => this.setupEventListeners(), 100);
 
     return card;
+  }
+
+  createWeaponSelect() {
+    const select = document.createElement("select");
+    select.id = "weaponSelect";
+    select.className = "form-input";
+    select.style.flex = "1";
+    return select;
+  }
+
+  updateWeaponSelect() {
+    const select = document.getElementById("weaponSelect");
+    if (!select) return;
+
+    // Clear existing options
+    select.innerHTML = "";
+
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "nicht relevant";
+    select.appendChild(defaultOption);
+
+    // Waffen hinzufügen
+    const sortedWeapons = [...storage.availableWeapons].sort((a, b) =>
+      a.localeCompare(b, "de", {
+        numeric: true,
+        sensitivity: "base",
+      })
+    );
+
+    sortedWeapons.forEach((weapon) => {
+      const option = document.createElement("option");
+      option.value = weapon;
+      option.textContent = UIUtils.escapeHtml(weapon);
+      select.appendChild(option);
+    });
+
+    // Aktuelle Auswahl setzen
+    if (this.selectedWeapon) {
+      select.value = this.selectedWeapon;
+    }
   }
 
   createFormRow(labelText, inputElement) {
@@ -185,6 +233,21 @@ class EntryView {
     const shooterSelect = document.getElementById("shooterSelect");
     const disciplineSelect = document.getElementById("disciplineSelect");
 
+    const weaponSelect = document.getElementById("weaponSelect");
+
+    if (weaponSelect) {
+      this.eventRegistry.register(weaponSelect, "change", (e) => {
+        try {
+          this.selectedWeapon = e.target.value || null;
+          // NEU: Titel aktualisieren wenn Waffe geändert wird
+          this.updateShotsDisplay();
+        } catch (error) {
+          console.error("Error handling weapon selection:", error);
+          UIUtils.showError("Fehler bei der Waffenauswahl");
+        }
+      });
+    }
+
     if (teamSelect) {
       this.eventRegistry.register(teamSelect, "change", (e) => {
         try {
@@ -231,6 +294,7 @@ class EntryView {
     this.updateTeamSelect();
     this.updateShooterSelect();
     this.updateDisciplineSelect();
+    this.updateWeaponSelect();
   }
 
   // =================================================================
@@ -1226,8 +1290,13 @@ class EntryView {
     // Update title
     const title = document.getElementById("shotsTitle");
     if (title) {
-      const shooterInfo = this.getSelectedShooterInfo();
-      const shooterText = shooterInfo ? `${shooterInfo}` : "noch kein Schütze ausgewählt";
+      const shooterInfo = this.getShooterInfo();
+      let shooterText = shooterInfo ? `${shooterInfo.name}` : "noch kein Schütze ausgewählt";
+
+      // Waffeninformation hinzufügen, wenn Schütze ausgewählt ist und Waffe nicht leer ist
+      if (shooterInfo && shooterInfo.weapon && shooterInfo.weapon.trim() !== "") {
+        shooterText += ` - Waffe: ${shooterInfo.weapon}`;
+      }
 
       // Leere zuerst den Container
       title.innerHTML = "";
@@ -1635,6 +1704,7 @@ class EntryView {
         isTeamShooter: !!teamName,
         discipline: this.selectedDiscipline,
         currentDiscipline: storage.selectedDiscipline || "Keine ausgewählt", // Aus Settings
+        weapon: this.selectedWeapon || "", // NEU: Waffe hinzufügen
         date: new Date().toLocaleDateString("de-DE"),
         competitionType: storage.selectedCompetitionType || "Rundenkampf",
       };
@@ -2024,65 +2094,76 @@ class EntryView {
     const competitionType = getCompetitionType(this.selectedDiscipline);
 
     // SKALIERUNGSFAKTOR
-    //const scale = 3;
     const scale = storage.settings.overlayScale || 3.0;
-    const opacity = storage.settings.overlayOpacity || 0.8; // NEU
+    const opacity = storage.settings.overlayOpacity || 0.8;
 
-    // Angepasste Box-Größen - 3x größer
+    // Prüfe ob Waffe vorhanden ist
+    const hasWeapon = shooterInfo.weapon && shooterInfo.weapon.trim();
+
+    // Angepasste Box-Größen - dynamisch basierend auf Inhalt
     const isAnnex = competitionType === CompetitionType.ANNEX_SCHEIBE;
     const boxWidth = Math.min(width * 0.9, (isAnnex ? 420 : 370) * scale);
-    const boxHeight = (isAnnex ? 270 : 270) * scale;
+
+    // NEU: Dynamische Box-Höhe basierend auf Waffen-Zeile
+    const baseHeight = isAnnex ? 270 : 270;
+    const weaponExtraHeight = hasWeapon ? 18 : 0; // Extra Höhe für Waffen-Zeile
+    const boxHeight = (baseHeight + weaponExtraHeight) * scale;
+
     const x = 20 * scale;
     const y = 20 * scale;
 
-    // Box zeichnen mit einstellbarer Transparenz
-    ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`; // GEÄNDERT
-    ctx.fillRect(x, y, boxWidth, boxHeight);
+    try {
+      // Box zeichnen mit einstellbarer Transparenz
+      ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+      ctx.fillRect(x, y, boxWidth, boxHeight);
 
-    // Rahmen - 3x dicker
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2 * scale;
-    ctx.strokeRect(x, y, boxWidth, boxHeight);
+      // Rahmen - 3x dicker
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 2 * scale;
+      ctx.strokeRect(x, y, boxWidth, boxHeight);
 
-    // Text-Stil für Header-Infos - 3x größer
-    ctx.fillStyle = "black";
-    ctx.font = `bold ${14 * scale}px Arial`;
-    ctx.textAlign = "left";
+      // Text-Stil für Header-Infos - 3x größer
+      ctx.fillStyle = "black";
+      ctx.font = `bold ${14 * scale}px Arial`;
+      ctx.textAlign = "left";
 
-    // Header-Informationen
-    const info = [
-      `Name: ${shooterInfo.name}`,
-      `Disziplin: ${shooterInfo.currentDiscipline}`,
-      `Scheibe: ${shooterInfo.discipline}`,
-      `Datum: ${shooterInfo.date}`,
-    ];
+      // Header-Informationen - NEU: Waffe nur wenn vorhanden
+      const info = [
+        `Name: ${shooterInfo.name}`,
+        ...(hasWeapon ? [`Waffe: ${shooterInfo.weapon}`] : []),
+        `Disziplin: ${shooterInfo.currentDiscipline}`,
+        `Scheibe: ${shooterInfo.discipline}`,
+        `Datum: ${shooterInfo.date}`,
+      ];
 
-    info.forEach((line, index) => {
-      ctx.fillText(line, x + (10 * scale), y + (20 * scale) + index * (18 * scale));
-    });
+      info.forEach((line, index) => {
+        ctx.fillText(line, x + (10 * scale), y + (20 * scale) + index * (18 * scale));
+      });
 
-    // Schuss-Matrix zeichnen
-    const matrixStartY = y + (100 * scale);
+      // Matrix-Position - NEU: Berücksichtigt die Anzahl der Info-Zeilen dynamisch
+      const matrixStartY = y + (20 * scale) + (info.length * 18 * scale) + (10 * scale);
 
-    if (isAnnex) {
-      this.drawAnnexMatrix(
-        ctx,
-        x + (10 * scale),
-        matrixStartY,
-        boxWidth - (20 * scale),
-        customShots,
-        scale  // Skalierung als Parameter übergeben
-      );
-    } else {
-      // STANDARD MATRIX
-      this.drawStandardMatrix(
-        ctx,
-        x + (10 * scale),
-        matrixStartY,
-        boxWidth - (20 * scale),
-        customShots,
-        scale  // Skalierung als Parameter übergeben
-      );
+      if (isAnnex) {
+        this.drawAnnexMatrix(
+          ctx,
+          x + (10 * scale),
+          matrixStartY,
+          boxWidth - (20 * scale),
+          customShots,
+          scale
+        );
+      } else {
+        this.drawStandardMatrix(
+          ctx,
+          x + (10 * scale),
+          matrixStartY,
+          boxWidth - (20 * scale),
+          customShots,
+          scale
+        );
+      }
+    } catch (error) {
+      console.error("Error adding overlay to canvas:", error);
     }
   }
 
@@ -2244,29 +2325,27 @@ class EntryView {
       seriesSums.push(seriesSum);
     }
 
-    // Serien-Ergebnisse und Gesamtpunkte
-    const filledShots = shotsToUse.slice(0, 40).filter((s) => s !== null);
-    const total = filledShots.reduce((sum, shot) => sum + shot, 0);
+    // Serien-Summen und Gesamtpunkten unter der Matrix
+    const summaryStartY = startY + 5 * (cellSize + gap) + (15 * scale);
 
-    const summaryY = startY + 5 * (cellSize + gap) + (25 * scale);
-
+    // Serien-Summen anzeigen
+    const seriesSumText = seriesSums.map((sum, i) => `S${i + 1}:${sum}`).join("  ");
     ctx.font = `bold ${12 * scale}px Arial`;
     ctx.fillStyle = "black";
     ctx.textAlign = "left";
+    ctx.fillText(seriesSumText, startX, summaryStartY);
 
-    // Serien-Summen
-    const seriesText = seriesSums
-      .map((sum, i) => `S${i + 1}:${sum}`)
-      .join("  ");
-    ctx.fillText(seriesText, startX, summaryY);
+    // Gesamtpunkten
+    const filledShots = shotsToUse.slice(0, 40).filter((s) => s !== null);
+    const total = filledShots.reduce((sum, shot) => sum + shot, 0);
 
-    // Gesamt
     ctx.fillText(
       `Schüsse: ${filledShots.length}/40  |  Gesamt: ${total}`,
       startX,
-      summaryY + (20 * scale),
+      summaryStartY + (18 * scale)
     );
   }
+
 
   normalizeGermanChars(str) {
     const charMap = {
@@ -2282,92 +2361,92 @@ class EntryView {
   }
 
   async downloadPhoto(canvas, shooterInfo) {
-  try {
-    // Canvas zu Blob konvertieren
-    canvas.toBlob(async (blob) => {
-      try {
-        // NEU: EXIF-Metadaten hinzufügen (auch offline)
-        const arrayBuffer = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (e) => resolve(e.target.result);
-          reader.onerror = reject;
-          reader.readAsArrayBuffer(blob);
-        });
+    try {
+      // Canvas zu Blob konvertieren
+      canvas.toBlob(async (blob) => {
+        try {
+          // NEU: EXIF-Metadaten hinzufügen (auch offline)
+          const arrayBuffer = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = reject;
+            reader.readAsArrayBuffer(blob);
+          });
 
-        // EXIF-Metadaten hinzufügen
-        const imageWithExif = exifWriter.addMetadata(arrayBuffer, shooterInfo);
-        
-        // Blob für Download erstellen
-        const finalBlob = imageWithExif 
-          ? new Blob([imageWithExif], { type: 'image/jpeg' })
-          : blob; // Fallback bei EXIF-Fehlern
+          // EXIF-Metadaten hinzufügen
+          const imageWithExif = exifWriter.addMetadata(arrayBuffer, shooterInfo);
 
-        // Download durchführen (bestehende Logik)
-        const url = URL.createObjectURL(finalBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        
-        // Dateiname erstellen
-        const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-        const sanitizedName = (shooterInfo.shooterName || shooterInfo.name || 'shooter')
-          .replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
-        const sanitizedDiscipline = (shooterInfo.discipline || 'discipline')
-          .replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
-        
-        link.download = `${timestamp}_${sanitizedName}_${sanitizedDiscipline}.jpg`;
-        
-        // Download ausführen
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        
-      } catch (error) {
-        console.error('Error adding EXIF metadata:', error);
-        
-        // Fallback: Normaler Download ohne EXIF
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        
-        const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-        const sanitizedName = (shooterInfo.shooterName || shooterInfo.name || 'shooter')
-          .replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
-        const sanitizedDiscipline = (shooterInfo.discipline || 'discipline')
-          .replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
-        
-        link.download = `${timestamp}_${sanitizedName}_${sanitizedDiscipline}.jpg`;
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }
-    }, 'image/jpeg', 0.92);
-    
-  } catch (error) {
-    console.error('Error in downloadPhoto:', error);
-    UIUtils.showError('Fehler beim Speichern des Fotos: ' + error.message);
+          // Blob für Download erstellen
+          const finalBlob = imageWithExif
+            ? new Blob([imageWithExif], { type: 'image/jpeg' })
+            : blob; // Fallback bei EXIF-Fehlern
+
+          // Download durchführen (bestehende Logik)
+          const url = URL.createObjectURL(finalBlob);
+          const link = document.createElement('a');
+          link.href = url;
+
+          // Dateiname erstellen
+          const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+          const sanitizedName = (shooterInfo.shooterName || shooterInfo.name || 'shooter')
+            .replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
+          const sanitizedDiscipline = (shooterInfo.discipline || 'discipline')
+            .replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
+
+          link.download = `${timestamp}_${sanitizedName}_${sanitizedDiscipline}.jpg`;
+
+          // Download ausführen
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+
+        } catch (error) {
+          console.error('Error adding EXIF metadata:', error);
+
+          // Fallback: Normaler Download ohne EXIF
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+
+          const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+          const sanitizedName = (shooterInfo.shooterName || shooterInfo.name || 'shooter')
+            .replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
+          const sanitizedDiscipline = (shooterInfo.discipline || 'discipline')
+            .replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
+
+          link.download = `${timestamp}_${sanitizedName}_${sanitizedDiscipline}.jpg`;
+
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }
+      }, 'image/jpeg', 0.92);
+
+    } catch (error) {
+      console.error('Error in downloadPhoto:', error);
+      UIUtils.showError('Fehler beim Speichern des Fotos: ' + error.message);
+    }
   }
-}
 
   // NEU: Hilfsmethode für den Download (bestehende Logik)
-performDownload(blob, shooterInfo) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  
-  const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-  const sanitizedName = (shooterInfo.shooterName || shooterInfo.name || 'shooter').replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
-  const sanitizedDiscipline = (shooterInfo.discipline || 'discipline').replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
-  
-  link.download = `${timestamp}_${sanitizedName}_${sanitizedDiscipline}.jpg`;
-  
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
+  performDownload(blob, shooterInfo) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    const sanitizedName = (shooterInfo.shooterName || shooterInfo.name || 'shooter').replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
+    const sanitizedDiscipline = (shooterInfo.discipline || 'discipline').replace(/[^a-z0-9äöüß]/gi, '_').substring(0, 20);
+
+    link.download = `${timestamp}_${sanitizedName}_${sanitizedDiscipline}.jpg`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
 
   // =================================================================
   // ERROR HANDLING

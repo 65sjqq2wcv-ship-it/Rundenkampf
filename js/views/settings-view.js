@@ -28,6 +28,11 @@ class SettingsView {
       const disciplinesSection = this.createDisciplinesSection();
       container.appendChild(disciplinesSection);
 
+      // NEU: Weapons Section
+      const weaponsSection = this.createWeaponsSection();
+      container.appendChild(weaponsSection);
+      this.updateWeaponsList();
+
       // Info Section
       const infoSection = this.createInfoSection();
       container.appendChild(infoSection);
@@ -45,6 +50,131 @@ class SettingsView {
     }
 
     return container;
+  }
+
+  createWeaponsSection() {
+    const section = document.createElement("div");
+    section.className = "card";
+    section.innerHTML = `
+    <h3>Verfügbare Waffen</h3>
+    <div id="weaponsList" style="margin-top: 12px;">
+      <!-- Weapons will be populated here -->
+    </div>
+    <div style="margin-top: 16px; display: flex; gap: 8px;">
+      <input type="text" id="newWeaponName" placeholder="Neue Waffe" 
+             style="flex: 1; padding: 12px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px; height:40px;">
+      <button class="btn btn-secondary" onclick="app.views.settings.addWeapon()" 
+              style="padding: 8px 12px; height: 40px;">Hinzufügen</button>
+    </div>
+  `;
+    return section;
+  }
+
+  updateWeaponsList() {
+    const weaponsList = document.getElementById("weaponsList");
+    if (!weaponsList) return;
+
+    weaponsList.innerHTML = "";
+
+    if (storage.availableWeapons.length === 0) {
+      weaponsList.innerHTML = '<p style="color: #8e8e93; font-style: italic;">Keine Waffen vorhanden</p>';
+      return;
+    }
+
+    storage.availableWeapons.forEach((weapon, index) => {
+      const weaponItem = document.createElement("div");
+      weaponItem.style.cssText = `
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    `;
+
+      weaponItem.innerHTML = `
+      <span style="flex: 1; height: 30px; max-width:60%;">${UIUtils.escapeHtml(weapon)}</span>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-small btn-secondary" style="height: 30px;" onclick="app.views.settings.editWeapon(${index})">
+          Bearbeiten
+        </button>
+        <button class="btn btn-small btn-danger" style="height: 30px;" onclick="app.views.settings.deleteWeapon(${index})">
+          Löschen
+        </button>
+      </div>
+    `;
+
+      weaponsList.appendChild(weaponItem);
+    });
+  }
+
+  addWeapon() {
+    try {
+      const nameInput = document.getElementById("newWeaponName");
+      const name = nameInput.value.trim();
+
+      if (!name) {
+        alert("Bitte geben Sie einen Namen für die Waffe ein.");
+        return;
+      }
+
+      if (storage.availableWeapons.includes(name)) {
+        alert("Diese Waffe existiert bereits.");
+        return;
+      }
+
+      storage.addWeapon(name);
+      nameInput.value = "";
+      this.updateWeaponsList();
+
+      UIUtils.showSuccessMessage("Waffe hinzugefügt");
+    } catch (error) {
+      console.error("Error adding weapon:", error);
+      alert("Fehler beim Hinzufügen der Waffe: " + error.message);
+    }
+  }
+
+  editWeapon(index) {
+    try {
+      const currentName = storage.availableWeapons[index];
+      const newName = prompt("Waffe bearbeiten:", currentName);
+
+      if (newName === null) return;
+
+      const trimmedName = newName.trim();
+      if (!trimmedName) {
+        alert("Waffenname darf nicht leer sein.");
+        return;
+      }
+
+      if (trimmedName === currentName) return;
+
+      if (storage.availableWeapons.includes(trimmedName)) {
+        alert("Diese Waffe existiert bereits.");
+        return;
+      }
+
+      storage.updateWeapon(index, trimmedName);
+      this.updateWeaponsList();
+
+      UIUtils.showSuccessMessage("Waffe bearbeitet");
+    } catch (error) {
+      console.error("Error editing weapon:", error);
+      alert("Fehler beim Bearbeiten der Waffe: " + error.message);
+    }
+  }
+
+  deleteWeapon(index) {
+    try {
+      const weaponName = storage.availableWeapons[index];
+      if (confirm(`Möchten Sie die Waffe "${weaponName}" wirklich löschen?`)) {
+        storage.deleteWeapon(index);
+        this.updateWeaponsList();
+        UIUtils.showSuccessMessage("Waffe gelöscht");
+      }
+    } catch (error) {
+      console.error("Error deleting weapon:", error);
+      alert("Fehler beim Löschen der Waffe: " + error.message);
+    }
   }
 
   createCompetitionTypeSection() {
@@ -147,10 +277,10 @@ class SettingsView {
 					💡 Hinweis:
 				</div>
 				<div style="font-size: 12px; color: #4a5568; line-height: 1.4;">
-					• <strong>Backup:</strong> Exportiert alle Einstellungen, Disziplinen und Vereinslogo<br>
-					• <strong>Wiederherstellen:</strong> Lädt gespeicherte Einstellungen (Teams/Ergebnisse bleiben erhalten)<br>
-					• <strong>Dateiformat:</strong> JSON-Datei mit .settings.json Endung
-				</div>
+  • <strong>Backup:</strong> Exportiert alle Einstellungen, Disziplinen, Waffen und Vereinslogo<br>
+  • <strong>Wiederherstellen:</strong> Lädt gespeicherte Einstellungen (Teams/Ergebnisse bleiben erhalten)<br>
+  • <strong>Dateiformat:</strong> JSON-Datei mit .settings.json Endung
+</div>
 			</div>
 		</div>
 		`;
@@ -284,6 +414,8 @@ class SettingsView {
         }
       });
     }
+
+    this.updateWeaponsList();
 
     if (currentDisciplineSelect) {
       currentDisciplineSelect.addEventListener("change", (e) => {
@@ -423,9 +555,10 @@ class SettingsView {
     try {
       const settingsData = {
         availableDisciplines: storage.availableDisciplines,
+        availableWeapons: storage.availableWeapons, // NEU
         selectedDiscipline: storage.selectedDiscipline,
         selectedCompetitionType: storage.selectedCompetitionType,
-        settings: storage.settings, // Enthält Logo
+        settings: storage.settings, // Enthält Logo und Overlay-Einstellungen
         exportDate: new Date().toISOString(),
         exportVersion: APP_VERSION || "1.0.0"
       };
@@ -535,6 +668,11 @@ class SettingsView {
           preview += `📝 <strong>Disziplinen:</strong> ${settingsData.availableDisciplines.length} Einträge<br>`;
         }
 
+        // NEU: Waffen-Vorschau
+        if (settingsData.availableWeapons && settingsData.availableWeapons.length > 0) {
+          preview += `🔫 <strong>Waffen:</strong> ${settingsData.availableWeapons.length} Einträge<br>`;
+        }
+
         if (settingsData.settings && settingsData.settings.clubLogo) {
           preview += `🖼️ <strong>Vereinslogo:</strong> Enthalten<br>`;
         }
@@ -569,14 +707,22 @@ class SettingsView {
         const content = e.target.result;
         const settingsData = JSON.parse(content);
 
-        // Validierung
-        if (!settingsData.availableDisciplines && !settingsData.selectedCompetitionType && !settingsData.settings) {
+        // Validierung - erweitert um Waffen
+        if (!settingsData.availableDisciplines &&
+          !settingsData.availableWeapons &&
+          !settingsData.selectedCompetitionType &&
+          !settingsData.settings) {
           throw new Error("Ungültige Einstellungen-Datei");
         }
 
         // Importiere Einstellungen
         if (settingsData.availableDisciplines) {
           storage.availableDisciplines = settingsData.availableDisciplines;
+        }
+
+        // NEU: Waffen importieren
+        if (settingsData.availableWeapons) {
+          storage.availableWeapons = settingsData.availableWeapons;
         }
 
         if (settingsData.selectedDiscipline) {
@@ -597,7 +743,7 @@ class SettingsView {
 
         UIUtils.showSuccessMessage("Einstellungen erfolgreich wiederhergestellt!");
 
-        // Refresh the settings view
+        // Refresh the settings view um auch die Waffen-Liste zu aktualisieren
         setTimeout(() => app.showView("settings"), 1000);
 
       } catch (error) {
@@ -608,6 +754,7 @@ class SettingsView {
 
     reader.readAsText(file, "UTF-8");
   }
+
 
   updateLogoPreview() {
     const logoPreview = document.getElementById("logoPreview");

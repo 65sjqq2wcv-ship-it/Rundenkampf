@@ -9,12 +9,57 @@ class Storage {
     this.availableDisciplines = [];
     this.selectedDiscipline = null;
     this.selectedCompetitionType = CompetitionType.PRAEZISION_DUELL;
+    this.availableWeapons = [];
+    this.selectedWeapon = null; // Default ist "leer"
     this.settings = {
       overlayScale: 3.0, // Default-Wert
       overlayOpacity: 0.8, // NEU: Default-Transparenz
     };
 
     this.load();
+  }
+
+  // In defaultWeapons() Methode hinzufügen:
+  defaultWeapons() {
+    return [
+      "Sig Sauer 1911"
+    ];
+  }
+
+  // Neue Waffen-Management Methoden hinzufügen:
+  addWeapon(weapon) {
+    if (!weapon || !weapon.trim()) {
+      throw new Error("Waffe muss einen Namen haben");
+    }
+
+    const trimmed = weapon.trim();
+    if (!this.availableWeapons.includes(trimmed)) {
+      this.availableWeapons.push(trimmed);
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
+  updateWeapon(index, newWeapon) {
+    if (index >= 0 && index < this.availableWeapons.length) {
+      const trimmed = newWeapon.trim();
+      if (trimmed) {
+        this.availableWeapons[index] = trimmed;
+        this.save();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  deleteWeapon(index) {
+    if (index >= 0 && index < this.availableWeapons.length) {
+      this.availableWeapons.splice(index, 1);
+      this.save();
+      return true;
+    }
+    return false;
   }
 
   // Standarddisziplinen
@@ -40,6 +85,8 @@ class Storage {
       this.availableDisciplines = this.defaultDisciplines();
       this.selectedDiscipline = this.availableDisciplines[0];
       this.selectedCompetitionType = CompetitionType.PRAEZISION_DUELL;
+      this.availableWeapons = this.defaultWeapons();
+      this.selectedWeapon = null;
       this.settings = {
         overlayScale: 3.0,
         overlayOpacity: 0.8, // NEU
@@ -74,6 +121,9 @@ class Storage {
         this.selectedCompetitionType =
           data.selectedCompetitionType || CompetitionType.PRAEZISION_DUELL;
         this.settings = data.settings || {};
+
+        this.availableWeapons = data.availableWeapons || this.defaultWeapons();
+        this.selectedWeapon = data.selectedWeapon || null;
 
         console.log(
           "Data loaded successfully. Logo present:",
@@ -148,6 +198,7 @@ class Storage {
           ? Array.from(this.visibleShooterIds)
           : null,
         availableDisciplines: this.availableDisciplines,
+        availableWeapons: this.availableWeapons, // NEU
         selectedDiscipline: this.selectedDiscipline,
         selectedCompetitionType: this.selectedCompetitionType,
         settings: this.settings,
