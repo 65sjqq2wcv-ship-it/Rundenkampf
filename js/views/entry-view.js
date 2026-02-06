@@ -111,8 +111,11 @@ class EntryView {
     formContainer.appendChild(disciplineRow);
 
     // NEU: Waffen-Zeile hinzufügen
-    const weaponRow = this.createFormRow("Waffe", this.createWeaponSelect());
-    formContainer.appendChild(weaponRow); // ← HIER einfügen
+    // NEU: Waffen-Zeile nur anzeigen wenn Waffen definiert sind
+    if (storage.availableWeapons && storage.availableWeapons.length > 0) {
+      const weaponRow = this.createFormRow("Waffe", this.createWeaponSelect());
+      formContainer.appendChild(weaponRow);
+    }
 
     card.appendChild(formContainer);
 
@@ -132,7 +135,7 @@ class EntryView {
 
   updateWeaponSelect() {
     const select = document.getElementById("weaponSelect");
-    if (!select) return;
+    if (!select) return; // Element existiert nicht - kein Problem
 
     // Clear existing options
     select.innerHTML = "";
@@ -235,11 +238,11 @@ class EntryView {
 
     const weaponSelect = document.getElementById("weaponSelect");
 
+    // Waffen-Handler nur wenn Element existiert
     if (weaponSelect) {
       this.eventRegistry.register(weaponSelect, "change", (e) => {
         try {
           this.selectedWeapon = e.target.value || null;
-          // NEU: Titel aktualisieren wenn Waffe geändert wird
           this.updateShotsDisplay();
         } catch (error) {
           console.error("Error handling weapon selection:", error);

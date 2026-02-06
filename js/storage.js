@@ -649,7 +649,6 @@ class Storage {
     };
   }
 
-  // Debug-Methoden
   exportData() {
     return {
       teams: this.teams.map((t) => t.toJSON()),
@@ -661,9 +660,15 @@ class Storage {
       visibleTeamIds: this.visibleTeamIds
         ? Array.from(this.visibleTeamIds)
         : null,
-      visibleShooterIds: this.visibleShooterIds // NEU
+      visibleShooterIds: this.visibleShooterIds
         ? Array.from(this.visibleShooterIds)
         : null,
+
+      // DIESE ZEILEN HINZUFÜGEN:
+      availableWeapons: this.availableWeapons,
+      selectedWeapon: this.selectedWeapon,
+      settings: this.settings,
+
       exportDate: new Date().toISOString(),
     };
   }
@@ -685,8 +690,16 @@ class Storage {
         this.selectedCompetitionType = data.selectedCompetitionType;
       if (data.visibleTeamIds)
         this.visibleTeamIds = new Set(data.visibleTeamIds);
-      if (data.visibleShooterIds) // NEU
+      if (data.visibleShooterIds)
         this.visibleShooterIds = new Set(data.visibleShooterIds);
+
+      // FEHLENDE ZEILEN HINZUFÜGEN:
+      if (data.availableWeapons)
+        this.availableWeapons = data.availableWeapons;
+      if (data.selectedWeapon)
+        this.selectedWeapon = data.selectedWeapon;
+      if (data.settings)
+        this.settings = { ...this.settings, ...data.settings };
 
       this.save();
       console.log("Data imported successfully");

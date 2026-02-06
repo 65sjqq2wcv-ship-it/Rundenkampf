@@ -44,6 +44,59 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json" />
 
+    <style>
+      /* Querformat-Warnung */
+      .landscape-warning {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        color: white;
+        text-align: center;
+        z-index: 10000;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+      }
+
+      .landscape-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px;
+      }
+
+      .rotate-icon {
+        font-size: 60px;
+        margin: 20px 0;
+        animation: rotate 2s infinite ease-in-out;
+      }
+
+      @keyframes rotate {
+        0%,
+        100% {
+          transform: rotate(0deg);
+        }
+        50% {
+          transform: rotate(90deg);
+        }
+      }
+
+      /* Zeige Warnung nur bei Querformat auf kleinen Bildschirmen */
+      @media screen and (orientation: landscape) and (max-height: 500px) {
+        .landscape-warning {
+          display: block;
+        }
+
+        #app {
+          display: none;
+        }
+      }
+    </style>
+
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
@@ -77,6 +130,21 @@
           <span class="tab-icon">⚙️</span>
           <span class="tab-label">Einstellungen</span>
         </button>
+      </div>
+    </div>
+
+    <!-- NEU: Querformat-Warnung -->
+    <div class="landscape-warning">
+      <div class="landscape-content">
+        <h2>📱 Bitte Gerät drehen</h2>
+        <div class="rotate-icon">📱</div>
+        <p style="font-size: 18px; margin: 20px 0">
+          Diese App funktioniert am besten<br />
+          im <strong>Hochformat</strong>.
+        </p>
+        <p style="font-size: 14px; color: #ccc">
+          Drehen Sie Ihr Gerät für die beste Erfahrung.
+        </p>
       </div>
     </div>
 

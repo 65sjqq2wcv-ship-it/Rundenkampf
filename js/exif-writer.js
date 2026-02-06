@@ -11,7 +11,7 @@ class SimpleExifWriter {
   addExifToJpeg(imageArrayBuffer, metadata) {
     try {
       const view = new DataView(imageArrayBuffer);
-      
+
       if (view.getUint16(0) !== 0xFFD8) {
         console.warn('Not a valid JPEG file');
         return null;
@@ -29,7 +29,7 @@ class SimpleExifWriter {
     const ifd0Entries = this.createIFD0Entries(metadata);
     const tiffData = this.createTiffData(ifd0Entries);
     const exifData = this.stringToBytes(this.EXIF_HEADER).concat(tiffData);
-    
+
     const segmentLength = exifData.length + 2;
     const segment = [
       (this.EXIF_MARKER >> 8) & 0xFF,
@@ -43,7 +43,7 @@ class SimpleExifWriter {
 
   createIFD0Entries(metadata) {
     const entries = [];
-    
+
     if (metadata.description) {
       entries.push({
         tag: 0x010E, // ImageDescription
@@ -86,7 +86,7 @@ class SimpleExifWriter {
   createTiffData(entries) {
     const header = [0x4D, 0x4D, 0x00, 0x2A, 0x00, 0x00, 0x00, 0x08];
     const entryCount = [(entries.length >> 8) & 0xFF, entries.length & 0xFF];
-    
+
     let dataOffset = 8 + 2 + (entries.length * 12) + 4;
     const ifdEntries = [];
     const ifdData = [];
@@ -104,11 +104,11 @@ class SimpleExifWriter {
           (dataOffset >> 24) & 0xFF, (dataOffset >> 16) & 0xFF,
           (dataOffset >> 8) & 0xFF, dataOffset & 0xFF
         );
-        
+
         const valueBytes = this.stringToBytes(entry.value);
         ifdData.push(...valueBytes);
         dataOffset += valueBytes.length;
-        
+
         if (valueBytes.length % 2 === 1) {
           ifdData.push(0);
           dataOffset++;
@@ -129,14 +129,14 @@ class SimpleExifWriter {
   insertExifSegment(imageBuffer, exifSegment) {
     const result = new Uint8Array(imageBuffer.byteLength + exifSegment.length);
     const view = new DataView(imageBuffer);
-    
+
     result[0] = view.getUint8(0);
     result[1] = view.getUint8(1);
     result.set(exifSegment, 2);
-    
+
     const remaining = new Uint8Array(imageBuffer, 2);
     result.set(remaining, 2 + exifSegment.length);
-    
+
     return result.buffer;
   }
 
@@ -149,7 +149,15 @@ class SimpleExifWriter {
       description: `${shooterInfo.name} ${shooterInfo.currentDiscipline} ${shooterInfo.discipline}`,
       make: "Rundenkampf App",
       model: "Scheibenerfassung",
-      software: `Rundenkampf App v${typeof APP_VERSION !== 'undefined' ? APP_VERSION : '1.82'}`
+      software: `Rundenkampf App v${typeof APP_VERSION !== 'undefined' ? APP_VERSION : 'Unknown'}`,
+      keywords: [
+        shooterInfo.shooterName,
+        shooterInfo.discipline,
+        shooterInfo.team || "Einzelschütze",
+        shooterInfo.competitionType,
+        "Rundenkampf",
+        "Schießsport"
+      ].filter(Boolean).join(", ")
     };
 
     return this.addExifToJpeg(imageArrayBuffer, metadata);

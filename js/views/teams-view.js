@@ -61,14 +61,7 @@ class TeamsView {
       const navButtons = document.getElementById("navButtons");
       if (navButtons) {
         navButtons.innerHTML = "";
-        // JSON Import/Export Button
-        const jsonBtn = document.createElement("button");
-        jsonBtn.className = "nav-btn";
-        jsonBtn.textContent = "📦";
-        jsonBtn.title = "JSON Import/Export";
-        jsonBtn.addEventListener("click", () => this.showJsonModal());
-        navButtons.appendChild(jsonBtn);
-
+        
         // Einzelschütze Button
         const shooterBtn = document.createElement("button");
         shooterBtn.className = "nav-btn";
@@ -177,12 +170,10 @@ class TeamsView {
     this.showTeamEditModal(team, false);
   }
 
-  // Auch die showTeamEditModal erweitern um einen Hinweis zu zeigen:
   showTeamEditModal(team, isNew = false) {
     const content = document.createElement("div");
     content.innerHTML = `
 		<div class="form-section">
-		<div class="form-section-header">Mannschaft</div>
 		<div class="form-row">
 		<input type="text" id="teamNameInput" class="form-input" placeholder="Mannschaftsname" value="${UIUtils.escapeHtml(
       team.name
@@ -191,21 +182,15 @@ class TeamsView {
 		</div>
 		
 		<div class="form-section">
-		<div class="form-section-header">Schützen (maximal 4)</div>
+		<div class="form-section-header">Schützen</div>
 		<div id="shootersList"></div>
-		<div class="form-row">
-		<div class="add-shooter-row">
-		<input type="text" id="newShooterName" class="form-input" placeholder="Neuer Schütze">
-		<button class="btn btn-secondary" id="addShooterBtn">Hinzufügen</button>
-		</div>
-		</div>
-		${team.shooters.length >= 4
-        ? '<p style="color: #666; font-size: 12px; margin-top: 8px;">ℹ️ Eine Mannschaft darf maximal 4 Schützen haben. Für die Wertung zählen die besten 3 Ergebnisse.</p>'
-        : '<p style="color: #666; font-size: 12px; margin-top: 8px;">💡 Tipp: Für die Mannschaftswertung werden die besten 3 von 4 Schützen gewertet.</p>'
-      }
+		<button class="btn btn-secondary" id="addShooterBtn" style="width: 100%; margin-top: 8px;">
+		Schütze hinzufügen
+		</button>
 		</div>
 		
-		${!isNew
+		${
+      !isNew
         ? `
 		<div class="form-section">
 		<div class="form-row">
@@ -216,7 +201,7 @@ class TeamsView {
 		</div>
 		`
         : ""
-      }
+    }
 		`;
 
     const modal = new ModalComponent(
@@ -236,130 +221,93 @@ class TeamsView {
 
     modal.show();
 
-    // Setup shooters list and event handlers
+    // Setup event handlers
     setTimeout(() => {
       this.updateShootersList(team);
-      this.setupTeamModalHandlers(team, isNew);
+
+      const addShooterBtn = document.getElementById("addShooterBtn");
+      if (addShooterBtn) {
+        addShooterBtn.addEventListener("click", () => {
+          // PRÜFUNG: Maximal 4 Schützen pro Mannschaft
+    if (team.shooters.length >= 4) {
+      UIUtils.showError("Eine Mannschaft darf maximal 4 Schützen haben.");
+      return;
+    }
+          const newShooter = new Shooter("");
+          team.shooters.push(newShooter);
+          this.updateShootersList(team);
+        });
+      }
+
+      const deleteTeamBtn = document.getElementById("deleteTeamBtn");
+      if (deleteTeamBtn && !isNew) {
+        deleteTeamBtn.addEventListener("click", () => {
+          if (
+            confirm(
+              `Möchten Sie die Mannschaft "${team.name}" wirklich löschen?`
+            )
+          ) {
+            storage.deleteTeam(team.id);
+            UIUtils.showSuccessMessage("Mannschaft gelöscht");
+
+            // NEU: Modal explizit schließen
+            const modal = document.querySelector('.modal');
+            if (modal) {
+              modal.remove();
+            }
+
+            app.showView("teams");
+          }
+        });
+      }
     }, 100);
   }
 
-  // updateShootersList Methode erweitern:
   updateShootersList(team) {
-    const shootersList = document.getElementById("shootersList");
-    if (!shootersList) return;
+  const shootersList = document.getElementById("shootersList");
+  const addShooterBtn = document.getElementById("addShooterBtn");
 
-    shootersList.innerHTML = "";
+  if (!shootersList) return;
 
-    team.shooters.forEach((shooter, index) => {
-      const shooterDiv = document.createElement("div");
-      shooterDiv.className = "shooter-item";
+  shootersList.innerHTML = "";
 
-      // Create input element
-      const input = document.createElement("input");
-      input.type = "text";
-      input.className = "form-input";
-      input.value = shooter.name;
-      input.addEventListener("change", (e) => {
-        this.updateShooterName(team.id, index, e.target.value);
-      });
+  team.shooters.forEach((shooter, index) => {
+    const shooterDiv = document.createElement("div");
+    shooterDiv.className = "form-row";
+    shooterDiv.style.cssText = "display: flex; gap: 8px; align-items: center;";
 
-      // Create remove button
-      const removeBtn = document.createElement("button");
-      removeBtn.className = "remove-shooter-btn";
-      removeBtn.textContent = "Entfernen";
-      removeBtn.addEventListener("click", () => {
-        this.removeShooter(team.id, index);
-      });
+    shooterDiv.innerHTML = `
+		<input type="text" 
+		placeholder="Schützenname" 
+		value="${UIUtils.escapeHtml(shooter.name)}" 
+		style="flex: 1; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px;"
+		onchange="this.shooter.name = this.value.trim()">
+		<button class="btn btn-danger btn-small" 
+		style="padding: 8px 12px;" 
+		onclick="app.views.teams.removeShooter('${team.id}', ${index})">
+		Löschen
+		</button>
+		`;
 
-      shooterDiv.appendChild(input);
-      shooterDiv.appendChild(removeBtn);
-      shootersList.appendChild(shooterDiv);
-    });
+    const input = shooterDiv.querySelector("input");
+    input.shooter = shooter;
 
-    // Update Add-Button Status basierend auf Anzahl Schützen
-    setTimeout(() => {
-      const addShooterBtn = document.getElementById("addShooterBtn");
-      const newShooterName = document.getElementById("newShooterName");
+    shootersList.appendChild(shooterDiv);
+  });
 
-      if (addShooterBtn && newShooterName) {
-        if (team.shooters.length >= 4) {
-          addShooterBtn.disabled = true;
-          addShooterBtn.textContent = "Maximum erreicht";
-          addShooterBtn.style.opacity = "0.5";
-          newShooterName.disabled = true;
-          newShooterName.placeholder = "Maximal 4 Schützen erlaubt";
-        } else {
-          addShooterBtn.disabled = false;
-          addShooterBtn.textContent = "Hinzufügen";
-          addShooterBtn.style.opacity = "1";
-          newShooterName.disabled = false;
-          newShooterName.placeholder = "Neuer Schütze";
-        }
-      }
-    }, 10);
-  }
-
-  // In der setupTeamModalHandlers Methode - den addShooter Teil ersetzen:
-  setupTeamModalHandlers(team, isNew) {
-    const addShooterBtn = document.getElementById("addShooterBtn");
-    const newShooterName = document.getElementById("newShooterName");
-    const deleteTeamBtn = document.getElementById("deleteTeamBtn");
-
-    if (addShooterBtn && newShooterName) {
-      const addShooter = () => {
-        const name = newShooterName.value.trim();
-        if (name) {
-          // Prüfung: Maximal 4 Schützen pro Mannschaft
-          if (team.shooters.length >= 4) {
-            UIUtils.showError("Eine Mannschaft darf maximal 4 Schützen haben.");
-            return;
-          }
-
-          team.shooters.push(new Shooter(name));
-          newShooterName.value = "";
-          this.updateShootersList(team);
-
-          // Button deaktivieren wenn Maximum erreicht
-          if (team.shooters.length >= 4) {
-            addShooterBtn.disabled = true;
-            addShooterBtn.textContent = "Maximum erreicht";
-            addShooterBtn.style.opacity = "0.5";
-            newShooterName.disabled = true;
-          }
-        }
-      };
-
-      addShooterBtn.addEventListener("click", addShooter);
-      newShooterName.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") addShooter();
-      });
-    }
-
-    if (deleteTeamBtn && !isNew) {
-      deleteTeamBtn.addEventListener("click", () => {
-        if (
-          confirm(`Möchten Sie die Mannschaft "${team.name}" wirklich löschen?`)
-        ) {
-          storage.deleteTeam(team.id);
-          UIUtils.showSuccessMessage("Mannschaft gelöscht");
-
-
-          const modal = document.querySelector('.modal');
-          if (modal) {
-            modal.remove();
-          }
-          app.showView("teams");
-        }
-      });
+  // KORREKTUR: Maximal 4 Schützen statt 5
+  if (addShooterBtn) {
+    if (team.shooters.length >= 4) {
+      addShooterBtn.textContent = "Maximum erreicht (4 Schützen)";
+      addShooterBtn.disabled = true;
+      addShooterBtn.style.opacity = "0.5";
+    } else {
+      addShooterBtn.textContent = `Schütze hinzufügen (${team.shooters.length}/4)`;
+      addShooterBtn.disabled = false;
+      addShooterBtn.style.opacity = "1";
     }
   }
-
-  updateShooterName(teamId, shooterIndex, newName) {
-    const team = storage.teams.find((t) => t.id === teamId);
-    if (team && team.shooters[shooterIndex]) {
-      team.shooters[shooterIndex].name = newName.trim();
-    }
-  }
+}
 
   // removeShooter Methode erweitern um Button-Status zu aktualisieren:
   removeShooter(teamId, shooterIndex) {
@@ -526,130 +474,4 @@ class TeamsView {
     )}</p>`;
     return card;
   }
-
-  showJsonModal() {
-    const content = document.createElement("div");
-    content.innerHTML = `
-   <h3>Teams & Ergebnisse sichern</h3>
-<div style="margin-top: 12px;">
-    <!-- Button Container -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-        <button class="btn btn-primary" onclick="app.views.teams.exportData()" 
-                style="padding: 12px; font-weight: bold; height:45px;">
-            💾 Export
-        </button>
-        <button class="btn btn-secondary" onclick="app.views.teams.importData()" 
-                style="padding: 12px; height:45px;">
-            📁 Import
-        </button>
-    </div>
-    
-    <!-- Info Text -->
-    <div style="background-color: #f0f8ff; padding: 12px; border-radius: 6px; border-left: 4px solid #0066cc;">
-        <div style="font-size: 13px; color: #0066cc; margin-bottom: 4px; font-weight: 500;">
-            💡 Hinweis:
-        </div>
-        <div style="font-size: 12px; color: #4a5568; line-height: 1.4;">
-            • <strong>Export:</strong> Sichert alle Teams und Ergebnisse<br>
-            • <strong>Import:</strong> Lädt Backup (überschreibt alle Daten)<br>
-            • <strong>Dateiformat:</strong> JSON-Datei mit .data.json Endung
-        </div>
-    </div>
-</div>
-  `;
-
-    const modal = new ModalComponent("Daten Export/Import", content);
-    modal.addAction("Schließen", null, false, false);
-    modal.show();
-  }
-
-  exportData() {
-    try {
-      const data = storage.exportData();
-      const dataStr = JSON.stringify(data, null, 2);
-      const blob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `rundenkampf-data-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      UIUtils.showSuccessMessage("Daten exportiert!");
-    } catch (error) {
-      console.error("Error exporting data:", error);
-      alert("Fehler beim Exportieren der Daten: " + error.message);
-    }
-  }
-
-  importData() {
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.accept = ".json";
-    fileInput.onchange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const content = e.target.result;
-            const data = JSON.parse(content);
-
-            // Zeige Vorschau der Daten
-            this.showDataPreview(data);
-
-          } catch (error) {
-            console.error("Error reading data:", error);
-            alert("Fehler beim Lesen der Daten: " + error.message);
-          }
-        };
-        reader.readAsText(file);
-      }
-    };
-    fileInput.click();
-  }
-
-  showDataPreview(data) {
-    const modal = new ModalComponent("Vorschau", this.createDataPreviewContent(data));
-    modal.addAction("Schließen", null, false, false);
-    modal.addAction("Importieren", () => this.confirmDataImport(data), true, false);
-    modal.show();
-  }
-
-  createDataPreviewContent(data) {
-    const content = document.createElement("div");
-    content.innerHTML = `
-    <div style="padding: 20px; border: 1px solid #ccc; border-radius: 8px; background-color: #f9f9f9; font-family: monospace;">
-      <p><strong>Einstellungen gefunden:</strong></p><br>
-      ${this.formatDataPreview(data)}
-    </div>
-  `;
-    return content;
-  }
-
-  formatDataPreview(data) {
-    let preview = "";
-    if (data.exportDate) {
-      const exportDate = new Date(data.exportDate).toLocaleString('de-DE');
-      preview += `<p>📅 <strong>Export-Datum:</strong> ${exportDate}</p><br>`;
-    }
-    if (data.teams && data.teams.length > 0) {
-      preview += `<p>👥 <strong>Teams:</strong> ${data.teams.length} Einträge</p>`;
-    }
-    if (data.standaloneShooters && data.standaloneShooters.length > 0) {
-      preview += `<p>👤 <strong>Einzelschützen:</strong> ${data.standaloneShooters.length} Einträge</p>`;
-    }
-    if (data.availableDisciplines && data.availableDisciplines.length > 0) {
-      preview += `<p>📝 <strong>Verfügbare Disziplinen:</strong> ${data.availableDisciplines.length} Einträge</p>`;
-    }
-    return preview;
-  }
-
-  confirmDataImport(data) {
-    storage.importData(data);
-    UIUtils.showSuccessMessage("Daten importiert!");
-    app.showView("teams");
-  }
-
 }

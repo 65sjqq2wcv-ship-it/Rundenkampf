@@ -257,33 +257,31 @@ class SettingsView {
     const section = document.createElement("div");
     section.className = "card";
     section.innerHTML = `
-		<h3>Einstellungen sichern</h3>
-		<div style="margin-top: 12px;">
-			<!-- Button Container -->
-			<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-				<button class="btn btn-primary" onclick="app.views.settings.exportSettings()" 
-						style="padding: 12px; font-weight: bold; height:45px;">
-					💾 Export
-				</button>
-				<button class="btn btn-secondary" onclick="app.views.settings.showImportSettings()" 
-						style="padding: 12px; height:45px;">
-					📁 Import
-				</button>
-			</div>
-			
-			<!-- Info Text -->
-			<div style="background-color: #f0f8ff; padding: 12px; border-radius: 6px; border-left: 4px solid #0066cc;">
-				<div style="font-size: 13px; color: #0066cc; margin-bottom: 4px; font-weight: 500;">
-					💡 Hinweis:
-				</div>
-				<div style="font-size: 12px; color: #4a5568; line-height: 1.4;">
-  • <strong>Backup:</strong> Exportiert alle Einstellungen, Disziplinen, Waffen und Vereinslogo<br>
-  • <strong>Wiederherstellen:</strong> Lädt gespeicherte Einstellungen (Teams/Ergebnisse bleiben erhalten)<br>
-  • <strong>Dateiformat:</strong> JSON-Datei mit .settings.json Endung
-</div>
-			</div>
-		</div>
-		`;
+    <h3>Backup & Wiederherstellung</h3>
+    <div style="margin-top: 12px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <button class="btn btn-primary" onclick="app.views.settings.exportSettings()" 
+                style="padding: 12px; font-weight: bold; height: 45px;">
+          💾 Backup
+        </button>
+        <button class="btn btn-secondary" onclick="app.views.settings.showImportSettings()" 
+                style="padding: 12px; height: 45px;">
+          📁 Wiederherstellen
+        </button>
+      </div>
+      
+      <div style="background-color: #f0f8ff; padding: 12px; border-radius: 6px; border-left: 4px solid #0066cc;">
+        <div style="font-size: 13px; color: #0066cc; margin-bottom: 4px; font-weight: 500;">
+          💡 Vollständiges Backup:
+        </div>
+        <div style="font-size: 12px; color: #4a5568; line-height: 1.4;">
+          • <strong>Backup:</strong> Sichert ALLE Daten (Teams, Ergebnisse, Einstellungen)<br>
+          • <strong>Wiederherstellen:</strong> Stellt alle Daten wieder her<br>
+          • <strong>Empfehlung:</strong> Regelmäßige Backups vor wichtigen Änderungen
+        </div>
+      </div>
+    </div>
+  `;
     return section;
   }
 
@@ -551,40 +549,55 @@ class SettingsView {
   }
 
   // NEU: Backup/Restore Methoden
+  // Ersetzen Sie die exportSettings() Methode:
   exportSettings() {
     try {
-      const settingsData = {
+      // KOMPLETTES Backup - Einstellungen UND alle Daten
+      const completeBackup = {
+        // Alle Teams und Ergebnisse
+        teams: storage.teams.map((t) => t.toJSON()),
+        standaloneShooters: storage.standaloneShooters.map((s) => s.toJSON()),
+        results: storage.results.map((r) => r.toJSON()),
+
+        // Filter-Einstellungen
+        visibleTeamIds: storage.visibleTeamIds ? Array.from(storage.visibleTeamIds) : null,
+        visibleShooterIds: storage.visibleShooterIds ? Array.from(storage.visibleShooterIds) : null,
+
+        // Disziplinen und Waffen
         availableDisciplines: storage.availableDisciplines,
-        availableWeapons: storage.availableWeapons, // NEU
+        availableWeapons: storage.availableWeapons,
         selectedDiscipline: storage.selectedDiscipline,
         selectedCompetitionType: storage.selectedCompetitionType,
-        settings: storage.settings, // Enthält Logo und Overlay-Einstellungen
+
+        // App-Einstellungen (Logo, Overlay-Einstellungen, etc.)
+        settings: storage.settings,
+
+        // Meta-Informationen
         exportDate: new Date().toISOString(),
-        exportVersion: APP_VERSION || "1.0.0"
+        exportVersion: APP_VERSION || "1.0.0",
+        exportType: "complete" // Marker für vollständiges Backup
       };
 
-      const dataStr = JSON.stringify(settingsData, null, 2);
+      const dataStr = JSON.stringify(completeBackup, null, 2);
       const blob = new Blob([dataStr], { type: 'application/json' });
 
-      // Erstelle Download-Link
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
 
-      // Dateiname mit Timestamp
       const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-      link.download = `rundenkampf-settings-${timestamp}.json`;
+      // GEÄNDERT: Dateiname zeigt, dass es ein vollständiges Backup ist
+      link.download = `rundenkampf-vollbackup-${timestamp}.json`;
 
-      // Trigger Download
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      UIUtils.showSuccessMessage("Einstellungen-Backup erstellt!");
+      UIUtils.showSuccessMessage("Vollständiges Backup erstellt!");
 
     } catch (error) {
-      console.error("Error exporting settings:", error);
+      console.error("Error creating complete backup:", error);
       alert("Fehler beim Erstellen des Backups: " + error.message);
     }
   }
@@ -592,26 +605,26 @@ class SettingsView {
   showImportSettings() {
     const content = document.createElement("div");
     content.innerHTML = `
-      <div class="form-section">
-        <div class="form-section-header">Einstellungen-Backup wiederherstellen</div>
-        <div class="form-row">
-          <p style="margin-bottom: 12px; font-size: 14px; color: #666;">
-            Wählen Sie eine zuvor exportierte Einstellungen-Datei aus.<br>
-            <strong>Achtung:</strong> Ihre aktuellen Einstellungen werden überschrieben!
-          </p>
-          <input type="file" id="settingsFileInput" accept=".json" class="form-input" style="padding: 8px;">
-        </div>
+    <div class="form-section">
+      <div class="form-section-header">Backup wiederherstellen</div>
+      <div class="form-row">
+        <p style="margin-bottom: 12px; font-size: 14px; color: #666;">
+          Wählen Sie eine zuvor exportierte Backup-Datei aus.<br>
+          <strong>Achtung:</strong> Bei einem Restore werden ALLE aktuellen Daten überschrieben!
+        </p>
+        <input type="file" id="settingsFileInput" accept=".json" class="form-input" style="padding: 8px;">
       </div>
-      
-      <div class="form-section">
-        <div class="form-section-header">Vorschau</div>
-        <div id="settingsPreview" style="max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; background: #f8f9fa; padding: 8px; border-radius: 4px;">
-          Keine Datei ausgewählt
-        </div>
+    </div>
+    
+    <div class="form-section">
+      <div class="form-section-header">Vorschau</div>
+      <div id="settingsPreview" style="max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; background: #f8f9fa; padding: 8px; border-radius: 4px;">
+        Keine Datei ausgewählt
       </div>
-    `;
+    </div>
+  `;
 
-    const modal = new ModalComponent("Einstellungen wiederherstellen", content);
+    const modal = new ModalComponent("Backup wiederherstellen", content);
 
     modal.addAction("Abbrechen", null, false, false);
     modal.addAction(
@@ -645,17 +658,44 @@ class SettingsView {
         const content = e.target.result;
         const settingsData = JSON.parse(content);
 
-        let preview = "<strong>Einstellungen gefunden:</strong><br><br>";
+        let preview = "<strong>Backup-Inhalt:</strong><br><br>";
 
+        // Export-Informationen
         if (settingsData.exportDate) {
           const exportDate = new Date(settingsData.exportDate).toLocaleString('de-DE');
           preview += `📅 <strong>Export-Datum:</strong> ${exportDate}<br>`;
         }
 
         if (settingsData.exportVersion) {
-          preview += `🏷️ <strong>Version:</strong> ${settingsData.exportVersion}<br><br>`;
+          preview += `🏷️ <strong>Version:</strong> ${settingsData.exportVersion}<br>`;
         }
 
+        // Backup-Typ erkennen
+        if (settingsData.exportType === "complete") {
+          preview += `📦 <strong>Backup-Typ:</strong> Vollständiges Backup<br><br>`;
+        } else {
+          preview += `⚙️ <strong>Backup-Typ:</strong> Nur Einstellungen<br><br>`;
+        }
+
+        // TEAMS UND ERGEBNISSE (NEU)
+        if (settingsData.teams && settingsData.teams.length > 0) {
+          preview += `👥 <strong>Teams:</strong> ${settingsData.teams.length} Einträge<br>`;
+        }
+
+        if (settingsData.standaloneShooters && settingsData.standaloneShooters.length > 0) {
+          preview += `👤 <strong>Einzelschützen:</strong> ${settingsData.standaloneShooters.length} Einträge<br>`;
+        }
+
+        if (settingsData.results && settingsData.results.length > 0) {
+          preview += `🎯 <strong>Ergebnisse:</strong> ${settingsData.results.length} Einträge<br>`;
+        }
+
+        // Trennlinie wenn Daten vorhanden sind
+        if (settingsData.teams || settingsData.standaloneShooters || settingsData.results) {
+          preview += `<br>`;
+        }
+
+        // EINSTELLUNGEN
         if (settingsData.selectedCompetitionType) {
           preview += `🎯 <strong>Wettbewerbsmodus:</strong> ${settingsData.selectedCompetitionType}<br>`;
         }
@@ -668,13 +708,22 @@ class SettingsView {
           preview += `📝 <strong>Disziplinen:</strong> ${settingsData.availableDisciplines.length} Einträge<br>`;
         }
 
-        // NEU: Waffen-Vorschau
+        // Waffen-Vorschau
         if (settingsData.availableWeapons && settingsData.availableWeapons.length > 0) {
           preview += `🔫 <strong>Waffen:</strong> ${settingsData.availableWeapons.length} Einträge<br>`;
         }
 
         if (settingsData.settings && settingsData.settings.clubLogo) {
           preview += `🖼️ <strong>Vereinslogo:</strong> Enthalten<br>`;
+        }
+
+        // Filter-Einstellungen (NEU)
+        if (settingsData.visibleTeamIds) {
+          preview += `🔍 <strong>Team-Filter:</strong> ${settingsData.visibleTeamIds.length} Teams sichtbar<br>`;
+        }
+
+        if (settingsData.visibleShooterIds) {
+          preview += `🔍 <strong>Schützen-Filter:</strong> ${settingsData.visibleShooterIds.length} Einzelschützen sichtbar<br>`;
         }
 
         const previewDiv = document.getElementById("settingsPreview");
@@ -697,7 +746,7 @@ class SettingsView {
     const file = fileInput?.files[0];
 
     if (!file) {
-      alert("Bitte wählen Sie eine Einstellungen-Datei aus.");
+      alert("Bitte wählen Sie eine Backup-Datei aus.");
       return;
     }
 
@@ -705,56 +754,36 @@ class SettingsView {
     reader.onload = (e) => {
       try {
         const content = e.target.result;
-        const settingsData = JSON.parse(content);
+        const backupData = JSON.parse(content);
 
-        // Validierung - erweitert um Waffen
-        if (!settingsData.availableDisciplines &&
-          !settingsData.availableWeapons &&
-          !settingsData.selectedCompetitionType &&
-          !settingsData.settings) {
-          throw new Error("Ungültige Einstellungen-Datei");
+        // Prüfe ob es ein vollständiges Backup ist
+        if (backupData.exportType === "complete") {
+          // Vollständiger Import über Storage
+          storage.importData(backupData);
+          UIUtils.showSuccessMessage("Vollständiges Backup wiederhergestellt!");
+        } else {
+          // Legacy: Nur Einstellungen importieren
+          if (backupData.availableDisciplines) storage.availableDisciplines = backupData.availableDisciplines;
+          if (backupData.availableWeapons) storage.availableWeapons = backupData.availableWeapons;
+          if (backupData.selectedDiscipline) storage.selectedDiscipline = backupData.selectedDiscipline;
+          if (backupData.selectedCompetitionType) storage.selectedCompetitionType = backupData.selectedCompetitionType;
+          if (backupData.settings) storage.settings = { ...storage.settings, ...backupData.settings };
+
+          storage.save();
+          UIUtils.showSuccessMessage("Einstellungen wiederhergestellt!");
         }
 
-        // Importiere Einstellungen
-        if (settingsData.availableDisciplines) {
-          storage.availableDisciplines = settingsData.availableDisciplines;
-        }
-
-        // NEU: Waffen importieren
-        if (settingsData.availableWeapons) {
-          storage.availableWeapons = settingsData.availableWeapons;
-        }
-
-        if (settingsData.selectedDiscipline) {
-          storage.selectedDiscipline = settingsData.selectedDiscipline;
-        }
-
-        if (settingsData.selectedCompetitionType) {
-          storage.selectedCompetitionType = settingsData.selectedCompetitionType;
-        }
-
-        if (settingsData.settings) {
-          // Merge settings, keep existing if not in backup
-          storage.settings = { ...storage.settings, ...settingsData.settings };
-        }
-
-        // Speichern
-        storage.save();
-
-        UIUtils.showSuccessMessage("Einstellungen erfolgreich wiederhergestellt!");
-
-        // Refresh the settings view um auch die Waffen-Liste zu aktualisieren
+        // Ansicht aktualisieren
         setTimeout(() => app.showView("settings"), 1000);
 
       } catch (error) {
-        console.error("Settings import error:", error);
-        alert("Fehler beim Wiederherstellen der Einstellungen: " + error.message);
+        console.error("Import error:", error);
+        alert("Fehler beim Wiederherstellen: " + error.message);
       }
     };
 
     reader.readAsText(file, "UTF-8");
   }
-
 
   updateLogoPreview() {
     const logoPreview = document.getElementById("logoPreview");
