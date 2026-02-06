@@ -146,7 +146,7 @@ class SimpleExifWriter {
 
   addMetadata(imageArrayBuffer, shooterInfo) {
     const metadata = {
-      description: `${shooterInfo.name} ${shooterInfo.currentDiscipline} ${shooterInfo.discipline}`,
+      description: `${shooterInfo.name} ${shooterInfo.currentDiscipline} ${shooterInfo.discipline}${shooterInfo.weapon ? ` - ${shooterInfo.weapon}` : ''}`,
       make: "Rundenkampf App",
       model: "Scheibenerfassung",
       software: `Rundenkampf App v${typeof APP_VERSION !== 'undefined' ? APP_VERSION : 'Unknown'}`,
@@ -154,10 +154,11 @@ class SimpleExifWriter {
         shooterInfo.shooterName,
         shooterInfo.discipline,
         shooterInfo.team || "Einzelschütze",
+        shooterInfo.weapon, // Waffe zu den Keywords hinzufügen
         shooterInfo.competitionType,
         "Rundenkampf",
         "Schießsport"
-      ].filter(Boolean).join(", ")
+      ].filter(Boolean).join(", ") // filter(Boolean) entfernt leere Werte
     };
 
     return this.addExifToJpeg(imageArrayBuffer, metadata);
