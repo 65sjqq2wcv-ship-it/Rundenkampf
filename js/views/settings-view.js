@@ -92,7 +92,7 @@ class SettingsView {
     `;
 
       weaponItem.innerHTML = `
-      <span style="flex: 1; height: 30px; max-width:60%;">${UIUtils.escapeHtml(weapon)}</span>
+      <span style="flex: 1; height: 30px; max-width:60%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;" title="${UIUtils.escapeHtml(weapon)}">${UIUtils.escapeHtml(weapon)}</span>
       <div style="display: flex; gap: 8px;">
         <button class="btn btn-small btn-secondary" style="height: 30px;" onclick="app.views.settings.editWeapon(${index})">
           Bearbeiten
@@ -865,9 +865,7 @@ class SettingsView {
 			`;
 
       disciplineItem.innerHTML = `
-			<span style="flex: 1; height: 30px; max-width:60%;">${UIUtils.escapeHtml(
-        discipline
-      )}</span>
+			<span style="flex: 1; height: 30px; max-width:60%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;" title="${UIUtils.escapeHtml(discipline)}">${UIUtils.escapeHtml(discipline)}</span>
 			<div style="display: flex; gap: 8px;">
 			<button class="btn btn-small btn-secondary" style="height: 30px;" onclick="app.views.settings.editDiscipline(${index})">
 			Bearbeiten
