@@ -92,7 +92,7 @@ class SettingsView {
     `;
 
       weaponItem.innerHTML = `
-      <span style="flex: 1; height: 30px; max-width:60%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;" title="${UIUtils.escapeHtml(weapon)}">${UIUtils.escapeHtml(weapon)}</span>
+      <span style="flex: 1; height: 30px; max-width:50%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;" title="${UIUtils.escapeHtml(weapon)}">${UIUtils.escapeHtml(weapon)}</span>
       <div style="display: flex; gap: 8px;">
         <button class="btn btn-small btn-secondary" style="height: 30px;" onclick="app.views.settings.editWeapon(${index})">
           Bearbeiten
@@ -257,7 +257,7 @@ class SettingsView {
     const section = document.createElement("div");
     section.className = "card";
     section.innerHTML = `
-    <h3>Backup & Wiederherstellung</h3>
+    <h3>Backup & Restore</h3>
     <div style="margin-top: 12px;">
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
         <button class="btn btn-primary" onclick="app.views.settings.exportSettings()" 
@@ -266,7 +266,7 @@ class SettingsView {
         </button>
         <button class="btn btn-secondary" onclick="app.views.settings.showImportSettings()" 
                 style="padding: 12px; height: 45px;">
-          📁 Wiederherstellen
+          📁 Restore
         </button>
       </div>
       
@@ -276,7 +276,7 @@ class SettingsView {
         </div>
         <div style="font-size: 12px; color: #4a5568; line-height: 1.4;">
           • <strong>Backup:</strong> Sichert ALLE Daten (Teams, Ergebnisse, Einstellungen)<br>
-          • <strong>Wiederherstellen:</strong> Stellt alle Daten wieder her<br>
+          • <strong>Restore:</strong> Stellt alle Daten wieder her<br>
           • <strong>Empfehlung:</strong> Regelmäßige Backups vor wichtigen Änderungen
         </div>
       </div>
@@ -587,14 +587,14 @@ class SettingsView {
 
       const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
       // GEÄNDERT: Dateiname zeigt, dass es ein vollständiges Backup ist
-      link.download = `rundenkampf-vollbackup-${timestamp}.json`;
+      link.download = `rundenkampf-backup-${timestamp}.json`;
 
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      UIUtils.showSuccessMessage("Vollständiges Backup erstellt!");
+      UIUtils.showSuccessMessage("Backup erstellt!");
 
     } catch (error) {
       console.error("Error creating complete backup:", error);
@@ -606,7 +606,7 @@ class SettingsView {
     const content = document.createElement("div");
     content.innerHTML = `
     <div class="form-section">
-      <div class="form-section-header">Backup wiederherstellen</div>
+      <div class="form-section-header">Wiederherstellen eines Backup</div>
       <div class="form-row">
         <p style="margin-bottom: 12px; font-size: 14px; color: #666;">
           Wählen Sie eine zuvor exportierte Backup-Datei aus.<br>
@@ -624,11 +624,11 @@ class SettingsView {
     </div>
   `;
 
-    const modal = new ModalComponent("Backup wiederherstellen", content);
+    const modal = new ModalComponent("Restore", content);
 
     modal.addAction("Abbrechen", null, false, false);
     modal.addAction(
-      "Wiederherstellen",
+      "Restore",
       () => {
         this.processSettingsImport();
       },
@@ -672,7 +672,7 @@ class SettingsView {
 
         // Backup-Typ erkennen
         if (settingsData.exportType === "complete") {
-          preview += `📦 <strong>Backup-Typ:</strong> Vollständiges Backup<br><br>`;
+          preview += `📦 <strong>Backup-Typ:</strong> Full Backup<br><br>`;
         } else {
           preview += `⚙️ <strong>Backup-Typ:</strong> Nur Einstellungen<br><br>`;
         }
@@ -760,7 +760,7 @@ class SettingsView {
         if (backupData.exportType === "complete") {
           // Vollständiger Import über Storage
           storage.importData(backupData);
-          UIUtils.showSuccessMessage("Vollständiges Backup wiederhergestellt!");
+          UIUtils.showSuccessMessage("Backup wiederhergestellt!");
         } else {
           // Legacy: Nur Einstellungen importieren
           if (backupData.availableDisciplines) storage.availableDisciplines = backupData.availableDisciplines;
@@ -865,7 +865,7 @@ class SettingsView {
 			`;
 
       disciplineItem.innerHTML = `
-			<span style="flex: 1; height: 30px; max-width:60%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;" title="${UIUtils.escapeHtml(discipline)}">${UIUtils.escapeHtml(discipline)}</span>
+			<span style="flex: 1; height: 30px; max-width:50%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;" title="${UIUtils.escapeHtml(discipline)}">${UIUtils.escapeHtml(discipline)}</span>
 			<div style="display: flex; gap: 8px;">
 			<button class="btn btn-small btn-secondary" style="height: 30px;" onclick="app.views.settings.editDiscipline(${index})">
 			Bearbeiten
