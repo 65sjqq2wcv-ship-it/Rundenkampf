@@ -1,4 +1,5 @@
 class SettingsView {
+  // In der render() Methode - Event-Listeners Setup korrigieren:
   render() {
     const container = document.createElement("div");
     container.style.cssText = "padding-bottom: 20px;";
@@ -12,15 +13,19 @@ class SettingsView {
       const currentDisciplineSection = this.createCurrentDisciplineSection();
       container.appendChild(currentDisciplineSection);
 
-      // NEU: Overlay Scale Section
+      // Overlay Scale Section
       const overlayScaleSection = this.createOverlayScaleSection();
       container.appendChild(overlayScaleSection);
 
-      // NEU: Logo Upload Section
+      // Logo Upload Section
       const logoSection = this.createLogoUploadSection();
       container.appendChild(logoSection);
 
-      // NEU: Backup/Restore Section
+      // NEU: Label-Einstellungen Section
+      const labelSection = this.createLabelSettingsSection();
+      container.appendChild(labelSection);
+
+      // Backup/Restore Section
       const backupSection = this.createBackupRestoreSection();
       container.appendChild(backupSection);
 
@@ -28,20 +33,21 @@ class SettingsView {
       const disciplinesSection = this.createDisciplinesSection();
       container.appendChild(disciplinesSection);
 
-      // NEU: Weapons Section
+      // Weapons Section
       const weaponsSection = this.createWeaponsSection();
       container.appendChild(weaponsSection);
-      this.updateWeaponsList();
 
       // Info Section
       const infoSection = this.createInfoSection();
       container.appendChild(infoSection);
 
-      // Setup event listeners after render
+      // Setup event listeners after render - ERWEITERT
       setTimeout(() => {
         this.setupEventListeners();
+        this.setupLabelSettingsEventListeners(); // NEU: Label-Settings Event-Listeners
         this.updateCurrentDisciplineSelect();
         this.updateDisciplinesList();
+        this.updateWeaponsList();
         this.updateLogoPreview();
       }, 100);
     } catch (error) {
@@ -50,6 +56,257 @@ class SettingsView {
     }
 
     return container;
+  }
+
+  createLabelSettingsSection() {
+  const section = document.createElement("div");
+  section.className = "card";
+
+  const labelSettings = storage.getLabelSettings();
+
+  section.innerHTML = `
+    <h3 style="margin-bottom: 16px;">📄 Label-Einstellungen</h3>
+    
+    <div class="form-section">
+      <div class="form-section-header">Label-Abmessungen</div>
+      
+      <div class="form-row">
+        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+          Label-Breite: <span id="labelWidthValue">${labelSettings.labelWidth}</span> mm
+        </label>
+        <input type="range" id="labelWidthSlider" min="30.0" max="100.0" step="0.1" value="${labelSettings.labelWidth}"
+               style="width: 100%; margin-bottom: 8px;">
+      </div>
+      
+      <div class="form-row">
+        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+          Label-Höhe: <span id="labelHeightValue">${labelSettings.labelHeight}</span> mm
+        </label>
+        <input type="range" id="labelHeightSlider" min="15.0" max="60.0" step="0.1" value="${labelSettings.labelHeight}"
+               style="width: 100%; margin-bottom: 8px;">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-header">Seitenränder</div>
+      
+      <div class="form-row">
+        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+          Rand oben: <span id="marginTopValue">${labelSettings.marginTop}</span> mm
+        </label>
+        <input type="range" id="marginTopSlider" min="0.0" max="30.0" step="0.1" value="${labelSettings.marginTop}"
+               style="width: 100%; margin-bottom: 8px;">
+      </div>
+      
+      <div class="form-row">
+        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+          Rand unten: <span id="marginBottomValue">${labelSettings.marginBottom}</span> mm
+        </label>
+        <input type="range" id="marginBottomSlider" min="0.0" max="30.0" step="0.1" value="${labelSettings.marginBottom}"
+               style="width: 100%; margin-bottom: 8px;">
+      </div>
+
+      <div class="form-row">
+        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+          Rand links: <span id="marginLeftValue">${labelSettings.marginLeft || 0}</span> mm
+        </label>
+        <input type="range" id="marginLeftSlider" min="0.0" max="30.0" step="0.1" value="${labelSettings.marginLeft || 0}"
+               style="width: 100%; margin-bottom: 8px;">
+      </div>
+
+      <div class="form-row">
+        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+          Rand rechts: <span id="marginRightValue">${labelSettings.marginRight || 0}</span> mm
+        </label>
+        <input type="range" id="marginRightSlider" min="0.0" max="30.0" step="0.1" value="${labelSettings.marginRight || 0}"
+               style="width: 100%; margin-bottom: 8px;">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-header">Layout</div>
+      
+      <div class="form-row">
+        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+          Spalten: <span id="columnsValue">${labelSettings.columns}</span>
+        </label>
+        <input type="range" id="columnsSlider" min="1" max="5" step="1" value="${labelSettings.columns}"
+               style="width: 100%; margin-bottom: 8px;">
+      </div>
+      
+      <div class="form-row">
+        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+          Zeilen: <span id="rowsValue">${labelSettings.rows}</span>
+        </label>
+        <input type="range" id="rowsSlider" min="1" max="15" step="1" value="${labelSettings.rows}"
+               style="width: 100%; margin-bottom: 8px;">
+      </div>
+
+      <div class="form-row">
+        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+          Abstand zwischen Labels: <span id="labelSpacingValue">${labelSettings.labelSpacing || 0}</span> mm
+        </label>
+        <input type="range" id="labelSpacingSlider" min="0.0" max="10.0" step="0.1" value="${labelSettings.labelSpacing || 0}"
+               style="width: 100%; margin-bottom: 8px;">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-header">Druckoptionen</div>
+      
+      <div class="form-row">
+        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+          Überspringen (alte Bögen): <span id="skipLabelsValue">${labelSettings.skipLabels}</span>
+        </label>
+        <input type="range" id="skipLabelsSlider" min="0" max="50" step="1" value="${labelSettings.skipLabels}"
+               style="width: 100%; margin-bottom: 8px;">
+      </div>
+      
+      <div class="form-row">
+        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+          Anzahl Kopien: <span id="copiesValue">${labelSettings.copies}</span>
+        </label>
+        <input type="range" id="copiesSlider" min="1" max="5" step="1" value="${labelSettings.copies}"
+               style="width: 100%; margin-bottom: 8px;">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-row">
+        <button class="btn btn-primary" id="saveLabelSettingsBtn" style="width: 100%;">
+          Label-Einstellungen speichern
+        </button>
+      </div>
+    </div>
+  `;
+
+  return section;
+}
+
+  setupLabelSettingsEventListeners() {
+    console.log("Setting up label settings event listeners...");
+
+    // Slider-Updates - ALLE auf 0.1 Schritte (außer Ganzzahlen)
+    const sliders = [
+      { name: "labelWidth", decimals: 1, step: 0.1 }, // 0,1 mm Schritte
+      { name: "labelHeight", decimals: 1, step: 0.1 }, // 0,1 mm Schritte
+      { name: "marginTop", decimals: 1, step: 0.1 }, // 0,1 mm Schritte - GEÄNDERT
+      { name: "marginBottom", decimals: 1, step: 0.1 }, // 0,1 mm Schritte - GEÄNDERT
+      { name: "marginLeft", decimals: 1, step: 0.1 }, // 0,1 mm Schritte - GEÄNDERT
+      { name: "marginRight", decimals: 1, step: 0.1 }, // 0,1 mm Schritte - GEÄNDERT
+      { name: "columns", decimals: 0, step: 1 }, // Ganzzahl
+      { name: "rows", decimals: 0, step: 1 }, // Ganzzahl
+      { name: "skipLabels", decimals: 0, step: 1 }, // Ganzzahl
+      { name: "copies", decimals: 0, step: 1 }, // Ganzzahl
+      { name: "labelSpacing", decimals: 1, step: 0.1 }, // 0,1 mm Schritte
+    ];
+
+    sliders.forEach((setting) => {
+      const slider = document.getElementById(`${setting.name}Slider`);
+      const valueDisplay = document.getElementById(`${setting.name}Value`);
+
+      console.log(
+        `Setting up slider for ${setting.name}:`,
+        slider ? "found" : "not found",
+      );
+
+      if (slider && valueDisplay) {
+        // Event-Listener hinzufügen
+        slider.addEventListener("input", (e) => {
+          const value = parseFloat(e.target.value);
+
+          // EINHEITLICHE FORMATIERUNG für alle 0.1-Schritte
+          if (setting.decimals === 0) {
+            // Ganzzahlen
+            valueDisplay.textContent = Math.round(value).toString();
+          } else {
+            // Dezimalzahlen - immer eine Nachkommastelle für 0.1-Schritte
+            valueDisplay.textContent = value.toFixed(1);
+          }
+
+          console.log(`${setting.name} updated to:`, value);
+        });
+
+        // Initial-Wert setzen
+        const currentSettings = storage.getLabelSettings();
+        const currentValue = currentSettings[setting.name];
+        if (currentValue !== undefined) {
+          slider.value = currentValue;
+
+          // Display aktualisieren
+          if (setting.decimals === 0) {
+            valueDisplay.textContent = Math.round(currentValue).toString();
+          } else {
+            valueDisplay.textContent = currentValue.toFixed(1);
+          }
+        }
+      } else {
+        console.warn(`Slider or value display not found for ${setting.name}`);
+      }
+    });
+
+    // Speichern Button
+    const saveBtn = document.getElementById("saveLabelSettingsBtn");
+    console.log("Save button:", saveBtn ? "found" : "not found");
+
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => {
+        console.log("Save button clicked");
+        this.saveLabelSettings();
+      });
+    }
+  }
+
+  // saveLabelSettings korrigieren:
+  saveLabelSettings() {
+    try {
+      console.log("Saving label settings...");
+
+      const settings = {
+        labelWidth: parseFloat(
+          document.getElementById("labelWidthSlider").value,
+        ),
+        labelHeight: parseFloat(
+          document.getElementById("labelHeightSlider").value,
+        ),
+        marginTop: parseFloat(document.getElementById("marginTopSlider").value),
+        marginBottom: parseFloat(
+          document.getElementById("marginBottomSlider").value,
+        ),
+        marginLeft: parseFloat(
+          document.getElementById("marginLeftSlider").value,
+        ),
+        marginRight: parseFloat(
+          document.getElementById("marginRightSlider").value,
+        ),
+        columns: parseInt(document.getElementById("columnsSlider").value),
+        rows: parseInt(document.getElementById("rowsSlider").value),
+        skipLabels: parseInt(document.getElementById("skipLabelsSlider").value),
+        copies: parseInt(document.getElementById("copiesSlider").value),
+        labelSpacing: parseFloat(
+          document.getElementById("labelSpacingSlider").value,
+        ),
+      };
+
+      console.log("Settings to save:", settings);
+
+      storage.saveLabelSettings(settings);
+      UIUtils.showSuccessMessage("Label-Einstellungen gespeichert");
+
+      console.log("Label settings saved successfully");
+    } catch (error) {
+      console.error("Error saving label settings:", error);
+      UIUtils.showError("Fehler beim Speichern: " + error.message);
+    }
+  }
+
+  // NEU: Test-Labels drucken
+  testPrintLabels() {
+    if (typeof labelPrinter !== "undefined" && labelPrinter.printLabels) {
+      labelPrinter.printLabels();
+    } else {
+      UIUtils.showError("Label-Printer nicht verfügbar");
+    }
   }
 
   createWeaponsSection() {
@@ -77,7 +334,8 @@ class SettingsView {
     weaponsList.innerHTML = "";
 
     if (storage.availableWeapons.length === 0) {
-      weaponsList.innerHTML = '<p style="color: #8e8e93; font-style: italic;">Keine Waffen vorhanden</p>';
+      weaponsList.innerHTML =
+        '<p style="color: #8e8e93; font-style: italic;">Keine Waffen vorhanden</p>';
       return;
     }
 
@@ -367,10 +625,10 @@ class SettingsView {
 
   setupEventListeners() {
     const competitionTypeSelect = document.getElementById(
-      "competitionTypeSelect"
+      "competitionTypeSelect",
     );
     const currentDisciplineSelect = document.getElementById(
-      "currentDisciplineSelect"
+      "currentDisciplineSelect",
     );
 
     const scaleSlider = document.getElementById("overlayScaleSlider");
@@ -429,6 +687,88 @@ class SettingsView {
     }
   }
 
+  // NEU: Separate Event-Listener-Methode für Label-Settings:
+  setupLabelSettingsEventListeners() {
+    console.log("Setting up label settings event listeners...");
+
+    // Slider-Updates mit intelligenter Formatierung
+    const sliders = [
+      { name: "labelWidth", decimals: 1 },
+      { name: "labelHeight", decimals: 1 },
+      { name: "marginTop", decimals: 1 },
+      { name: "marginBottom", decimals: 1 },
+      { name: "marginLeft", decimals: 1 },
+      { name: "marginRight", decimals: 1 },
+      { name: "columns", decimals: 0 }, // Ganzzahl
+      { name: "rows", decimals: 0 }, // Ganzzahl
+      { name: "skipLabels", decimals: 0 }, // Ganzzahl
+      { name: "copies", decimals: 0 }, // Ganzzahl
+      { name: "labelSpacing", decimals: 1 },
+    ];
+
+    sliders.forEach((setting) => {
+      const slider = document.getElementById(`${setting.name}Slider`);
+      const valueDisplay = document.getElementById(`${setting.name}Value`);
+
+      console.log(
+        `Setting up slider for ${setting.name}:`,
+        slider ? "found" : "not found",
+      );
+
+      if (slider && valueDisplay) {
+        // Event-Listener hinzufügen
+        slider.addEventListener("input", (e) => {
+          const value = parseFloat(e.target.value);
+
+          // Formatierung: Ganzzahlen ohne Dezimale, sonst mit Dezimale
+          if (setting.decimals === 0) {
+            valueDisplay.textContent = Math.round(value).toString();
+          } else {
+            // Zeige Dezimale nur wenn nötig
+            const formatted =
+              value % 1 === 0
+                ? Math.round(value).toString()
+                : value.toFixed(setting.decimals);
+            valueDisplay.textContent = formatted;
+          }
+
+          console.log(`${setting.name} updated to:`, value);
+        });
+
+        // Initial-Wert setzen
+        const currentSettings = storage.getLabelSettings();
+        const currentValue = currentSettings[setting.name];
+        if (currentValue !== undefined) {
+          slider.value = currentValue;
+
+          // Display aktualisieren
+          if (setting.decimals === 0) {
+            valueDisplay.textContent = Math.round(currentValue).toString();
+          } else {
+            const formatted =
+              currentValue % 1 === 0
+                ? Math.round(currentValue).toString()
+                : currentValue.toFixed(setting.decimals);
+            valueDisplay.textContent = formatted;
+          }
+        }
+      } else {
+        console.warn(`Slider or value display not found for ${setting.name}`);
+      }
+    });
+
+    // Speichern Button
+    const saveBtn = document.getElementById("saveLabelSettingsBtn");
+    console.log("Save button:", saveBtn ? "found" : "not found");
+
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => {
+        console.log("Save button clicked");
+        this.saveLabelSettings();
+      });
+    }
+  }
+
   // Verbesserte Logo Management Methoden in SettingsView
   uploadLogo() {
     try {
@@ -459,7 +799,7 @@ class SettingsView {
 
       // Loading Indicator
       const uploadButton = document.querySelector(
-        'button[onclick="app.views.settings.uploadLogo()"]'
+        'button[onclick="app.views.settings.uploadLogo()"]',
       );
       const originalText = uploadButton.textContent;
       uploadButton.disabled = true;
@@ -472,7 +812,7 @@ class SettingsView {
           console.log(
             "File loaded, size:",
             Math.round(base64.length / 1024),
-            "KB"
+            "KB",
           );
 
           // Logo über Storage-Methode speichern
@@ -496,7 +836,7 @@ class SettingsView {
 
           if (error.message.includes("Speicher ist voll")) {
             alert(
-              "Das Logo ist zu groß für den verfügbaren Speicher. Versuchen Sie ein kleineres Bild oder komprimieren Sie es."
+              "Das Logo ist zu groß für den verfügbaren Speicher. Versuchen Sie ein kleineres Bild oder komprimieren Sie es.",
             );
           } else {
             alert("Fehler beim Speichern des Logos: " + error.message);
@@ -528,7 +868,7 @@ class SettingsView {
 
       if (
         confirm(
-          "Möchten Sie das Vereinslogo wirklich löschen?\n\nEs wird dann nicht mehr im PDF-Bericht angezeigt."
+          "Möchten Sie das Vereinslogo wirklich löschen?\n\nEs wird dann nicht mehr im PDF-Bericht angezeigt.",
         )
       ) {
         storage.deleteLogo();
@@ -560,8 +900,12 @@ class SettingsView {
         results: storage.results.map((r) => r.toJSON()),
 
         // Filter-Einstellungen
-        visibleTeamIds: storage.visibleTeamIds ? Array.from(storage.visibleTeamIds) : null,
-        visibleShooterIds: storage.visibleShooterIds ? Array.from(storage.visibleShooterIds) : null,
+        visibleTeamIds: storage.visibleTeamIds
+          ? Array.from(storage.visibleTeamIds)
+          : null,
+        visibleShooterIds: storage.visibleShooterIds
+          ? Array.from(storage.visibleShooterIds)
+          : null,
 
         // Disziplinen und Waffen
         availableDisciplines: storage.availableDisciplines,
@@ -572,20 +916,26 @@ class SettingsView {
         // App-Einstellungen (Logo, Overlay-Einstellungen, etc.)
         settings: storage.settings,
 
+        // NEU: Label-Einstellungen hinzufügen
+        labelSettings: storage.getLabelSettings(),
+
         // Meta-Informationen
         exportDate: new Date().toISOString(),
         exportVersion: APP_VERSION || "1.0.0",
-        exportType: "complete" // Marker für vollständiges Backup
+        exportType: "complete", // Marker für vollständiges Backup
       };
 
       const dataStr = JSON.stringify(completeBackup, null, 2);
-      const blob = new Blob([dataStr], { type: 'application/json' });
+      const blob = new Blob([dataStr], { type: "application/json" });
 
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
 
-      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      const timestamp = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/:/g, "-");
       // GEÄNDERT: Dateiname zeigt, dass es ein vollständiges Backup ist
       link.download = `rundenkampf-backup-${timestamp}.json`;
 
@@ -595,7 +945,6 @@ class SettingsView {
       URL.revokeObjectURL(url);
 
       UIUtils.showSuccessMessage("Backup erstellt!");
-
     } catch (error) {
       console.error("Error creating complete backup:", error);
       alert("Fehler beim Erstellen des Backups: " + error.message);
@@ -633,7 +982,7 @@ class SettingsView {
         this.processSettingsImport();
       },
       true,
-      false
+      false,
     );
 
     modal.show();
@@ -662,12 +1011,19 @@ class SettingsView {
 
         // Export-Informationen
         if (settingsData.exportDate) {
-          const exportDate = new Date(settingsData.exportDate).toLocaleString('de-DE');
+          const exportDate = new Date(settingsData.exportDate).toLocaleString(
+            "de-DE",
+          );
           preview += `📅 <strong>Export-Datum:</strong> ${exportDate}<br>`;
         }
 
         if (settingsData.exportVersion) {
           preview += `🏷️ <strong>Version:</strong> ${settingsData.exportVersion}<br>`;
+        }
+
+        // NEU: Label-Einstellungen Preview
+        if (settingsData.labelSettings) {
+          preview += `🏷️ <strong>Label-Einstellungen:</strong> Enthalten<br>`;
         }
 
         // Backup-Typ erkennen
@@ -682,7 +1038,10 @@ class SettingsView {
           preview += `👥 <strong>Teams:</strong> ${settingsData.teams.length} Einträge<br>`;
         }
 
-        if (settingsData.standaloneShooters && settingsData.standaloneShooters.length > 0) {
+        if (
+          settingsData.standaloneShooters &&
+          settingsData.standaloneShooters.length > 0
+        ) {
           preview += `👤 <strong>Einzelschützen:</strong> ${settingsData.standaloneShooters.length} Einträge<br>`;
         }
 
@@ -691,7 +1050,11 @@ class SettingsView {
         }
 
         // Trennlinie wenn Daten vorhanden sind
-        if (settingsData.teams || settingsData.standaloneShooters || settingsData.results) {
+        if (
+          settingsData.teams ||
+          settingsData.standaloneShooters ||
+          settingsData.results
+        ) {
           preview += `<br>`;
         }
 
@@ -704,12 +1067,18 @@ class SettingsView {
           preview += `📋 <strong>Aktuelle Disziplin:</strong> ${settingsData.selectedDiscipline}<br>`;
         }
 
-        if (settingsData.availableDisciplines && settingsData.availableDisciplines.length > 0) {
+        if (
+          settingsData.availableDisciplines &&
+          settingsData.availableDisciplines.length > 0
+        ) {
           preview += `📝 <strong>Disziplinen:</strong> ${settingsData.availableDisciplines.length} Einträge<br>`;
         }
 
         // Waffen-Vorschau
-        if (settingsData.availableWeapons && settingsData.availableWeapons.length > 0) {
+        if (
+          settingsData.availableWeapons &&
+          settingsData.availableWeapons.length > 0
+        ) {
           preview += `🔫 <strong>Waffen:</strong> ${settingsData.availableWeapons.length} Einträge<br>`;
         }
 
@@ -763,11 +1132,21 @@ class SettingsView {
           UIUtils.showSuccessMessage("Backup wiederhergestellt!");
         } else {
           // Legacy: Nur Einstellungen importieren
-          if (backupData.availableDisciplines) storage.availableDisciplines = backupData.availableDisciplines;
-          if (backupData.availableWeapons) storage.availableWeapons = backupData.availableWeapons;
-          if (backupData.selectedDiscipline) storage.selectedDiscipline = backupData.selectedDiscipline;
-          if (backupData.selectedCompetitionType) storage.selectedCompetitionType = backupData.selectedCompetitionType;
-          if (backupData.settings) storage.settings = { ...storage.settings, ...backupData.settings };
+          if (backupData.availableDisciplines)
+            storage.availableDisciplines = backupData.availableDisciplines;
+          if (backupData.availableWeapons)
+            storage.availableWeapons = backupData.availableWeapons;
+          if (backupData.selectedDiscipline)
+            storage.selectedDiscipline = backupData.selectedDiscipline;
+          if (backupData.selectedCompetitionType)
+            storage.selectedCompetitionType =
+              backupData.selectedCompetitionType;
+          if (backupData.settings)
+            storage.settings = { ...storage.settings, ...backupData.settings };
+
+          // NEU: Label-Einstellungen importieren
+          if (backupData.labelSettings)
+            storage.saveLabelSettings(backupData.labelSettings);
 
           storage.save();
           UIUtils.showSuccessMessage("Einstellungen wiederhergestellt!");
@@ -775,7 +1154,6 @@ class SettingsView {
 
         // Ansicht aktualisieren
         setTimeout(() => app.showView("settings"), 1000);
-
       } catch (error) {
         console.error("Import error:", error);
         alert("Fehler beim Wiederherstellen: " + error.message);
@@ -943,7 +1321,7 @@ class SettingsView {
       const disciplineName = storage.availableDisciplines[index];
       if (
         confirm(
-          `Möchten Sie die Disziplin "${disciplineName}" wirklich löschen?`
+          `Möchten Sie die Disziplin "${disciplineName}" wirklich löschen?`,
         )
       ) {
         storage.deleteDiscipline(index);
@@ -961,13 +1339,13 @@ class SettingsView {
   resetApp() {
     if (
       confirm(
-        "Möchten Sie wirklich alle Daten zurücksetzen? Diese Aktion kann nicht rückgängig gemacht werden."
+        "Möchten Sie wirklich alle Daten zurücksetzen? Diese Aktion kann nicht rückgängig gemacht werden.",
       )
     ) {
       try {
         localStorage.removeItem("rundenkampf_bericht");
         UIUtils.showSuccessMessage(
-          "App zurückgesetzt - Seite wird neu geladen..."
+          "App zurückgesetzt - Seite wird neu geladen...",
         );
 
         setTimeout(() => {

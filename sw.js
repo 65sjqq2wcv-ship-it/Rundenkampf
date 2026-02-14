@@ -1,5 +1,5 @@
 // Erweiterte Service Worker Version für vollständige Offline-Funktionalität
-const APP_VERSION = "1.91";
+const APP_VERSION = "1.92";
 const CACHE_NAME = `rundenkampf-v${APP_VERSION}`;
 const STATIC_CACHE = `rundenkampf-static-v${APP_VERSION}`;
 const DYNAMIC_CACHE = `rundenkampf-dynamic-v${APP_VERSION}`;
@@ -22,6 +22,7 @@ const STATIC_ASSETS = [
   "./js/views/teams-view.js",
   "./js/views/settings-view.js",
   "./js/pdf-exporter.js",
+  "./js/label-printer.js", // NEU HINZUFÜGEN
   "./icons/icon-192x192.png",
   "./icons/icon-512x512.png",
 ];

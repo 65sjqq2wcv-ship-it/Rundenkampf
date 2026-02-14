@@ -16,14 +16,50 @@ class Storage {
       overlayOpacity: 0.8, // NEU: Default-Transparenz
     };
 
+    // defaultLabelSettings mit Dezimalwerten:
+    this.defaultLabelSettings = {
+      labelWidth: 52.5, // mm
+      labelHeight: 29.7, // mm
+      marginTop: 0.0, // mm - 0.1 Schritte
+      marginBottom: 0.0, // mm - 0.1 Schritte
+      marginLeft: 0.0, // mm - 0.1 Schritte
+      marginRight: 0.0, // mm - 0.1 Schritte
+      columns: 4, // Ganzzahl
+      rows: 10, // Ganzzahl
+      skipLabels: 0, // Ganzzahl
+      copies: 1, // Ganzzahl
+      labelSpacing: 0.0, // mm - 0.1 Schritte
+    };
+
     this.load();
+  }
+
+  // NEU: Label-Einstellungen laden
+  getLabelSettings() {
+    return {
+      ...this.defaultLabelSettings,
+      ...this.settings.labelSettings,
+    };
+  }
+
+  // NEU: Label-Einstellungen speichern
+  saveLabelSettings(labelSettings) {
+    if (!this.settings.labelSettings) {
+      this.settings.labelSettings = {};
+    }
+
+    this.settings.labelSettings = {
+      ...this.settings.labelSettings,
+      ...labelSettings,
+    };
+
+    this.save();
+    console.log("Label settings saved:", labelSettings);
   }
 
   // In defaultWeapons() Methode hinzufügen:
   defaultWeapons() {
-    return [
-      "Sig Sauer 1911"
-    ];
+    return ["Sig Sauer 1911"];
   }
 
   // Neue Waffen-Management Methoden hinzufügen:
@@ -105,7 +141,7 @@ class Storage {
 
         this.teams = (data.teams || []).map((t) => Team.fromJSON(t));
         this.standaloneShooters = (data.standaloneShooters || []).map((s) =>
-          Shooter.fromJSON(s)
+          Shooter.fromJSON(s),
         );
         this.results = (data.results || []).map((r) => ResultEntry.fromJSON(r));
         this.visibleTeamIds = data.visibleTeamIds
@@ -127,7 +163,7 @@ class Storage {
 
         console.log(
           "Data loaded successfully. Logo present:",
-          !!this.settings.clubLogo
+          !!this.settings.clubLogo,
         );
       } else {
         this.setupInitialData();
@@ -211,7 +247,7 @@ class Storage {
         console.warn(
           "Data size is very large:",
           Math.round(dataString.length / 1024),
-          "KB"
+          "KB",
         );
 
         // Versuche Logo-Komprimierung falls vorhanden
@@ -224,7 +260,7 @@ class Storage {
       localStorage.setItem("rundenkampf_bericht", dataString);
       console.log(
         "Data saved successfully. Logo present:",
-        !!this.settings.clubLogo
+        !!this.settings.clubLogo,
       );
     } catch (error) {
       console.error("Fehler beim Speichern der Daten:", error);
@@ -238,7 +274,7 @@ class Storage {
             const retryData = {
               teams: this.teams.map((t) => t.toJSON()),
               standaloneShooters: this.standaloneShooters.map((s) =>
-                s.toJSON()
+                s.toJSON(),
               ),
               results: this.results.map((r) => r.toJSON()),
               visibleTeamIds: this.visibleTeamIds
@@ -254,7 +290,7 @@ class Storage {
             };
             localStorage.setItem(
               "rundenkampf_bericht",
-              JSON.stringify(retryData)
+              JSON.stringify(retryData),
             );
             console.log("Data saved successfully after logo compression");
             return;
@@ -263,7 +299,7 @@ class Storage {
           }
         }
         throw new Error(
-          "Speicher ist voll. Bitte löschen Sie das Logo oder andere Daten."
+          "Speicher ist voll. Bitte löschen Sie das Logo oder andere Daten.",
         );
       }
 
@@ -294,7 +330,7 @@ class Storage {
       const oldShooters = this.teams[index].shooters;
       const newShooterIds = new Set(updatedTeam.shooters.map((s) => s.id));
       const removedShooters = oldShooters.filter(
-        (s) => !newShooterIds.has(s.id)
+        (s) => !newShooterIds.has(s.id),
       );
 
       removedShooters.forEach((s) => {
@@ -362,7 +398,7 @@ class Storage {
     }
 
     const index = this.standaloneShooters.findIndex(
-      (s) => s.id === updatedShooter.id
+      (s) => s.id === updatedShooter.id,
     );
     if (index !== -1) {
       this.standaloneShooters[index] = updatedShooter;
@@ -389,7 +425,7 @@ class Storage {
 
       // Entferne Schützen aus der Liste
       this.standaloneShooters = this.standaloneShooters.filter(
-        (s) => s.id !== shooterId
+        (s) => s.id !== shooterId,
       );
 
       // NEU: Entferne Schützen aus Sichtbarkeitsfilter
@@ -417,7 +453,7 @@ class Storage {
       (r) =>
         r.shooterId === entry.shooterId &&
         r.discipline === entry.discipline &&
-        r.teamId === entry.teamId
+        r.teamId === entry.teamId,
     );
 
     if (existingIndex !== -1) {
@@ -506,7 +542,7 @@ class Storage {
     // Größenprüfung (5MB Limit)
     if (base64Data.length > 5 * 1024 * 1024) {
       throw new Error(
-        "Das Logo ist zu groß. Bitte verwenden Sie ein kleineres Bild."
+        "Das Logo ist zu groß. Bitte verwenden Sie ein kleineres Bild.",
       );
     }
 
@@ -532,7 +568,7 @@ class Storage {
   getFilteredStandaloneShooters() {
     if (this.visibleShooterIds) {
       return this.standaloneShooters.filter((shooter) =>
-        this.visibleShooterIds.has(shooter.id)
+        this.visibleShooterIds.has(shooter.id),
       );
     }
     return this.standaloneShooters;
@@ -540,9 +576,7 @@ class Storage {
 
   getFilteredTeams() {
     if (this.visibleTeamIds) {
-      return this.teams.filter((team) =>
-        this.visibleTeamIds.has(team.id)
-      );
+      return this.teams.filter((team) => this.visibleTeamIds.has(team.id));
     }
     return this.teams;
   }
@@ -557,7 +591,7 @@ class Storage {
           (r) =>
             r.teamId === team.id &&
             r.shooterId === shooter.id &&
-            r.discipline === Discipline.PRAEZISION
+            r.discipline === Discipline.PRAEZISION,
         )
         .reduce((sum, r) => sum + r.total(), 0);
       const duell = this.results
@@ -565,7 +599,7 @@ class Storage {
           (r) =>
             r.teamId === team.id &&
             r.shooterId === shooter.id &&
-            r.discipline === Discipline.DUELL
+            r.discipline === Discipline.DUELL,
         )
         .reduce((sum, r) => sum + r.total(), 0);
       return precision + duell;
@@ -585,7 +619,7 @@ class Storage {
           (r) =>
             r.teamId === team.id &&
             r.shooterId === shooter.id &&
-            r.discipline === Discipline.ANNEX_SCHEIBE
+            r.discipline === Discipline.ANNEX_SCHEIBE,
         );
         return result ? result.total() : 0;
       });
@@ -669,6 +703,9 @@ class Storage {
       selectedWeapon: this.selectedWeapon,
       settings: this.settings,
 
+      // NEU: Label-Einstellungen explizit exportieren
+      labelSettings: this.getLabelSettings(),
+
       exportDate: new Date().toISOString(),
     };
   }
@@ -678,7 +715,7 @@ class Storage {
       if (data.teams) this.teams = data.teams.map((t) => Team.fromJSON(t));
       if (data.standaloneShooters)
         this.standaloneShooters = data.standaloneShooters.map((s) =>
-          Shooter.fromJSON(s)
+          Shooter.fromJSON(s),
         );
       if (data.results)
         this.results = data.results.map((r) => ResultEntry.fromJSON(r));
@@ -694,12 +731,14 @@ class Storage {
         this.visibleShooterIds = new Set(data.visibleShooterIds);
 
       // FEHLENDE ZEILEN HINZUFÜGEN:
-      if (data.availableWeapons)
-        this.availableWeapons = data.availableWeapons;
-      if (data.selectedWeapon)
-        this.selectedWeapon = data.selectedWeapon;
-      if (data.settings)
-        this.settings = { ...this.settings, ...data.settings };
+      if (data.availableWeapons) this.availableWeapons = data.availableWeapons;
+      if (data.selectedWeapon) this.selectedWeapon = data.selectedWeapon;
+      if (data.settings) this.settings = { ...this.settings, ...data.settings };
+
+      // NEU: Label-Einstellungen importieren
+      if (data.labelSettings) {
+        this.saveLabelSettings(data.labelSettings);
+      }
 
       this.save();
       console.log("Data imported successfully");

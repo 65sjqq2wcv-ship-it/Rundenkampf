@@ -29,7 +29,8 @@ class OverviewView {
       }
 
       // Standalone shooters overview - MIT FILTER
-      const filteredStandaloneShooters = storage.getFilteredStandaloneShooters();
+      const filteredStandaloneShooters =
+        storage.getFilteredStandaloneShooters();
       if (filteredStandaloneShooters.length > 0) {
         const soloCard = this.createSoloShootersCard();
         container.appendChild(soloCard);
@@ -97,6 +98,14 @@ class OverviewView {
         filterBtn.addEventListener("click", () => this.showFilterModal());
         navButtons.appendChild(filterBtn);
 
+        // NEU: Labels Button
+        const labelsBtn = document.createElement("button");
+        labelsBtn.className = "nav-btn";
+        labelsBtn.textContent = "🏷️";
+        labelsBtn.title = "Labels drucken";
+        labelsBtn.addEventListener("click", () => this.printLabels());
+        navButtons.appendChild(labelsBtn);
+
         // PDF Export Button
         const pdfBtn = document.createElement("button");
         pdfBtn.className = "nav-btn";
@@ -106,6 +115,21 @@ class OverviewView {
         navButtons.appendChild(pdfBtn);
       }
     }, 100);
+  }
+
+  // NEU: printLabels Methode hinzufügen
+  printLabels() {
+    // Verwende den neuen Label-Printer
+    if (typeof labelPrinter !== "undefined" && labelPrinter.printLabels) {
+      labelPrinter.printLabels();
+    } else if (typeof window.printLabels === "function") {
+      window.printLabels();
+    } else {
+      console.error("Label-Printer not available");
+      UIUtils.showError(
+        "Label-Printer nicht verfügbar. Bitte laden Sie die Seite neu.",
+      );
+    }
   }
 
   createInfoCard() {
@@ -145,9 +169,10 @@ class OverviewView {
       "display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;";
     header.innerHTML = `
 			<h3 style="margin: 0; flex: 1; line-height: 1.3;">${UIUtils.escapeHtml(
-      team.name
-    )}</h3>
-			<span style="color: #666; font-size: 14px;">Schützen: ${team.shooters.length
+        team.name,
+      )}</h3>
+			<span style="color: #666; font-size: 14px;">Schützen: ${
+        team.shooters.length
       }</span>
 		`;
     card.appendChild(header);
@@ -197,11 +222,13 @@ class OverviewView {
 				${isWorst ? "color: #ff3b30; background-color: #ffebee;" : ""}
 			`;
       row.innerHTML = `
-				<div style="overflow: hidden; text-overflow: ellipsis; ${isWorst ? "text-decoration: normal;" : ""
+				<div style="overflow: hidden; text-overflow: ellipsis; ${
+          isWorst ? "text-decoration: normal;" : ""
         }">${UIUtils.escapeHtml(shooter.name)}</div>
 				<div style="text-align: center;">${precision}</div>
 				<div style="text-align: center;">${duell}</div>
-				<div style="text-align: right; font-weight: 500; ${isWorst ? "text-decoration: normal;" : ""
+				<div style="text-align: right; font-weight: 500; ${
+          isWorst ? "text-decoration: normal;" : ""
         }">${total}</div>
 			`;
       table.appendChild(row);
@@ -236,9 +263,10 @@ class OverviewView {
       "display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;";
     header.innerHTML = `
 			<h3 style="margin: 0; flex: 1; line-height: 1.3;">${UIUtils.escapeHtml(
-      team.name
-    )}</h3>
-			<span style="color: #666; font-size: 14px;">Schützen: ${team.shooters.length
+        team.name,
+      )}</h3>
+			<span style="color: #666; font-size: 14px;">Schützen: ${
+        team.shooters.length
       }</span>
 		`;
     card.appendChild(header);
@@ -294,8 +322,9 @@ class OverviewView {
 				${isWorst ? "color: #ff3b30; background-color: #ffebee;" : ""}
 			`;
 
-      let rowHTML = `<div style="overflow: hidden; text-overflow: ellipsis; ${isWorst ? "text-decoration: normal;" : ""
-        }">${UIUtils.escapeHtml(shooter.name)}</div>`;
+      let rowHTML = `<div style="overflow: hidden; text-overflow: ellipsis; ${
+        isWorst ? "text-decoration: normal;" : ""
+      }">${UIUtils.escapeHtml(shooter.name)}</div>`;
 
       // Series sums
       for (let i = 0; i < 5; i++) {
@@ -303,8 +332,9 @@ class OverviewView {
         rowHTML += `<div style="text-align: center;">${seriesValue}</div>`;
       }
 
-      rowHTML += `<div style="text-align: right; font-weight: 500; ${isWorst ? "text-decoration: normal;" : ""
-        }">${total}</div>`;
+      rowHTML += `<div style="text-align: right; font-weight: 500; ${
+        isWorst ? "text-decoration: normal;" : ""
+      }">${total}</div>`;
 
       row.innerHTML = rowHTML;
       table.appendChild(row);
@@ -313,7 +343,7 @@ class OverviewView {
     // Calculate team total using storage method
     const teamTotal = storage.calculateTeamTotal(
       team,
-      CompetitionType.ANNEX_SCHEIBE
+      CompetitionType.ANNEX_SCHEIBE,
     );
 
     // Team total row - spanning across name and series columns
@@ -389,7 +419,7 @@ class OverviewView {
             (r) =>
               r.teamId === null &&
               r.shooterId === shooter.id &&
-              r.discipline === Discipline.PRAEZISION
+              r.discipline === Discipline.PRAEZISION,
           )
           .reduce((sum, r) => sum + r.total(), 0);
         const duell = storage.results
@@ -397,13 +427,15 @@ class OverviewView {
             (r) =>
               r.teamId === null &&
               r.shooterId === shooter.id &&
-              r.discipline === Discipline.DUELL
+              r.discipline === Discipline.DUELL,
           )
           .reduce((sum, r) => sum + r.total(), 0);
         return [shooter, precision, duell, precision + duell];
       })
       //.sort((a, b) => b[3] - a[3])
-      .sort((a, b) => a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" }))
+      .sort((a, b) =>
+        a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" }),
+      )
       .forEach((data, index) => {
         const [shooter, precision, duell, total] = data;
 
@@ -419,7 +451,7 @@ class OverviewView {
 			`;
         row.innerHTML = `
 				<div style="overflow: hidden; text-overflow: ellipsis;">${UIUtils.escapeHtml(
-          shooter.name
+          shooter.name,
         )}</div>
 				<div style="text-align: center;">${precision}</div>
 				<div style="text-align: center;">${duell}</div>
@@ -483,7 +515,7 @@ class OverviewView {
           (r) =>
             r.teamId === null &&
             r.shooterId === shooter.id &&
-            r.discipline === Discipline.ANNEX_SCHEIBE
+            r.discipline === Discipline.ANNEX_SCHEIBE,
         );
 
         if (result && result.seriesSums) {
@@ -494,7 +526,9 @@ class OverviewView {
         return [shooter, [0, 0, 0, 0, 0], 0];
       })
       //.sort((a, b) => b[2] - a[2])
-      .sort((a, b) => a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" }))
+      .sort((a, b) =>
+        a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" }),
+      )
       .forEach((data, index) => {
         const [shooter, seriesSums, total] = data;
 
@@ -510,7 +544,7 @@ class OverviewView {
 			`;
 
         let rowHTML = `<div style="overflow: hidden; text-overflow: ellipsis;">${UIUtils.escapeHtml(
-          shooter.name
+          shooter.name,
         )}</div>`;
 
         // Series sums
@@ -538,7 +572,7 @@ class OverviewView {
             (r) =>
               r.teamId === team.id &&
               r.shooterId === shooter.id &&
-              r.discipline === Discipline.PRAEZISION
+              r.discipline === Discipline.PRAEZISION,
           )
           .reduce((sum, r) => sum + r.total(), 0);
         const duell = storage.results
@@ -546,13 +580,13 @@ class OverviewView {
             (r) =>
               r.teamId === team.id &&
               r.shooterId === shooter.id &&
-              r.discipline === Discipline.DUELL
+              r.discipline === Discipline.DUELL,
           )
           .reduce((sum, r) => sum + r.total(), 0);
         return [shooter, precision, duell, precision + duell];
       })
       .sort((a, b) =>
-        a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" })
+        a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" }),
       );
   }
 
@@ -563,7 +597,7 @@ class OverviewView {
           (r) =>
             r.teamId === team.id &&
             r.shooterId === shooter.id &&
-            r.discipline === Discipline.ANNEX_SCHEIBE
+            r.discipline === Discipline.ANNEX_SCHEIBE,
         );
 
         if (result && result.seriesSums) {
@@ -574,7 +608,7 @@ class OverviewView {
         return [shooter, [0, 0, 0, 0, 0], 0];
       })
       .sort((a, b) =>
-        a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" })
+        a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" }),
       );
   }
 
@@ -587,7 +621,7 @@ class OverviewView {
           (r) =>
             r.teamId === team.id &&
             r.shooterId === shooter.id &&
-            r.discipline === Discipline.PRAEZISION
+            r.discipline === Discipline.PRAEZISION,
         )
         .reduce((sum, r) => sum + r.total(), 0);
       const duell = storage.results
@@ -595,7 +629,7 @@ class OverviewView {
           (r) =>
             r.teamId === team.id &&
             r.shooterId === shooter.id &&
-            r.discipline === Discipline.DUELL
+            r.discipline === Discipline.DUELL,
         )
         .reduce((sum, r) => sum + r.total(), 0);
       return { id: shooter.id, total: precision + duell };
@@ -613,7 +647,7 @@ class OverviewView {
         (r) =>
           r.teamId === team.id &&
           r.shooterId === shooter.id &&
-          r.discipline === Discipline.ANNEX_SCHEIBE
+          r.discipline === Discipline.ANNEX_SCHEIBE,
       );
       const total = result ? result.total() : 0;
       return { id: shooter.id, total: total };
@@ -631,8 +665,9 @@ class OverviewView {
       <div class="form-section-header">Anzuzeigende Mannschaften</div>
       <div class="form-row">
         <label style="display: flex; align-items: center; gap: 8px;">
-          <input type="checkbox" id="showAllTeams" ${!storage.visibleTeamIds ? "checked" : ""
-      }>
+          <input type="checkbox" id="showAllTeams" ${
+            !storage.visibleTeamIds ? "checked" : ""
+          }>
           <span>Alle anzeigen</span>
         </label>
       </div>
@@ -643,8 +678,9 @@ class OverviewView {
       <div class="form-section-header">Anzuzeigende Einzelschützen</div>
       <div class="form-row">
         <label style="display: flex; align-items: center; gap: 8px;">
-          <input type="checkbox" id="showAllShooters" ${!storage.visibleShooterIds ? "checked" : ""
-      }>
+          <input type="checkbox" id="showAllShooters" ${
+            !storage.visibleShooterIds ? "checked" : ""
+          }>
           <span>Alle anzeigen</span>
         </label>
       </div>
@@ -660,7 +696,7 @@ class OverviewView {
         app.showView("overview");
       },
       true,
-      false
+      false,
     );
 
     modal.show();
@@ -675,14 +711,15 @@ class OverviewView {
     const showAllTeamsCheckbox = document.getElementById("showAllTeams");
     const teamCheckboxesContainer = document.getElementById("teamCheckboxes");
     const showAllShootersCheckbox = document.getElementById("showAllShooters");
-    const shooterCheckboxesContainer = document.getElementById("shooterCheckboxes");
+    const shooterCheckboxesContainer =
+      document.getElementById("shooterCheckboxes");
 
     // Teams Handling
     if (showAllTeamsCheckbox && teamCheckboxesContainer) {
       // Show all teams checkbox handler
       showAllTeamsCheckbox.addEventListener("change", (e) => {
         const teamCheckboxes = teamCheckboxesContainer.querySelectorAll(
-          'input[type="checkbox"]'
+          'input[type="checkbox"]',
         );
         teamCheckboxes.forEach((cb) => {
           cb.disabled = e.target.checked;
@@ -696,10 +733,11 @@ class OverviewView {
         row.innerHTML = `
         <label style="display: flex; align-items: center; gap: 8px;">
           <input type="checkbox" class="team-checkbox" data-team-id="${team.id}" 
-            ${!storage.visibleTeamIds || storage.visibleTeamIds.has(team.id)
-            ? "checked"
-            : ""
-          }
+            ${
+              !storage.visibleTeamIds || storage.visibleTeamIds.has(team.id)
+                ? "checked"
+                : ""
+            }
             ${!storage.visibleTeamIds ? "disabled" : ""}>
           <span>${UIUtils.escapeHtml(team.name)}</span>
         </label>
@@ -713,7 +751,7 @@ class OverviewView {
       // Show all shooters checkbox handler
       showAllShootersCheckbox.addEventListener("change", (e) => {
         const shooterCheckboxes = shooterCheckboxesContainer.querySelectorAll(
-          'input[type="checkbox"]'
+          'input[type="checkbox"]',
         );
         shooterCheckboxes.forEach((cb) => {
           cb.disabled = e.target.checked;
@@ -727,10 +765,12 @@ class OverviewView {
         row.innerHTML = `
         <label style="display: flex; align-items: center; gap: 8px;">
           <input type="checkbox" class="shooter-checkbox" data-shooter-id="${shooter.id}" 
-            ${!storage.visibleShooterIds || storage.visibleShooterIds.has(shooter.id)
-            ? "checked"
-            : ""
-          }
+            ${
+              !storage.visibleShooterIds ||
+              storage.visibleShooterIds.has(shooter.id)
+                ? "checked"
+                : ""
+            }
             ${!storage.visibleShooterIds ? "disabled" : ""}>
           <span>${UIUtils.escapeHtml(shooter.name)}</span>
         </label>
@@ -790,7 +830,7 @@ class OverviewView {
     } else {
       console.error("PDF-Exporter not available");
       UIUtils.showError(
-        "PDF-Exporter nicht verfügbar. Bitte laden Sie die Seite neu."
+        "PDF-Exporter nicht verfügbar. Bitte laden Sie die Seite neu.",
       );
     }
   }
