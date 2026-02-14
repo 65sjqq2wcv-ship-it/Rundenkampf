@@ -350,12 +350,15 @@ class LabelPrinter {
   // EINZELNES LABEL ERSTELLEN - KORRIGIERT
   // =================================================================
 
+  // =================================================================
+  // EINFACHE LABEL-ERSTELLUNG - NUR NORMALER UMBRUCH
+  // =================================================================
+
   createSingleLabel(label, settings) {
     if (label.type === "empty") {
       return `<div class="label empty-label"></div>`;
     }
 
-    // KORREKTUR: Prüfe auf existierende Werte und vermeide "null"
     const text1 = label.displayText1
       ? UIUtils.escapeHtml(label.displayText1)
       : "";
@@ -364,13 +367,31 @@ class LabelPrinter {
       : "";
 
     return `
-      <div class="label">
-        <div class="label-content">
-          <div class="label-text primary">${text1}</div>
-          ${text2 ? `<div class="label-text secondary">${text2}</div>` : ""}
-        </div>
+    <div class="label">
+      <div class="label-content">
+        <div class="label-text primary">${text1}</div>
+        ${text2 ? `<div class="label-text secondary">${text2}</div>` : ""}
       </div>
-    `;
+    </div>
+  `;
+  }
+
+  getTextSizeClass(text, type) {
+    if (!text) return "";
+
+    const length = text.length;
+
+    if (type === "primary") {
+      if (length > 15) return "text-very-long";
+      if (length > 12) return "text-long";
+      if (length > 8) return "text-medium";
+      return "text-short";
+    } else {
+      if (length > 20) return "text-very-long";
+      if (length > 15) return "text-long";
+      if (length > 10) return "text-medium";
+      return "text-short";
+    }
   }
 
   // =================================================================
@@ -382,10 +403,10 @@ class LabelPrinter {
       margin: [0, 0, 0, 0],
       image: {
         type: "jpeg",
-        quality: 0.98,
+        quality: 1,
       },
       html2canvas: {
-        scale: 1.5,
+        scale: 2.5,
         dpi: 300,
         useCORS: true,
         letterRendering: true,
@@ -396,6 +417,7 @@ class LabelPrinter {
         unit: "mm",
         format: "a4",
         orientation: "portrait",
+        compress: false,
       },
     };
   }
@@ -404,14 +426,9 @@ class LabelPrinter {
   // CSS STYLES - ERWEITERT MIT DEZIMALWERTEN
   // =================================================================
 
-  // =================================================================
-  // CSS STYLES - OHNE LABEL-RÄNDER
-  // =================================================================
-
   getFallbackCSS() {
     const settings = storage.getLabelSettings();
 
-    // Präzise Berechnung mit Dezimalwerten
     const pageWidth =
       210.0 - (settings.marginLeft || 0.0) - (settings.marginRight || 0.0);
     const availableWidth =
@@ -429,11 +446,17 @@ class LabelPrinter {
     }
 
     body {
-      font-family: Arial, sans-serif;
+      /* font-family: 'Calibri', 'Trebuchet MS', 'Segoe UI', Arial, sans-serif; */
+      /* font-family: 'Open Sans', 'Calibri', 'Segoe UI', Arial, sans-serif; */
+      /* font-family: 'Tahoma', 'Verdana', 'Segoe UI', Arial, sans-serif; */
+      font-family: 'Verdana', 'Calibri', 'Segoe UI', Arial, sans-serif;
       background: white;
       margin: 0;
       padding: 0;
       font-size: 12px;
+      -webkit-font-smoothing: subpixel-antialiased;
+      -moz-osx-font-smoothing: auto;
+      text-rendering: optimizeLegibility;
     }
 
     .label-container {
@@ -448,12 +471,16 @@ class LabelPrinter {
 
     .label-page {
       width: 100%;
-      page-break-after: always;
       background: white;
+      min-height: 10mm;
     }
 
-    .label-page:last-child {
-      page-break-after: avoid;
+    .label-page:not(:last-child) {
+      page-break-after: always;
+    }
+
+    .label-page:empty {
+      display: none;
     }
 
     .label-row {
@@ -467,7 +494,7 @@ class LabelPrinter {
     .label {
       width: ${labelWidth.toFixed(1)}mm;
       height: ${settings.labelHeight.toFixed(1)}mm;
-      border: none; /* GEÄNDERT: Kein Rand mehr */
+      border: none;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -482,7 +509,7 @@ class LabelPrinter {
     }
 
     .label-content {
-      padding: 1mm;
+      padding: 1.5mm;
       text-align: center;
       width: 100%;
       height: 100%;
@@ -490,60 +517,127 @@ class LabelPrinter {
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      gap: 1mm;
     }
 
     .label-text {
+      width: 100%;
+      text-align: center;
+      
+      /* INTELLIGENTER TEXTUMBRUCH */
       word-wrap: break-word;
       overflow-wrap: break-word;
-      line-height: 1.1;
-      width: 100%;
+      word-break: normal; /* Normale Wortumbrüche bevorzugen */
+      hyphens: none; /* Keine Silbentrennung, sauberer Umbruch */
+      
+      /* MEHRZEILIGKEIT ERMÖGLICHEN */
+      white-space: normal; /* Umbruch erlauben */
+      line-height: 1.2; /* Kompakte Zeilenhöhe */
+      
+      /* SCHRIFT-OPTIMIERUNG */
+      text-rendering: optimizeLegibility;
+      -webkit-font-feature-settings: "liga" 1, "kern" 1;
+      font-feature-settings: "liga" 1, "kern" 1;
+      letter-spacing: 0em; /* Normaler Zeichenabstand */
+      
+      /* OVERFLOW HANDLING */
       overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3; /* Maximal 3 Zeilen */
+      -webkit-box-orient: vertical;
     }
 
     .label-text.primary {
       font-size: ${this.calculatePrimaryFontSize(settings).toFixed(1)}pt;
-      font-weight: bold;
+      font-weight: 600;
       color: #000;
-      margin-bottom: 1mm;
+      margin-bottom: 0.5mm;
+      
+      /* PRIMÄRER TEXT: MAXIMAL 2 ZEILEN */
+      -webkit-line-clamp: 2;
+      max-height: ${(this.calculatePrimaryFontSize(settings) * 1.2 * 2 * 1.33).toFixed(1)}px; /* 2 Zeilen Höhe */
     }
 
     .label-text.secondary {
       font-size: ${this.calculateSecondaryFontSize(settings).toFixed(1)}pt;
+      font-weight: 500;
       color: #000;
-      font-weight: normal;
+      
+      /* SEKUNDÄRER TEXT: MAXIMAL 2 ZEILEN */
+      -webkit-line-clamp: 2;
+      max-height: ${(this.calculateSecondaryFontSize(settings) * 1.2 * 2 * 1.33).toFixed(1)}px; /* 2 Zeilen Höhe */
     }
 
     @media print {
       body {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+        -webkit-font-smoothing: subpixel-antialiased;
+        -moz-osx-font-smoothing: auto;
+        text-rendering: geometricPrecision;
       }
       
-      .label-page {
+      .label-page:not(:last-child) {
         page-break-after: always;
       }
       
-      .label-page:last-child {
-        page-break-after: avoid;
+      .label-page:empty {
+        display: none !important;
+      }
+
+      .label {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      /* DRUCK-OPTIMIERUNGEN FÜR MEHRZEIILIGEN TEXT */
+      .label-text {
+        text-rendering: geometricPrecision;
+        -webkit-font-smoothing: antialiased;
+      }
+      
+      .label-text.primary {
+        font-weight: 600;
+      }
+      
+      .label-text.secondary {
+        font-weight: 500;
       }
     }
   `;
   }
 
   // =================================================================
-  // HILFSFUNKTIONEN - ERWEITERT FÜR DEZIMALWERTE
+  // NORMALE SCHRIFTGRÖSSEN - KEIN VERKLEINER FÜR LANGE TEXTE
   // =================================================================
 
   calculatePrimaryFontSize(settings) {
-    const baseSize = Math.min(
-      settings.labelWidth / 8.0,
-      settings.labelHeight / 4.0,
+    const labelWidth = settings.labelWidth;
+    const labelHeight = settings.labelHeight;
+
+    // Normale Berechnung ohne Textlängen-Berücksichtigung
+    const widthBased = labelWidth / 5.5;
+    const heightBased = labelHeight / 3.2; // Etwas mehr Platz für mehrzeiligen Text
+
+    const baseSize = Math.min(widthBased, heightBased);
+
+    // Runde auf halbe Punkte
+    const fontSize = Math.round(Math.max(10, Math.min(16, baseSize)) * 2) / 2;
+
+    console.log(
+      `Primary font size: ${fontSize}pt for ${labelWidth}×${labelHeight}mm`,
     );
-    return Math.max(8.0, Math.min(14.0, baseSize));
+    return fontSize;
   }
 
   calculateSecondaryFontSize(settings) {
-    return Math.max(7.0, this.calculatePrimaryFontSize(settings) - 2.0);
+    const primarySize = this.calculatePrimaryFontSize(settings);
+
+    // Normaler Unterschied
+    const secondarySize = Math.round((primarySize - 1.5) * 2) / 2;
+
+    console.log(`Secondary font size: ${secondarySize}pt`);
+    return Math.max(9, secondarySize);
   }
 
   // =================================================================
