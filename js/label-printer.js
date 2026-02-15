@@ -9,6 +9,16 @@ class LabelPrinter {
   }
 
   // =================================================================
+  // NEU: CSS-CACHE INVALIDIEREN
+  // =================================================================
+
+  invalidateCSS() {
+    console.log("Invalidating CSS cache for updated settings");
+    this.cssStyles = null;
+    this.cssLoaded = false;
+  }
+
+  // =================================================================
   // HAUPT-PRINT-METHODE
   // =================================================================
 
@@ -16,9 +26,9 @@ class LabelPrinter {
     try {
       console.log("Starting label printing...");
 
-      // CSS laden
-      const cssStyles = await this.loadCSS();
-      console.log("CSS loaded");
+      // NEU: CSS immer neu laden (da settings sich geändert haben könnten)
+      this.cssStyles = this.getFallbackCSS();
+      console.log("CSS refreshed with current settings");
 
       const filteredTeams = storage.getFilteredTeams();
       const filteredStandaloneShooters =
@@ -45,7 +55,7 @@ class LabelPrinter {
       }
 
       // HTML-Content erstellen
-      const htmlContent = this.createLabelHTML(labelData, cssStyles);
+      const htmlContent = this.createLabelHTML(labelData, this.cssStyles);
       console.log("HTML content created, length:", htmlContent.length);
 
       // Prüfe ob html2pdf verfügbar ist
@@ -148,17 +158,13 @@ class LabelPrinter {
   }
 
   // =================================================================
-  // CSS LOADING
+  // CSS LOADING (ÜBERARBEITET)
   // =================================================================
 
   async loadCSS() {
-    if (this.cssLoaded && this.cssStyles) {
-      return this.cssStyles;
-    }
-
-    console.log("Loading label CSS...");
+    // NEU: Immer aktuelle Settings verwenden, nicht cachen
+    console.log("Loading label CSS with current settings...");
     this.cssStyles = this.getFallbackCSS();
-    this.cssLoaded = true;
     return this.cssStyles;
   }
 
@@ -347,11 +353,7 @@ class LabelPrinter {
   }
 
   // =================================================================
-  // EINZELNES LABEL ERSTELLEN - KORRIGIERT
-  // =================================================================
-
-  // =================================================================
-  // EINFACHE LABEL-ERSTELLUNG - NUR NORMALER UMBRUCH
+  // EINZELNES LABEL ERSTELLEN
   // =================================================================
 
   createSingleLabel(label, settings) {
@@ -374,24 +376,6 @@ class LabelPrinter {
       </div>
     </div>
   `;
-  }
-
-  getTextSizeClass(text, type) {
-    if (!text) return "";
-
-    const length = text.length;
-
-    if (type === "primary") {
-      if (length > 15) return "text-very-long";
-      if (length > 12) return "text-long";
-      if (length > 8) return "text-medium";
-      return "text-short";
-    } else {
-      if (length > 20) return "text-very-long";
-      if (length > 15) return "text-long";
-      if (length > 10) return "text-medium";
-      return "text-short";
-    }
   }
 
   // =================================================================
@@ -423,7 +407,7 @@ class LabelPrinter {
   }
 
   // =================================================================
-  // CSS STYLES - ERWEITERT MIT DEZIMALWERTEN
+  // CSS STYLES - ERWEITERT MIT RAHMEN-OPTION
   // =================================================================
 
   getFallbackCSS() {
@@ -438,6 +422,9 @@ class LabelPrinter {
       availableWidth / settings.columns,
     );
 
+    // NEU: Rahmen-Stil basierend auf Einstellung
+    const borderStyle = settings.showBorders ? '1px solid #ccc' : 'none';
+
     return `
     * {
       margin: 0;
@@ -446,9 +433,6 @@ class LabelPrinter {
     }
 
     body {
-      /* font-family: 'Calibri', 'Trebuchet MS', 'Segoe UI', Arial, sans-serif; */
-      /* font-family: 'Open Sans', 'Calibri', 'Segoe UI', Arial, sans-serif; */
-      /* font-family: 'Tahoma', 'Verdana', 'Segoe UI', Arial, sans-serif; */
       font-family: 'Verdana', 'Calibri', 'Segoe UI', Arial, sans-serif;
       background: white;
       margin: 0;
@@ -494,7 +478,7 @@ class LabelPrinter {
     .label {
       width: ${labelWidth.toFixed(1)}mm;
       height: ${settings.labelHeight.toFixed(1)}mm;
-      border: none;
+      border: ${borderStyle};
       display: flex;
       align-items: center;
       justify-content: center;
@@ -527,23 +511,23 @@ class LabelPrinter {
       /* INTELLIGENTER TEXTUMBRUCH */
       word-wrap: break-word;
       overflow-wrap: break-word;
-      word-break: normal; /* Normale Wortumbrüche bevorzugen */
-      hyphens: none; /* Keine Silbentrennung, sauberer Umbruch */
+      word-break: normal;
+      hyphens: none;
       
       /* MEHRZEILIGKEIT ERMÖGLICHEN */
-      white-space: normal; /* Umbruch erlauben */
-      line-height: 1.2; /* Kompakte Zeilenhöhe */
+      white-space: normal;
+      line-height: 1.2;
       
       /* SCHRIFT-OPTIMIERUNG */
       text-rendering: optimizeLegibility;
       -webkit-font-feature-settings: "liga" 1, "kern" 1;
       font-feature-settings: "liga" 1, "kern" 1;
-      letter-spacing: 0em; /* Normaler Zeichenabstand */
+      letter-spacing: 0em;
       
       /* OVERFLOW HANDLING */
       overflow: hidden;
       display: -webkit-box;
-      -webkit-line-clamp: 3; /* Maximal 3 Zeilen */
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
     }
 
@@ -555,7 +539,7 @@ class LabelPrinter {
       
       /* PRIMÄRER TEXT: MAXIMAL 2 ZEILEN */
       -webkit-line-clamp: 2;
-      max-height: ${(this.calculatePrimaryFontSize(settings) * 1.2 * 2 * 1.33).toFixed(1)}px; /* 2 Zeilen Höhe */
+      max-height: ${(this.calculatePrimaryFontSize(settings) * 1.2 * 2 * 1.33).toFixed(1)}px;
     }
 
     .label-text.secondary {
@@ -565,7 +549,7 @@ class LabelPrinter {
       
       /* SEKUNDÄRER TEXT: MAXIMAL 2 ZEILEN */
       -webkit-line-clamp: 2;
-      max-height: ${(this.calculateSecondaryFontSize(settings) * 1.2 * 2 * 1.33).toFixed(1)}px; /* 2 Zeilen Höhe */
+      max-height: ${(this.calculateSecondaryFontSize(settings) * 1.2 * 2 * 1.33).toFixed(1)}px;
     }
 
     @media print {
@@ -590,7 +574,6 @@ class LabelPrinter {
         page-break-inside: avoid;
       }
 
-      /* DRUCK-OPTIMIERUNGEN FÜR MEHRZEIILIGEN TEXT */
       .label-text {
         text-rendering: geometricPrecision;
         -webkit-font-smoothing: antialiased;
@@ -608,7 +591,7 @@ class LabelPrinter {
   }
 
   // =================================================================
-  // NORMALE SCHRIFTGRÖSSEN - KEIN VERKLEINER FÜR LANGE TEXTE
+  // SCHRIFTGRÖSSEN-BERECHNUNG
   // =================================================================
 
   calculatePrimaryFontSize(settings) {
@@ -617,7 +600,7 @@ class LabelPrinter {
 
     // Normale Berechnung ohne Textlängen-Berücksichtigung
     const widthBased = labelWidth / 5.5;
-    const heightBased = labelHeight / 3.2; // Etwas mehr Platz für mehrzeiligen Text
+    const heightBased = labelHeight / 3.2;
 
     const baseSize = Math.min(widthBased, heightBased);
 
@@ -641,26 +624,50 @@ class LabelPrinter {
   }
 
   // =================================================================
-  // VORSCHAU-FUNKTION (OPTIONAL)
+  // VORSCHAU-FUNKTION (KORRIGIERT)
   // =================================================================
 
   previewLabels() {
     try {
+      console.log("previewLabels() called");
+      
       const filteredTeams = storage.getFilteredTeams();
-      const filteredStandaloneShooters =
-        storage.getFilteredStandaloneShooters();
+      const filteredStandaloneShooters = storage.getFilteredStandaloneShooters();
+      
+      console.log("Filtered teams:", filteredTeams.length);
+      console.log("Filtered standalone shooters:", filteredStandaloneShooters.length);
+      
       const labelData = this.prepareLabelData(
         filteredTeams,
         filteredStandaloneShooters,
       );
-      const html = this.createLabelHTML(labelData, this.getFallbackCSS());
+      
+      console.log("Label data prepared:", labelData.length, "labels");
+      
+      if (labelData.length === 0) {
+        UIUtils.showError("Keine Daten für Vorschau verfügbar. Fügen Sie Teams oder Einzelschützen hinzu.");
+        return;
+      }
+      
+      // CSS immer frisch laden für Vorschau
+      const css = this.getFallbackCSS();
+      const html = this.createLabelHTML(labelData, css);
+      
+      console.log("HTML created, opening preview window");
 
       // Öffne in neuem Fenster
       const newWindow = window.open("", "_blank", "width=800,height=600");
+      
+      if (!newWindow) {
+        UIUtils.showError("Popup-Blocker verhindert Vorschau. Bitte erlauben Sie Popups für diese Seite.");
+        return;
+      }
+      
       newWindow.document.write(html);
       newWindow.document.close();
 
       UIUtils.showSuccessMessage("Label-Vorschau geöffnet");
+      console.log("Preview window opened successfully");
     } catch (error) {
       console.error("Preview error:", error);
       UIUtils.showError("Vorschau-Fehler: " + error.message);
@@ -668,7 +675,7 @@ class LabelPrinter {
   }
 
   // =================================================================
-  // DEBUG-METHODE (OPTIONAL)
+  // DEBUG-METHODE
   // =================================================================
 
   debugPrint() {
@@ -704,18 +711,32 @@ class LabelPrinter {
   }
 }
 
-// Globale Instanz erstellen
-const labelPrinter = new LabelPrinter();
+// =================================================================
+// SICHERE GLOBALE INITIALISIERUNG (NUR EINMAL!)
+// =================================================================
 
-// Globale Funktionen
-window.printLabels = function () {
-  labelPrinter.printLabels();
-};
+// Prüfe ob labelPrinter bereits existiert
+if (typeof window.labelPrinter === 'undefined') {
+  // Globale Instanz erstellen
+  window.labelPrinter = new LabelPrinter();
+  
+  // Globale Funktionen
+  window.printLabels = function () {
+    window.labelPrinter.printLabels();
+  };
 
-window.previewLabels = function () {
-  labelPrinter.previewLabels();
-};
+  window.previewLabels = function () {
+    window.labelPrinter.previewLabels();
+  };
 
-window.debugLabelPrinter = function () {
-  labelPrinter.debugPrint();
-};
+  window.debugLabelPrinter = function () {
+    window.labelPrinter.debugPrint();
+  };
+
+  console.log("✅ LabelPrinter initialized and globally available");
+} else {
+  console.log("⚠️ LabelPrinter already exists, skipping initialization");
+}
+
+// Für backward compatibility auch als lokale Variable
+const labelPrinter = window.labelPrinter;

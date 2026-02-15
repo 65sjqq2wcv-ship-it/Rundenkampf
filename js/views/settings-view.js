@@ -1,6 +1,13 @@
+console.log("🔄 Loading settings-view.js...");
+
 class SettingsView {
-  // In der render() Methode - Event-Listeners Setup korrigieren:
+  constructor() {
+    console.log("🏗️ SettingsView constructor called");
+  }
+
   render() {
+    console.log("🎨 SettingsView render called");
+
     const container = document.createElement("div");
     container.style.cssText = "padding-bottom: 20px;";
 
@@ -58,273 +65,756 @@ class SettingsView {
     return container;
   }
 
+  createCompetitionTypeSection() {
+    const section = document.createElement("div");
+    section.className = "card";
+    section.innerHTML = `
+      <h3>Wettbewerbsmodus</h3>
+      <div class="form-section">
+        <div class="form-row">
+          <select id="competitionTypeSelect" class="form-input">
+            <option value="$${CompetitionType.PRAEZISION_DUELL}" $${storage.selectedCompetitionType === CompetitionType.PRAEZISION_DUELL ? "selected" : ""}>
+              ${CompetitionType.PRAEZISION_DUELL}
+            </option>
+            <option value="$${CompetitionType.ANNEX_SCHEIBE}" $${storage.selectedCompetitionType === CompetitionType.ANNEX_SCHEIBE ? "selected" : ""}>
+              ${CompetitionType.ANNEX_SCHEIBE}
+            </option>
+          </select>
+        </div>
+      </div>
+    `;
+    return section;
+  }
+
+  createCurrentDisciplineSection() {
+    const section = document.createElement("div");
+    section.className = "card";
+    section.innerHTML = `
+      <h3>Aktuelle Disziplin</h3>
+      <div class="form-section">
+        <div class="form-row">
+          <select id="currentDisciplineSelect" class="form-input">
+            <option value="">Keine ausgewählt</option>
+          </select>
+        </div>
+      </div>
+    `;
+    return section;
+  }
+
+  createOverlayScaleSection() {
+    const section = document.createElement("div");
+    section.className = "card";
+    const overlayScale = storage.settings.overlayScale || 3.0;
+    const overlayOpacity = storage.settings.overlayOpacity || 0.8;
+
+    section.innerHTML = `
+      <h3>📷 Foto-Overlay Einstellungen</h3>
+      <div class="form-section">
+        <div class="form-row">
+          <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+            Overlay-Größe: <span id="overlayScaleValue">${overlayScale.toFixed(1)}x</span>
+          </label>
+          <input type="range" id="overlayScaleSlider" min="0.5" max="5.0" step="0.1" value="${overlayScale}"
+                 style="width: 100%; margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 16px;">
+            <span>klein (0,5x)</span>
+            <span>Standard (3x)</span>
+            <span>groß (5x)</span>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+            Transparenz: <span id="overlayOpacityValue">${Math.round(overlayOpacity * 100)}%</span>
+          </label>
+          <input type="range" id="overlayOpacitySlider" min="0.2" max="1.0" step="0.1" value="${overlayOpacity}"
+                 style="width: 100%; margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666;">
+            <span>sehr Durchsichtig (20%)</span>
+            <span>Standard</span>
+            <span>Undurchsichtig (100%)</span>
+          </div>
+        </div>
+      </div>
+    `;
+    return section;
+  }
+
+  createLogoUploadSection() {
+    const section = document.createElement("div");
+    section.className = "card";
+    section.innerHTML = `
+      <h3>Vereinslogo</h3>
+      <div id="logoPreview" style="text-align: center; margin-bottom: 16px;"></div>
+      <p style="text-align: center; margin-bottom: 16px; color: #666;">Laden Sie ein Vereinslogo hoch</p>
+      
+      <div class="form-section">
+        <div class="form-row">
+          <input type="file" id="logoUpload" accept="image/*" class="form-input">
+        </div>
+        <div class="form-row" style="display: flex; gap: 8px;">
+          <button class="btn btn-primary" onclick="app.views.settings.uploadLogo()" style="flex: 1;">
+            📂 Hochladen
+          </button>
+          <button class="btn btn-danger" onclick="app.views.settings.removeLogo()" style="flex: 1;">
+            🗑️ Löschen
+          </button>
+        </div>
+      </div>
+      
+      <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-top: 16px;">
+        <h4 style="margin: 0 0 8px 0; font-size: 14px;">📋 Anforderungen:</h4>
+        <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #666;">
+          <li><strong>Größe:</strong> Mindestens 200×200px empfohlen</li>
+          <li><strong>Format:</strong> JPG, PNG oder GIF</li>
+          <li><strong>Dateigröße:</strong> Maximal 5MB</li>
+          <li><strong>Verwendung:</strong> Wird im PDF-Bericht angezeigt</li>
+        </ul>
+      </div>
+    `;
+    return section;
+  }
+
+  // GEÄNDERT: Label-Einstellungen mit Input-Feldern statt Slidern
   createLabelSettingsSection() {
-  const section = document.createElement("div");
-  section.className = "card";
+    const section = document.createElement("div");
+    section.className = "card";
 
-  const labelSettings = storage.getLabelSettings();
+    const labelSettings = storage.getLabelSettings();
 
-  section.innerHTML = `
-    <h3 style="margin-bottom: 16px;">📄 Label-Einstellungen</h3>
+    section.innerHTML = `
+      <h3 style="margin-bottom: 16px;">📄 Label-Einstellungen</h3>
+      
+      <div class="form-section">
+        <div class="form-section-header">Label-Abmessungen</div>
+        
+        <div class="form-row" style="display: flex; gap: 8px;">
+          <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+              Label-Breite (mm)
+            </label>
+            <input type="number" id="labelWidthInput" min="30.0" max="100.0" step="0.1" 
+                   value="${labelSettings.labelWidth}" 
+                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+              Label-Höhe (mm)
+            </label>
+            <input type="number" id="labelHeightInput" min="15.0" max="60.0" step="0.1" 
+                   value="${labelSettings.labelHeight}" 
+                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-header">Seitenränder</div>
+        
+        <div class="form-row" style="display: flex; gap: 8px;">
+          <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+              Rand oben (mm)
+            </label>
+            <input type="number" id="marginTopInput" min="0.0" max="30.0" step="0.1" 
+                   value="${labelSettings.marginTop}" 
+                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+              Rand unten (mm)
+            </label>
+            <input type="number" id="marginBottomInput" min="0.0" max="30.0" step="0.1" 
+                   value="${labelSettings.marginBottom}" 
+                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+          </div>
+        </div>
+        
+        <div class="form-row" style="display: flex; gap: 8px;">
+          <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+              Rand links (mm)
+            </label>
+            <input type="number" id="marginLeftInput" min="0.0" max="30.0" step="0.1" 
+                   value="${labelSettings.marginLeft || 0}" 
+                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+              Rand rechts (mm)
+            </label>
+            <input type="number" id="marginRightInput" min="0.0" max="30.0" step="0.1" 
+                   value="${labelSettings.marginRight || 0}" 
+                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-header">Layout</div>
+        
+        <div class="form-row" style="display: flex; gap: 8px;">
+          <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+              Spalten
+            </label>
+            <input type="number" id="columnsInput" min="1" max="4" step="1" 
+                   value="${labelSettings.columns}" 
+                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+              Zeilen
+            </label>
+            <input type="number" id="rowsInput" min="1" max="20" step="1" 
+                   value="${labelSettings.rows}" 
+                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+            Abstand zwischen Labels (mm)
+          </label>
+          <input type="number" id="labelSpacingInput" min="0.0" max="10.0" step="0.1" 
+                 value="${labelSettings.labelSpacing || 0}" 
+                 style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-header">Darstellungsoptionen</div>
+        
+        <div class="form-row">
+          <label style="display: flex; align-items: center; gap: 8px; font-weight: 500;">
+            <input type="checkbox" id="showBordersCheckbox" ${labelSettings.showBorders ? "checked" : ""} 
+                   style="transform: scale(1.2);">
+            <span>Rahmen um Labels anzeigen</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-header">Druckoptionen</div>
+    <div class="form-row">
+      <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+        Überspringe Felder (für alte Bögen)
+      </label>
+      <input type="number" id="skipLabelsInput" min="0" max="50" step="1" 
+             value="${labelSettings.skipLabels}" 
+             style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+    </div>
     
-    <div class="form-section">
-      <div class="form-section-header">Label-Abmessungen</div>
-      
-      <div class="form-row">
-        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
-          Label-Breite: <span id="labelWidthValue">${labelSettings.labelWidth}</span> mm
-        </label>
-        <input type="range" id="labelWidthSlider" min="30.0" max="100.0" step="0.1" value="${labelSettings.labelWidth}"
-               style="width: 100%; margin-bottom: 8px;">
-      </div>
-      
-      <div class="form-row">
-        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
-          Label-Höhe: <span id="labelHeightValue">${labelSettings.labelHeight}</span> mm
-        </label>
-        <input type="range" id="labelHeightSlider" min="15.0" max="60.0" step="0.1" value="${labelSettings.labelHeight}"
-               style="width: 100%; margin-bottom: 8px;">
-      </div>
+    <div class="form-row">
+      <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+        Anzahl Kopien
+      </label>
+      <input type="number" id="copiesInput" min="1" max="5" step="1" 
+             value="${labelSettings.copies}" 
+             style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
     </div>
+</div>
+      </div>
 
-    <div class="form-section">
-      <div class="form-section-header">Seitenränder</div>
+      <div class="form-row">
+        <button class="btn btn-secondary" id="previewLabelsBtn" style="width: 100%; margin-bottom: 8px;">
+            🔍 Vorschau
+       </button>
+     </div>
+     <div class="form-row">
+       <button class="btn btn-primary" id="saveLabelSettingsBtn" style="width: 100%;">
+         Label-Einstellungen speichern
+       </button>
+     </div>
+    `;
+
+    return section;
+  }
+
+  createBackupRestoreSection() {
+    const section = document.createElement("div");
+    section.className = "card";
+    section.innerHTML = `
+      <h3>Backup & Restore</h3>
       
-      <div class="form-row">
-        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
-          Rand oben: <span id="marginTopValue">${labelSettings.marginTop}</span> mm
-        </label>
-        <input type="range" id="marginTopSlider" min="0.0" max="30.0" step="0.1" value="${labelSettings.marginTop}"
-               style="width: 100%; margin-bottom: 8px;">
-      </div>
-      
-      <div class="form-row">
-        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
-          Rand unten: <span id="marginBottomValue">${labelSettings.marginBottom}</span> mm
-        </label>
-        <input type="range" id="marginBottomSlider" min="0.0" max="30.0" step="0.1" value="${labelSettings.marginBottom}"
-               style="width: 100%; margin-bottom: 8px;">
-      </div>
-
-      <div class="form-row">
-        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
-          Rand links: <span id="marginLeftValue">${labelSettings.marginLeft || 0}</span> mm
-        </label>
-        <input type="range" id="marginLeftSlider" min="0.0" max="30.0" step="0.1" value="${labelSettings.marginLeft || 0}"
-               style="width: 100%; margin-bottom: 8px;">
-      </div>
-
-      <div class="form-row">
-        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
-          Rand rechts: <span id="marginRightValue">${labelSettings.marginRight || 0}</span> mm
-        </label>
-        <input type="range" id="marginRightSlider" min="0.0" max="30.0" step="0.1" value="${labelSettings.marginRight || 0}"
-               style="width: 100%; margin-bottom: 8px;">
-      </div>
-    </div>
-
-    <div class="form-section">
-      <div class="form-section-header">Layout</div>
-      
-      <div class="form-row">
-        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
-          Spalten: <span id="columnsValue">${labelSettings.columns}</span>
-        </label>
-        <input type="range" id="columnsSlider" min="1" max="5" step="1" value="${labelSettings.columns}"
-               style="width: 100%; margin-bottom: 8px;">
-      </div>
-      
-      <div class="form-row">
-        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
-          Zeilen: <span id="rowsValue">${labelSettings.rows}</span>
-        </label>
-        <input type="range" id="rowsSlider" min="1" max="15" step="1" value="${labelSettings.rows}"
-               style="width: 100%; margin-bottom: 8px;">
-      </div>
-
-      <div class="form-row">
-        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
-          Abstand zwischen Labels: <span id="labelSpacingValue">${labelSettings.labelSpacing || 0}</span> mm
-        </label>
-        <input type="range" id="labelSpacingSlider" min="0.0" max="10.0" step="0.1" value="${labelSettings.labelSpacing || 0}"
-               style="width: 100%; margin-bottom: 8px;">
-      </div>
-    </div>
-
-    <div class="form-section">
-      <div class="form-section-header">Druckoptionen</div>
-      
-      <div class="form-row">
-        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
-          Überspringen (alte Bögen): <span id="skipLabelsValue">${labelSettings.skipLabels}</span>
-        </label>
-        <input type="range" id="skipLabelsSlider" min="0" max="50" step="1" value="${labelSettings.skipLabels}"
-               style="width: 100%; margin-bottom: 8px;">
-      </div>
-      
-      <div class="form-row">
-        <label style="display: block; margin-bottom: 4px; font-weight: 500;">
-          Anzahl Kopien: <span id="copiesValue">${labelSettings.copies}</span>
-        </label>
-        <input type="range" id="copiesSlider" min="1" max="5" step="1" value="${labelSettings.copies}"
-               style="width: 100%; margin-bottom: 8px;">
-      </div>
-    </div>
-
-    <div class="form-section">
-      <div class="form-row">
-        <button class="btn btn-primary" id="saveLabelSettingsBtn" style="width: 100%;">
-          Label-Einstellungen speichern
+      <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+        <button class="btn btn-primary" onclick="app.views.settings.createFullBackup()" style="flex: 1; height: 60px; font-size: 16px;">
+          💾 Backup
+        </button>
+        <button class="btn btn-secondary" onclick="app.views.settings.showImportSettings()" style="flex: 1; height: 60px; font-size: 16px;">
+          📂 Restore
         </button>
       </div>
-    </div>
-  `;
-
-  return section;
-}
-
-  setupLabelSettingsEventListeners() {
-    console.log("Setting up label settings event listeners...");
-
-    // Slider-Updates - ALLE auf 0.1 Schritte (außer Ganzzahlen)
-    const sliders = [
-      { name: "labelWidth", decimals: 1, step: 0.1 }, // 0,1 mm Schritte
-      { name: "labelHeight", decimals: 1, step: 0.1 }, // 0,1 mm Schritte
-      { name: "marginTop", decimals: 1, step: 0.1 }, // 0,1 mm Schritte - GEÄNDERT
-      { name: "marginBottom", decimals: 1, step: 0.1 }, // 0,1 mm Schritte - GEÄNDERT
-      { name: "marginLeft", decimals: 1, step: 0.1 }, // 0,1 mm Schritte - GEÄNDERT
-      { name: "marginRight", decimals: 1, step: 0.1 }, // 0,1 mm Schritte - GEÄNDERT
-      { name: "columns", decimals: 0, step: 1 }, // Ganzzahl
-      { name: "rows", decimals: 0, step: 1 }, // Ganzzahl
-      { name: "skipLabels", decimals: 0, step: 1 }, // Ganzzahl
-      { name: "copies", decimals: 0, step: 1 }, // Ganzzahl
-      { name: "labelSpacing", decimals: 1, step: 0.1 }, // 0,1 mm Schritte
-    ];
-
-    sliders.forEach((setting) => {
-      const slider = document.getElementById(`${setting.name}Slider`);
-      const valueDisplay = document.getElementById(`${setting.name}Value`);
-
-      console.log(
-        `Setting up slider for ${setting.name}:`,
-        slider ? "found" : "not found",
-      );
-
-      if (slider && valueDisplay) {
-        // Event-Listener hinzufügen
-        slider.addEventListener("input", (e) => {
-          const value = parseFloat(e.target.value);
-
-          // EINHEITLICHE FORMATIERUNG für alle 0.1-Schritte
-          if (setting.decimals === 0) {
-            // Ganzzahlen
-            valueDisplay.textContent = Math.round(value).toString();
-          } else {
-            // Dezimalzahlen - immer eine Nachkommastelle für 0.1-Schritte
-            valueDisplay.textContent = value.toFixed(1);
-          }
-
-          console.log(`${setting.name} updated to:`, value);
-        });
-
-        // Initial-Wert setzen
-        const currentSettings = storage.getLabelSettings();
-        const currentValue = currentSettings[setting.name];
-        if (currentValue !== undefined) {
-          slider.value = currentValue;
-
-          // Display aktualisieren
-          if (setting.decimals === 0) {
-            valueDisplay.textContent = Math.round(currentValue).toString();
-          } else {
-            valueDisplay.textContent = currentValue.toFixed(1);
-          }
-        }
-      } else {
-        console.warn(`Slider or value display not found for ${setting.name}`);
-      }
-    });
-
-    // Speichern Button
-    const saveBtn = document.getElementById("saveLabelSettingsBtn");
-    console.log("Save button:", saveBtn ? "found" : "not found");
-
-    if (saveBtn) {
-      saveBtn.addEventListener("click", () => {
-        console.log("Save button clicked");
-        this.saveLabelSettings();
-      });
-    }
+      
+      <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px; border-radius: 8px;">
+        <div style="font-weight: 600; margin-bottom: 8px;">💡 Vollständiges Backup:</div>
+        <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
+          <li><strong>Backup:</strong> Sichert ALLE Daten (Teams, Ergebnisse, Einstellungen)</li>
+          <li><strong>Restore:</strong> Stellt alle Daten wieder her</li>
+          <li><strong>Empfehlung:</strong> Regelmäßige Backups vor wichtigen Änderungen</li>
+        </ul>
+      </div>
+    `;
+    return section;
   }
 
-  // saveLabelSettings korrigieren:
-  saveLabelSettings() {
-    try {
-      console.log("Saving label settings...");
-
-      const settings = {
-        labelWidth: parseFloat(
-          document.getElementById("labelWidthSlider").value,
-        ),
-        labelHeight: parseFloat(
-          document.getElementById("labelHeightSlider").value,
-        ),
-        marginTop: parseFloat(document.getElementById("marginTopSlider").value),
-        marginBottom: parseFloat(
-          document.getElementById("marginBottomSlider").value,
-        ),
-        marginLeft: parseFloat(
-          document.getElementById("marginLeftSlider").value,
-        ),
-        marginRight: parseFloat(
-          document.getElementById("marginRightSlider").value,
-        ),
-        columns: parseInt(document.getElementById("columnsSlider").value),
-        rows: parseInt(document.getElementById("rowsSlider").value),
-        skipLabels: parseInt(document.getElementById("skipLabelsSlider").value),
-        copies: parseInt(document.getElementById("copiesSlider").value),
-        labelSpacing: parseFloat(
-          document.getElementById("labelSpacingSlider").value,
-        ),
-      };
-
-      console.log("Settings to save:", settings);
-
-      storage.saveLabelSettings(settings);
-      UIUtils.showSuccessMessage("Label-Einstellungen gespeichert");
-
-      console.log("Label settings saved successfully");
-    } catch (error) {
-      console.error("Error saving label settings:", error);
-      UIUtils.showError("Fehler beim Speichern: " + error.message);
-    }
-  }
-
-  // NEU: Test-Labels drucken
-  testPrintLabels() {
-    if (typeof labelPrinter !== "undefined" && labelPrinter.printLabels) {
-      labelPrinter.printLabels();
-    } else {
-      UIUtils.showError("Label-Printer nicht verfügbar");
-    }
+  createDisciplinesSection() {
+    const section = document.createElement("div");
+    section.className = "card";
+    section.innerHTML = `
+      <h3>Verfügbare Disziplinen</h3>
+      <div id="disciplinesList" style="margin-top: 12px;"></div>
+      <div style="margin-top: 16px; display: flex; gap: 8px;">
+        <input type="text" id="newDisciplineName" placeholder="Neue Disziplin" 
+               style="flex: 1; padding: 12px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px; height:40px;">
+        <button class="btn btn-secondary" onclick="app.views.settings.addDiscipline()" 
+                style="padding: 8px 12px; height: 40px;">Hinzufügen</button>
+      </div>
+    `;
+    return section;
   }
 
   createWeaponsSection() {
     const section = document.createElement("div");
     section.className = "card";
     section.innerHTML = `
-    <h3>Verfügbare Waffen</h3>
-    <div id="weaponsList" style="margin-top: 12px;">
-      <!-- Weapons will be populated here -->
+      <h3>Verfügbare Waffen</h3>
+      <div id="weaponsList" style="margin-top: 12px;"></div>
+      <div style="margin-top: 16px; display: flex; gap: 8px;">
+        <input type="text" id="newWeaponName" placeholder="Neue Waffe" 
+               style="flex: 1; padding: 12px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px; height:40px;">
+        <button class="btn btn-secondary" onclick="app.views.settings.addWeapon()" 
+                style="padding: 8px 12px; height: 40px;">Hinzufügen</button>
+      </div>
+    `;
+    return section;
+  }
+
+  createInfoSection() {
+    const section = document.createElement("div");
+    section.className = "card";
+    section.style.cssText = "margin-bottom: 30px;"; // Zusätzlicher Abstand
+    section.innerHTML = `
+    <h3>App-Information</h3>
+    <div style="margin-top: 12px;">
+      <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+        <span>App Version</span>
+        <span style="color: #8e8e93;">${APP_VERSION}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+        <span>Rundenkampfbericht</span>
+        <span style="color: #8e8e93;">© 2026</span>
+      </div>
     </div>
-    <div style="margin-top: 16px; display: flex; gap: 8px;">
-      <input type="text" id="newWeaponName" placeholder="Neue Waffe" 
-             style="flex: 1; padding: 12px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px; height:40px;">
-      <button class="btn btn-secondary" onclick="app.views.settings.addWeapon()" 
-              style="padding: 8px 12px; height: 40px;">Hinzufügen</button>
+    <div style="margin-top: 16px;">
+      <button class="btn btn-danger" onclick="app.views.settings.resetApp()" style="width: 100%;">
+        App zurücksetzen
+      </button>
     </div>
   `;
     return section;
+  }
+
+  setupEventListeners() {
+    const competitionTypeSelect = document.getElementById(
+      "competitionTypeSelect",
+    );
+    if (competitionTypeSelect) {
+      competitionTypeSelect.addEventListener("change", (e) => {
+        storage.selectedCompetitionType = e.target.value;
+        storage.save();
+        UIUtils.showSuccessMessage("Wettbewerbsmodus geändert");
+      });
+    }
+
+    const currentDisciplineSelect = document.getElementById(
+      "currentDisciplineSelect",
+    );
+    if (currentDisciplineSelect) {
+      currentDisciplineSelect.addEventListener("change", (e) => {
+        storage.selectedDiscipline = e.target.value;
+        storage.save();
+        UIUtils.showSuccessMessage("Aktuelle Disziplin geändert");
+      });
+    }
+
+    const overlayScaleSlider = document.getElementById("overlayScaleSlider");
+    const overlayScaleValue = document.getElementById("overlayScaleValue");
+    if (overlayScaleSlider && overlayScaleValue) {
+      overlayScaleSlider.addEventListener("input", (e) => {
+        const value = parseFloat(e.target.value);
+        overlayScaleValue.textContent = value.toFixed(1) + "x";
+        storage.settings.overlayScale = value;
+        storage.save();
+      });
+    }
+
+    const overlayOpacitySlider = document.getElementById(
+      "overlayOpacitySlider",
+    );
+    const overlayOpacityValue = document.getElementById("overlayOpacityValue");
+    if (overlayOpacitySlider && overlayOpacityValue) {
+      overlayOpacitySlider.addEventListener("input", (e) => {
+        const value = parseFloat(e.target.value);
+        overlayOpacityValue.textContent = Math.round(value * 100) + "%";
+        storage.settings.overlayOpacity = value;
+        storage.save();
+      });
+    }
+  }
+
+  // GEÄNDERT: setupLabelSettingsEventListeners für Input-Felder
+  setupLabelSettingsEventListeners() {
+    console.log(
+      "Setting up label settings event listeners (INPUT FIELDS ONLY)...",
+    );
+
+    const inputConfigs = [
+      {
+        id: "labelWidthInput",
+        setting: "labelWidth",
+        min: 30.0,
+        max: 100.0,
+        decimals: 1,
+      },
+      {
+        id: "labelHeightInput",
+        setting: "labelHeight",
+        min: 15.0,
+        max: 60.0,
+        decimals: 1,
+      },
+      {
+        id: "marginTopInput",
+        setting: "marginTop",
+        min: 0.0,
+        max: 30.0,
+        decimals: 1,
+      },
+      {
+        id: "marginBottomInput",
+        setting: "marginBottom",
+        min: 0.0,
+        max: 30.0,
+        decimals: 1,
+      },
+      {
+        id: "marginLeftInput",
+        setting: "marginLeft",
+        min: 0.0,
+        max: 30.0,
+        decimals: 1,
+      },
+      {
+        id: "marginRightInput",
+        setting: "marginRight",
+        min: 0.0,
+        max: 30.0,
+        decimals: 1,
+      },
+      { id: "columnsInput", setting: "columns", min: 1, max: 4, decimals: 0 },
+      { id: "rowsInput", setting: "rows", min: 1, max: 20, decimals: 0 },
+      {
+        id: "skipLabelsInput",
+        setting: "skipLabels",
+        min: 0,
+        max: 50,
+        decimals: 0,
+      },
+      { id: "copiesInput", setting: "copies", min: 1, max: 5, decimals: 0 },
+      {
+        id: "labelSpacingInput",
+        setting: "labelSpacing",
+        min: 0.0,
+        max: 10.0,
+        decimals: 1,
+      },
+    ];
+
+    const currentSettings = storage.getLabelSettings();
+
+    inputConfigs.forEach((config) => {
+      const input = document.getElementById(config.id);
+      if (input) {
+        // Setze Initial-Wert
+        const currentValue = currentSettings[config.setting];
+        if (currentValue !== undefined) {
+          if (config.decimals === 0) {
+            input.value = Math.round(currentValue);
+          } else {
+            input.value = currentValue.toFixed(1);
+          }
+        }
+
+        // Input-Validierung
+        input.addEventListener("input", (e) => {
+          let value = parseFloat(e.target.value);
+          if (isNaN(value)) return;
+          if (value < config.min) e.target.value = config.min;
+          if (value > config.max) e.target.value = config.max;
+          if (config.decimals === 0) {
+            e.target.value = Math.round(parseFloat(e.target.value));
+          }
+        });
+
+        // Verhindere ungültige Zeichen
+        input.addEventListener("keypress", (e) => {
+          const char = String.fromCharCode(e.which);
+          const currentValue = e.target.value;
+
+          if (
+            !/[0-9.]/.test(char) &&
+            ![8, 9, 13, 27, 46, 37, 38, 39, 40].includes(e.which)
+          ) {
+            e.preventDefault();
+            return;
+          }
+
+          if (
+            char === "." &&
+            (currentValue.includes(".") || config.decimals === 0)
+          ) {
+            e.preventDefault();
+            return;
+          }
+        });
+
+        // Formatierung beim Verlassen
+        input.addEventListener("blur", (e) => {
+          const value = parseFloat(e.target.value);
+          if (!isNaN(value)) {
+            e.target.value =
+              config.decimals === 0 ? Math.round(value) : value.toFixed(1);
+          }
+        });
+      }
+    });
+
+    // Checkbox für Rahmen
+    const bordersCheckbox = document.getElementById("showBordersCheckbox");
+    if (bordersCheckbox) {
+      bordersCheckbox.checked = currentSettings.showBorders || false;
+    }
+
+    // Vorschau Button
+    const previewBtn = document.getElementById("previewLabelsBtn");
+    if (previewBtn) {
+      previewBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const printer = window.labelPrinter || labelPrinter;
+
+        if (printer && typeof printer.previewLabels === "function") {
+          try {
+            printer.previewLabels();
+          } catch (error) {
+            console.error("Error calling previewLabels:", error);
+            UIUtils.showError("Fehler bei der Vorschau: " + error.message);
+          }
+        } else {
+          UIUtils.showError("Label-Printer noch nicht verfügbar.");
+        }
+      });
+    }
+
+    // Speichern Button
+    const saveBtn = document.getElementById("saveLabelSettingsBtn");
+    if (saveBtn) {
+      saveBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        this.saveLabelSettings();
+      });
+    }
+  }
+
+  // GEÄNDERT: saveLabelSettings für Input-Felder
+  saveLabelSettings() {
+    try {
+      const settings = {
+        labelWidth: parseFloat(
+          document.getElementById("labelWidthInput").value,
+        ),
+        labelHeight: parseFloat(
+          document.getElementById("labelHeightInput").value,
+        ),
+        marginTop: parseFloat(document.getElementById("marginTopInput").value),
+        marginBottom: parseFloat(
+          document.getElementById("marginBottomInput").value,
+        ),
+        marginLeft: parseFloat(
+          document.getElementById("marginLeftInput").value,
+        ),
+        marginRight: parseFloat(
+          document.getElementById("marginRightInput").value,
+        ),
+        columns: parseInt(document.getElementById("columnsInput").value),
+        rows: parseInt(document.getElementById("rowsInput").value),
+        skipLabels: parseInt(document.getElementById("skipLabelsInput").value),
+        copies: parseInt(document.getElementById("copiesInput").value),
+        labelSpacing: parseFloat(
+          document.getElementById("labelSpacingInput").value,
+        ),
+        showBorders: document.getElementById("showBordersCheckbox").checked,
+      };
+
+      // Validiere die Settings
+      for (const [key, value] of Object.entries(settings)) {
+        if (
+          key !== "showBorders" &&
+          (isNaN(value) || value === null || value === undefined)
+        ) {
+          throw new Error(`Ungültiger Wert für $${key}: $${value}`);
+        }
+      }
+
+      storage.saveLabelSettings(settings);
+
+      // CSS-Cache invalidieren
+      if (typeof window.labelPrinter !== "undefined") {
+        window.labelPrinter.invalidateCSS();
+      }
+
+      UIUtils.showSuccessMessage(
+        "Label-Einstellungen gespeichert - Änderungen sind sofort aktiv",
+      );
+    } catch (error) {
+      console.error("Error saving label settings:", error);
+      UIUtils.showError("Fehler beim Speichern: " + error.message);
+    }
+  }
+
+  updateCurrentDisciplineSelect() {
+    const select = document.getElementById("currentDisciplineSelect");
+    if (!select) return;
+
+    select.innerHTML = '<option value="">Keine ausgewählt</option>';
+
+    storage.availableDisciplines.forEach((discipline) => {
+      const option = document.createElement("option");
+      option.value = discipline;
+      option.textContent = discipline;
+      if (discipline === storage.selectedDiscipline) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+  }
+
+  updateDisciplinesList() {
+    const disciplinesList = document.getElementById("disciplinesList");
+    if (!disciplinesList) return;
+
+    disciplinesList.innerHTML = "";
+
+    if (storage.availableDisciplines.length === 0) {
+      disciplinesList.innerHTML =
+        '<p style="color: #8e8e93; font-style: italic;">Keine Disziplinen vorhanden</p>';
+      return;
+    }
+
+    storage.availableDisciplines.forEach((discipline, index) => {
+      const disciplineItem = document.createElement("div");
+      disciplineItem.style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+        `;
+
+      disciplineItem.innerHTML = `
+        <span style="flex: 1; height: 30px; max-width:50%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;" title="${UIUtils.escapeHtml(discipline)}">${UIUtils.escapeHtml(discipline)}</span>
+        <div style="display: flex; gap: 8px;">
+        <button class="btn btn-small btn-secondary" style="height: 30px;" onclick="app.views.settings.editDiscipline(${index})">
+        Bearbeiten
+        </button>
+        <button class="btn btn-small btn-danger" style="height: 30px;" onclick="app.views.settings.deleteDiscipline(${index})">
+        Löschen
+        </button>
+        </div>
+        `;
+
+      disciplinesList.appendChild(disciplineItem);
+    });
+  }
+
+  addDiscipline() {
+    try {
+      const nameInput = document.getElementById("newDisciplineName");
+      const name = nameInput.value.trim();
+
+      if (!name) {
+        alert("Bitte geben Sie einen Namen für die Disziplin ein.");
+        return;
+      }
+
+      if (storage.availableDisciplines.includes(name)) {
+        alert("Diese Disziplin existiert bereits.");
+        return;
+      }
+
+      storage.addDiscipline(name);
+      nameInput.value = "";
+      this.updateDisciplinesList();
+      this.updateCurrentDisciplineSelect();
+
+      UIUtils.showSuccessMessage("Disziplin hinzugefügt");
+    } catch (error) {
+      console.error("Error adding discipline:", error);
+      alert("Fehler beim Hinzufügen der Disziplin: " + error.message);
+    }
+  }
+
+  editDiscipline(index) {
+    try {
+      const currentName = storage.availableDisciplines[index];
+      const newName = prompt("Disziplin bearbeiten:", currentName);
+
+      if (newName === null) return;
+
+      const trimmedName = newName.trim();
+      if (!trimmedName) {
+        alert("Disziplinname darf nicht leer sein.");
+        return;
+      }
+
+      if (trimmedName === currentName) return;
+
+      if (storage.availableDisciplines.includes(trimmedName)) {
+        alert("Diese Disziplin existiert bereits.");
+        return;
+      }
+
+      storage.updateDiscipline(index, trimmedName);
+      this.updateDisciplinesList();
+      this.updateCurrentDisciplineSelect();
+
+      UIUtils.showSuccessMessage("Disziplin bearbeitet");
+    } catch (error) {
+      console.error("Error editing discipline:", error);
+      alert("Fehler beim Bearbeiten der Disziplin: " + error.message);
+    }
+  }
+
+  deleteDiscipline(index) {
+    try {
+      const disciplineName = storage.availableDisciplines[index];
+      if (
+        confirm(
+          `Möchten Sie die Disziplin "${disciplineName}" wirklich löschen?`,
+        )
+      ) {
+        storage.deleteDiscipline(index);
+        this.updateDisciplinesList();
+        this.updateCurrentDisciplineSelect();
+
+        UIUtils.showSuccessMessage("Disziplin gelöscht");
+      }
+    } catch (error) {
+      console.error("Error deleting discipline:", error);
+      alert("Fehler beim Löschen der Disziplin: " + error.message);
+    }
   }
 
   updateWeaponsList() {
@@ -342,24 +832,24 @@ class SettingsView {
     storage.availableWeapons.forEach((weapon, index) => {
       const weaponItem = document.createElement("div");
       weaponItem.style.cssText = `
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid #f0f0f0;
-    `;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+      `;
 
       weaponItem.innerHTML = `
-      <span style="flex: 1; height: 30px; max-width:50%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;" title="${UIUtils.escapeHtml(weapon)}">${UIUtils.escapeHtml(weapon)}</span>
-      <div style="display: flex; gap: 8px;">
+        <span style="flex: 1; height: 30px; max-width:50%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;" title="${UIUtils.escapeHtml(weapon)}">${UIUtils.escapeHtml(weapon)}</span>
+        <div style="display: flex; gap: 8px;">
         <button class="btn btn-small btn-secondary" style="height: 30px;" onclick="app.views.settings.editWeapon(${index})">
-          Bearbeiten
+        Bearbeiten
         </button>
         <button class="btn btn-small btn-danger" style="height: 30px;" onclick="app.views.settings.deleteWeapon(${index})">
-          Löschen
+        Löschen
         </button>
-      </div>
-    `;
+        </div>
+        `;
 
       weaponsList.appendChild(weaponItem);
     });
@@ -435,341 +925,26 @@ class SettingsView {
     }
   }
 
-  createCompetitionTypeSection() {
-    const section = document.createElement("div");
-    section.className = "card";
-    section.innerHTML = `
-		<h3>Wettbewerbsmodus</h3>
-		<div style="margin-top: 12px;">
-		<select class="form-select" id="competitionTypeSelect">
-		<option value="${CompetitionType.PRAEZISION_DUELL}">${CompetitionType.PRAEZISION_DUELL}</option>
-		<option value="${CompetitionType.ANNEX_SCHEIBE}">${CompetitionType.ANNEX_SCHEIBE}</option>
-		</select>
-		</div>
-		`;
-    return section;
-  }
+  updateLogoPreview() {
+    const logoPreview = document.getElementById("logoPreview");
+    if (!logoPreview) return;
 
-  createCurrentDisciplineSection() {
-    const section = document.createElement("div");
-    section.className = "card";
-    section.innerHTML = `
-		<h3>Aktuelle Disziplin</h3>
-		<div style="margin-top: 12px;">
-		<select class="form-select" id="currentDisciplineSelect">
-		<option value="">Keine ausgewählt</option>
-		</select>
-		</div>
-		`;
-    return section;
-  }
+    const logoData = storage.getLogo();
 
-  // NEU: Verbesserte Logo Upload Section
-  createLogoUploadSection() {
-    const section = document.createElement("div");
-    section.className = "card";
-    section.innerHTML = `
-	<h3>Vereinslogo</h3>
-	<div style="margin-top: 12px;">
-		<div id="logoPreview" style="margin-bottom: 16px; text-align: center;">
-			<!-- Logo preview will be inserted here -->
-		</div>
-		
-		<!-- Upload Input Bereich -->
-		<div style="margin-bottom: 12px;">
-			<input type="file" id="logoUpload" accept="image/*" 
-				   style="width: 100%; padding: 10px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 14px;">
-		</div>
-		
-		<!-- Button Container -->
-		<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-			<button class="btn btn-primary" onclick="app.views.settings.uploadLogo()" 
-					style="padding: 12px; font-weight: bold; height:45px;">
-				📁 Hochladen
-			</button>
-			<button class="btn btn-danger" onclick="app.views.settings.deleteLogo()" 
-					style="padding: 12px; height:45px;">
-				🗑️ Löschen
-			</button>
-		</div>
-		
-		<!-- Info Text -->
-		<div style="background-color: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 4px solid #007bff;">
-			<div style="font-size: 13px; color: #495057; margin-bottom: 4px; font-weight: 500;">
-				📋 Anforderungen:
-			</div>
-			<div style="font-size: 12px; color: #6c757d; line-height: 1.4;">
-				• <strong>Größe:</strong> Mindestens 200×200px empfohlen<br>
-				• <strong>Format:</strong> JPG, PNG oder GIF<br>
-				• <strong>Dateigröße:</strong> Maximal 5MB<br>
-				• <strong>Verwendung:</strong> Wird im PDF-Bericht angezeigt
-			</div>
-		</div>
-	</div>
-	`;
-    return section;
-  }
-
-  // NEU: Backup/Restore Section
-  createBackupRestoreSection() {
-    const section = document.createElement("div");
-    section.className = "card";
-    section.innerHTML = `
-    <h3>Backup & Restore</h3>
-    <div style="margin-top: 12px;">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-        <button class="btn btn-primary" onclick="app.views.settings.exportSettings()" 
-                style="padding: 12px; font-weight: bold; height: 45px;">
-          💾 Backup
-        </button>
-        <button class="btn btn-secondary" onclick="app.views.settings.showImportSettings()" 
-                style="padding: 12px; height: 45px;">
-          📁 Restore
-        </button>
-      </div>
-      
-      <div style="background-color: #f0f8ff; padding: 12px; border-radius: 6px; border-left: 4px solid #0066cc;">
-        <div style="font-size: 13px; color: #0066cc; margin-bottom: 4px; font-weight: 500;">
-          💡 Vollständiges Backup:
+    if (logoData) {
+      logoPreview.innerHTML = `
+        <img src="${logoData}" alt="Vereinslogo" style="max-width: 200px; max-height: 100px; border-radius: 8px; border: 1px solid #ddd;">
+        <p style="margin-top: 8px; font-size: 12px; color: #666;">Logo erfolgreich hochgeladen</p>
+      `;
+    } else {
+      logoPreview.innerHTML = `
+        <div style="width: 200px; height: 100px; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto; color: #999;">
+          📷 Kein Logo
         </div>
-        <div style="font-size: 12px; color: #4a5568; line-height: 1.4;">
-          • <strong>Backup:</strong> Sichert ALLE Daten (Teams, Ergebnisse, Einstellungen)<br>
-          • <strong>Restore:</strong> Stellt alle Daten wieder her<br>
-          • <strong>Empfehlung:</strong> Regelmäßige Backups vor wichtigen Änderungen
-        </div>
-      </div>
-    </div>
-  `;
-    return section;
-  }
-
-  createDisciplinesSection() {
-    const section = document.createElement("div");
-    section.className = "card";
-    section.innerHTML = `
-		<h3>Verfügbare Disziplinen</h3>
-		<div id="disciplinesList" style="margin-top: 12px;">
-		<!-- Disciplines will be populated here -->
-		</div>
-		<div style="margin-top: 16px; display: flex; gap: 8px;">
-		<input type="text" id="newDisciplineName" placeholder="Neue Disziplin" 
-		style="flex: 1; padding: 12px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px; height:40px;">
-		<button class="btn btn-secondary" onclick="app.views.settings.addDiscipline()" style="padding: 8px 12px; height: 40px;">Hinzufügen</button>
-		</div>
-		`;
-    return section;
-  }
-
-  createOverlayScaleSection() {
-    const section = document.createElement("div");
-    section.className = "card";
-    section.innerHTML = `
-    <h3>Foto-Overlay Einstellungen</h3>
-    <div style="margin-top: 12px;">
-      <!-- Größe -->
-      <label style="display: block; font-weight: 600; margin-bottom: 8px;">
-        Overlay-Größe: <span id="scaleValue">${storage.settings.overlayScale || 3.0}x</span>
-      </label>
-      <input type="range" id="overlayScaleSlider" 
-             min="0.5" max="5.0" step="0.1" 
-             value="${storage.settings.overlayScale || 3.0}"
-             style="width: 100%; margin-bottom: 16px;">
-             <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-top: 4px; margin-bottom: 12px;">
-        <span>klein (0,5x)</span>
-        <span>Standard (3x)</span>
-        <span>groß (5x)</span>
-      </div>
-      
-      <!-- Transparenz -->
-      <label style="display: block; font-weight: 600; margin-bottom: 8px;">
-        Transparenz: <span id="opacityValue">${Math.round((storage.settings.overlayOpacity || 0.8) * 100)}%</span>
-      </label>
-      <input type="range" id="overlayOpacitySlider" 
-             min="0.2" max="1.0" step="0.1" 
-             value="${storage.settings.overlayOpacity || 0.8}"
-             style="width: 100%;">
-      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-top: 4px;">
-        <span>sehr Duchsichtig (20%)</span>
-        <span>Standard (80%)</span>
-        <span>Undurchsichtig (100%)</span>
-      </div>
-    </div>
-  `;
-    return section;
-  }
-
-  createInfoSection() {
-    const section = document.createElement("div");
-    section.className = "card";
-    section.style.cssText = "margin-bottom: 30px;"; // Zusätzlicher Abstand
-    section.innerHTML = `
-		<h3>App-Information</h3>
-		<div style="margin-top: 12px;">
-		<div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
-		<span>App Version</span>
-    <span style="color: #8e8e93;">${APP_VERSION}</span>
-		</div>
-		<div style="display: flex; justify-content: space-between; padding: 8px 0;">
-		<span>Rundenkampfbericht</span>
-		<span style="color: #8e8e93;">© 2026</span>
-		</div>
-		</div>
-		<div style="margin-top: 16px;">
-		<button class="btn btn-danger" onclick="app.views.settings.resetApp()" style="width: 100%;">
-		App zurücksetzen
-		</button>
-		</div>
-		`;
-    return section;
-  }
-
-  setupEventListeners() {
-    const competitionTypeSelect = document.getElementById(
-      "competitionTypeSelect",
-    );
-    const currentDisciplineSelect = document.getElementById(
-      "currentDisciplineSelect",
-    );
-
-    const scaleSlider = document.getElementById("overlayScaleSlider");
-    const scaleValue = document.getElementById("scaleValue");
-
-    // ✅ KORREKTUR: opacitySlider richtig definieren
-    const opacitySlider = document.getElementById("overlayOpacitySlider");
-    const opacityValue = document.getElementById("opacityValue");
-
-    if (scaleSlider && scaleValue) {
-      scaleSlider.addEventListener("input", (e) => {
-        const value = parseFloat(e.target.value);
-        scaleValue.textContent = `${value}x`;
-        storage.settings.overlayScale = value;
-        storage.save();
-      });
-    }
-
-    // ✅ Jetzt funktioniert der Opacity Slider Event Listener
-    if (opacitySlider && opacityValue) {
-      opacitySlider.addEventListener("input", (e) => {
-        const value = parseFloat(e.target.value);
-        opacityValue.textContent = `${Math.round(value * 100)}%`;
-        storage.settings.overlayOpacity = value;
-        storage.save();
-      });
-    }
-
-    if (competitionTypeSelect) {
-      competitionTypeSelect.value = storage.selectedCompetitionType;
-      competitionTypeSelect.addEventListener("change", (e) => {
-        storage.selectedCompetitionType = e.target.value;
-        storage.save();
-        UIUtils.showSuccessMessage("Wettbewerbsmodus geändert");
-
-        // Refresh overview if currently showing
-        if (app && app.getCurrentView() === "overview") {
-          setTimeout(() => app.showView("overview"), 500);
-        }
-      });
-    }
-
-    this.updateWeaponsList();
-
-    if (currentDisciplineSelect) {
-      currentDisciplineSelect.addEventListener("change", (e) => {
-        storage.selectedDiscipline = e.target.value || null;
-        storage.save();
-        UIUtils.showSuccessMessage("Disziplin gewählt");
-
-        // Refresh overview if currently showing
-        if (app && app.getCurrentView() === "overview") {
-          setTimeout(() => app.showView("overview"), 500);
-        }
-      });
+      `;
     }
   }
 
-  // NEU: Separate Event-Listener-Methode für Label-Settings:
-  setupLabelSettingsEventListeners() {
-    console.log("Setting up label settings event listeners...");
-
-    // Slider-Updates mit intelligenter Formatierung
-    const sliders = [
-      { name: "labelWidth", decimals: 1 },
-      { name: "labelHeight", decimals: 1 },
-      { name: "marginTop", decimals: 1 },
-      { name: "marginBottom", decimals: 1 },
-      { name: "marginLeft", decimals: 1 },
-      { name: "marginRight", decimals: 1 },
-      { name: "columns", decimals: 0 }, // Ganzzahl
-      { name: "rows", decimals: 0 }, // Ganzzahl
-      { name: "skipLabels", decimals: 0 }, // Ganzzahl
-      { name: "copies", decimals: 0 }, // Ganzzahl
-      { name: "labelSpacing", decimals: 1 },
-    ];
-
-    sliders.forEach((setting) => {
-      const slider = document.getElementById(`${setting.name}Slider`);
-      const valueDisplay = document.getElementById(`${setting.name}Value`);
-
-      console.log(
-        `Setting up slider for ${setting.name}:`,
-        slider ? "found" : "not found",
-      );
-
-      if (slider && valueDisplay) {
-        // Event-Listener hinzufügen
-        slider.addEventListener("input", (e) => {
-          const value = parseFloat(e.target.value);
-
-          // Formatierung: Ganzzahlen ohne Dezimale, sonst mit Dezimale
-          if (setting.decimals === 0) {
-            valueDisplay.textContent = Math.round(value).toString();
-          } else {
-            // Zeige Dezimale nur wenn nötig
-            const formatted =
-              value % 1 === 0
-                ? Math.round(value).toString()
-                : value.toFixed(setting.decimals);
-            valueDisplay.textContent = formatted;
-          }
-
-          console.log(`${setting.name} updated to:`, value);
-        });
-
-        // Initial-Wert setzen
-        const currentSettings = storage.getLabelSettings();
-        const currentValue = currentSettings[setting.name];
-        if (currentValue !== undefined) {
-          slider.value = currentValue;
-
-          // Display aktualisieren
-          if (setting.decimals === 0) {
-            valueDisplay.textContent = Math.round(currentValue).toString();
-          } else {
-            const formatted =
-              currentValue % 1 === 0
-                ? Math.round(currentValue).toString()
-                : currentValue.toFixed(setting.decimals);
-            valueDisplay.textContent = formatted;
-          }
-        }
-      } else {
-        console.warn(`Slider or value display not found for ${setting.name}`);
-      }
-    });
-
-    // Speichern Button
-    const saveBtn = document.getElementById("saveLabelSettingsBtn");
-    console.log("Save button:", saveBtn ? "found" : "not found");
-
-    if (saveBtn) {
-      saveBtn.addEventListener("click", () => {
-        console.log("Save button clicked");
-        this.saveLabelSettings();
-      });
-    }
-  }
-
-  // Verbesserte Logo Management Methoden in SettingsView
   uploadLogo() {
     try {
       const fileInput = document.getElementById("logoUpload");
@@ -833,14 +1008,7 @@ class SettingsView {
           console.error("Error saving logo:", error);
           uploadButton.disabled = false;
           uploadButton.textContent = originalText;
-
-          if (error.message.includes("Speicher ist voll")) {
-            alert(
-              "Das Logo ist zu groß für den verfügbaren Speicher. Versuchen Sie ein kleineres Bild oder komprimieren Sie es.",
-            );
-          } else {
-            alert("Fehler beim Speichern des Logos: " + error.message);
-          }
+          alert("Fehler beim Speichern des Logos: " + error.message);
         }
       };
 
@@ -853,100 +1021,54 @@ class SettingsView {
       reader.readAsDataURL(file);
     } catch (error) {
       console.error("Error uploading logo:", error);
-      alert("Fehler beim Hochladen: " + error.message);
+      alert("Fehler beim Logo-Upload: " + error.message);
     }
   }
 
-  deleteLogo() {
+  removeLogo() {
     try {
-      const hasLogo = storage.getLogo();
-
-      if (!hasLogo) {
-        alert("Es ist kein Logo vorhanden.");
-        return;
-      }
-
-      if (
-        confirm(
-          "Möchten Sie das Vereinslogo wirklich löschen?\n\nEs wird dann nicht mehr im PDF-Bericht angezeigt.",
-        )
-      ) {
-        storage.deleteLogo();
-
-        // File Input leeren
-        const fileInput = document.getElementById("logoUpload");
-        if (fileInput) {
-          fileInput.value = "";
-        }
-
+      if (confirm("Möchten Sie das Logo wirklich entfernen?")) {
+        storage.removeLogo();
         this.updateLogoPreview();
-        UIUtils.showSuccessMessage("Logo wurde gelöscht.");
+        UIUtils.showSuccessMessage("Logo entfernt");
       }
     } catch (error) {
-      console.error("Error deleting logo:", error);
-      alert("Fehler beim Löschen des Logos: " + error.message);
+      console.error("Error removing logo:", error);
+      alert("Fehler beim Entfernen des Logos: " + error.message);
     }
   }
 
-  // NEU: Backup/Restore Methoden
-  // Ersetzen Sie die exportSettings() Methode:
-  exportSettings() {
+  createFullBackup() {
     try {
-      // KOMPLETTES Backup - Einstellungen UND alle Daten
-      const completeBackup = {
-        // Alle Teams und Ergebnisse
-        teams: storage.teams.map((t) => t.toJSON()),
-        standaloneShooters: storage.standaloneShooters.map((s) => s.toJSON()),
-        results: storage.results.map((r) => r.toJSON()),
-
-        // Filter-Einstellungen
-        visibleTeamIds: storage.visibleTeamIds
-          ? Array.from(storage.visibleTeamIds)
-          : null,
-        visibleShooterIds: storage.visibleShooterIds
-          ? Array.from(storage.visibleShooterIds)
-          : null,
-
-        // Disziplinen und Waffen
-        availableDisciplines: storage.availableDisciplines,
-        availableWeapons: storage.availableWeapons,
-        selectedDiscipline: storage.selectedDiscipline,
-        selectedCompetitionType: storage.selectedCompetitionType,
-
-        // App-Einstellungen (Logo, Overlay-Einstellungen, etc.)
-        settings: storage.settings,
-
-        // NEU: Label-Einstellungen hinzufügen
-        labelSettings: storage.getLabelSettings(),
-
-        // Meta-Informationen
-        exportDate: new Date().toISOString(),
-        exportVersion: APP_VERSION || "1.0.0",
-        exportType: "complete", // Marker für vollständiges Backup
-      };
-
-      const dataStr = JSON.stringify(completeBackup, null, 2);
-      const blob = new Blob([dataStr], { type: "application/json" });
-
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
+      const data = storage.exportData();
+      const jsonString = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonString], { type: "application/json" });
 
       const timestamp = new Date()
         .toISOString()
         .slice(0, 19)
         .replace(/:/g, "-");
-      // GEÄNDERT: Dateiname zeigt, dass es ein vollständiges Backup ist
-      link.download = `rundenkampf-backup-${timestamp}.json`;
+      const filename = `rundenkampf-backup-${timestamp}.json`;
+
+      // Download starten
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.style.display = "none";
 
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
 
-      UIUtils.showSuccessMessage("Backup erstellt!");
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
+
+      UIUtils.showSuccessMessage("Backup erfolgreich erstellt");
+      console.log("Backup created:", filename);
     } catch (error) {
-      console.error("Error creating complete backup:", error);
+      console.error("Error creating backup:", error);
       alert("Fehler beim Erstellen des Backups: " + error.message);
     }
   }
@@ -1163,176 +1285,56 @@ class SettingsView {
     reader.readAsText(file, "UTF-8");
   }
 
-  updateLogoPreview() {
-    const logoPreview = document.getElementById("logoPreview");
-    if (!logoPreview) return;
-
-    const logoBase64 = storage.getLogo();
-
-    if (logoBase64) {
-      logoPreview.innerHTML = `
-			<div style="position: relative; display: inline-block;">
-				<img src="${logoBase64}" 
-					 style="max-width: 120px; max-height: 120px; border-radius: 12px; 
-					 		box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 2px solid #e9ecef;"
-					 alt="Vereinslogo">
-				<div style="position: absolute; top: -8px; right: -8px; background: #28a745; 
-							color: white; border-radius: 50%; width: 24px; height: 24px; 
-							display: flex; align-items: center; justify-content: center; font-size: 12px;">
-					✓
-				</div>
-			</div>
-			<div style="font-size: 13px; color: #28a745; margin-top: 8px; font-weight: 500;">
-				✅ Logo aktiv (wird im PDF verwendet)
-			</div>
-		`;
-    } else {
-      logoPreview.innerHTML = `
-			<div style="width: 120px; height: 120px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
-						border-radius: 12px; margin: 0 auto; display: flex; align-items: center; 
-						justify-content: center; color: #adb5bd; border: 2px dashed #dee2e6;">
-				<div style="text-align: center;">
-					<div style="font-size: 28px; margin-bottom: 4px;">📷</div>
-					<div style="font-size: 12px; font-weight: 500;">Kein Logo</div>
-				</div>
-			</div>
-			<div style="font-size: 13px; color: #6c757d; margin-top: 8px;">
-				Laden Sie ein Vereinslogo hoch
-			</div>
-		`;
-    }
-  }
-
-  updateCurrentDisciplineSelect() {
-    const select = document.getElementById("currentDisciplineSelect");
-    if (!select) return;
-
-    select.innerHTML = '<option value="">Keine ausgewählt</option>';
-
-    storage.availableDisciplines.forEach((discipline) => {
-      const option = document.createElement("option");
-      option.value = discipline;
-      option.textContent = discipline;
-      if (discipline === storage.selectedDiscipline) {
-        option.selected = true;
-      }
-      select.appendChild(option);
-    });
-  }
-
-  updateDisciplinesList() {
-    const disciplinesList = document.getElementById("disciplinesList");
-    if (!disciplinesList) return;
-
-    disciplinesList.innerHTML = "";
-
-    if (storage.availableDisciplines.length === 0) {
-      disciplinesList.innerHTML =
-        '<p style="color: #8e8e93; font-style: italic;">Keine Disziplinen vorhanden</p>';
-      return;
-    }
-
-    storage.availableDisciplines.forEach((discipline, index) => {
-      const disciplineItem = document.createElement("div");
-      disciplineItem.style.cssText = `
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			padding: 8px 0;
-			border-bottom: 1px solid #f0f0f0;
-			`;
-
-      disciplineItem.innerHTML = `
-			<span style="flex: 1; height: 30px; max-width:50%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;" title="${UIUtils.escapeHtml(discipline)}">${UIUtils.escapeHtml(discipline)}</span>
-			<div style="display: flex; gap: 8px;">
-			<button class="btn btn-small btn-secondary" style="height: 30px;" onclick="app.views.settings.editDiscipline(${index})">
-			Bearbeiten
-			</button>
-			<button class="btn btn-small btn-danger" style="height: 30px;" onclick="app.views.settings.deleteDiscipline(${index})">
-			Löschen
-			</button>
-			</div>
-			`;
-
-      disciplinesList.appendChild(disciplineItem);
-    });
-  }
-
-  addDiscipline() {
+  importBackup() {
     try {
-      const nameInput = document.getElementById("newDisciplineName");
-      const name = nameInput.value.trim();
+      const fileInput = document.getElementById("backupFileInput");
+      const file = fileInput.files[0];
 
-      if (!name) {
-        alert("Bitte geben Sie einen Namen für die Disziplin ein.");
+      if (!file) {
+        alert("Bitte wählen Sie eine Backup-Datei aus.");
         return;
       }
 
-      if (storage.availableDisciplines.includes(name)) {
-        alert("Diese Disziplin existiert bereits.");
+      if (!file.name.endsWith(".json")) {
+        alert("Bitte wählen Sie eine gültige JSON-Backup-Datei aus.");
         return;
       }
 
-      storage.addDiscipline(name);
-      nameInput.value = "";
-      this.updateDisciplinesList();
-      this.updateCurrentDisciplineSelect();
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const jsonData = e.target.result;
+          const data = JSON.parse(jsonData);
 
-      UIUtils.showSuccessMessage("Disziplin hinzugefügt");
+          // Backup importieren
+          const success = storage.importData(data);
+
+          if (success) {
+            UIUtils.showSuccessMessage(
+              "Backup erfolgreich wiederhergestellt - Seite wird neu geladen",
+            );
+
+            // Seite nach kurzer Verzögerung neu laden
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+          }
+        } catch (parseError) {
+          console.error("Error parsing backup file:", parseError);
+          alert(
+            "Fehler beim Lesen der Backup-Datei. Bitte stellen Sie sicher, dass es sich um eine gültige Backup-Datei handelt.",
+          );
+        }
+      };
+
+      reader.onerror = () => {
+        alert("Fehler beim Lesen der Datei.");
+      };
+
+      reader.readAsText(file);
     } catch (error) {
-      console.error("Error adding discipline:", error);
-      alert("Fehler beim Hinzufügen der Disziplin: " + error.message);
-    }
-  }
-
-  editDiscipline(index) {
-    try {
-      const currentName = storage.availableDisciplines[index];
-      const newName = prompt("Disziplin bearbeiten:", currentName);
-
-      if (newName === null) return;
-
-      const trimmedName = newName.trim();
-      if (!trimmedName) {
-        alert("Disziplinname darf nicht leer sein.");
-        return;
-      }
-
-      if (trimmedName === currentName) return;
-
-      if (storage.availableDisciplines.includes(trimmedName)) {
-        alert("Diese Disziplin existiert bereits.");
-        return;
-      }
-
-      storage.updateDiscipline(index, trimmedName);
-      this.updateDisciplinesList();
-      this.updateCurrentDisciplineSelect();
-
-      UIUtils.showSuccessMessage("Disziplin bearbeitet");
-    } catch (error) {
-      console.error("Error editing discipline:", error);
-      alert("Fehler beim Bearbeiten der Disziplin: " + error.message);
-    }
-  }
-
-  deleteDiscipline(index) {
-    try {
-      const disciplineName = storage.availableDisciplines[index];
-      if (
-        confirm(
-          `Möchten Sie die Disziplin "${disciplineName}" wirklich löschen?`,
-        )
-      ) {
-        storage.deleteDiscipline(index);
-        this.updateDisciplinesList();
-        this.updateCurrentDisciplineSelect();
-
-        UIUtils.showSuccessMessage("Disziplin gelöscht");
-      }
-    } catch (error) {
-      console.error("Error deleting discipline:", error);
-      alert("Fehler beim Löschen der Disziplin: " + error.message);
+      console.error("Error importing backup:", error);
+      alert("Fehler beim Wiederherstellen des Backups: " + error.message);
     }
   }
 
@@ -1357,4 +1359,13 @@ class SettingsView {
       }
     }
   }
+}
+
+console.log("✅ SettingsView class definition completed");
+
+// Teste ob die Klasse korrekt definiert wurde
+if (typeof SettingsView === "undefined") {
+  console.error("❌ SettingsView class definition failed!");
+} else {
+  console.log("✅ SettingsView class is available");
 }

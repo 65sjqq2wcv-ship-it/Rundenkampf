@@ -20,15 +20,16 @@ class Storage {
     this.defaultLabelSettings = {
       labelWidth: 52.5, // mm
       labelHeight: 29.7, // mm
-      marginTop: 0.0, // mm - 0.1 Schritte
-      marginBottom: 0.0, // mm - 0.1 Schritte
-      marginLeft: 0.0, // mm - 0.1 Schritte
-      marginRight: 0.0, // mm - 0.1 Schritte
-      columns: 4, // Ganzzahl
-      rows: 10, // Ganzzahl
+      marginTop: 0.0, // mm
+      marginBottom: 0.0, // mm
+      marginLeft: 0.0, // mm
+      marginRight: 0.0, // mm
+      columns: 4, // Max 4 Spalten
+      rows: 10, // Max 20 Zeilen
       skipLabels: 0, // Ganzzahl
       copies: 1, // Ganzzahl
-      labelSpacing: 0.0, // mm - 0.1 Schritte
+      labelSpacing: 0.0, // mm
+      showBorders: false, // NEU: Rahmen-Option
     };
 
     this.load();

@@ -1,12 +1,7 @@
 class App {
   constructor() {
     this.currentView = "overview";
-    this.views = {
-      overview: new OverviewView(),
-      entry: new EntryView(),
-      teams: new TeamsView(),
-      settings: new SettingsView(),
-    };
+    this.views = {}; // GEÄNDERT: Leeres Object statt direkte Initialisierung
     this.isInitialized = false;
   }
 
@@ -19,6 +14,9 @@ class App {
         throw new Error("Storage not available");
       }
 
+      // SICHERE VIEW-INITIALISIERUNG
+      this.initializeViews();
+
       this.setupTabNavigation();
       this.isInitialized = true;
       this.showView("overview");
@@ -29,6 +27,51 @@ class App {
       console.error("Error initializing app:", error);
       this.showError("Initialisierungsfehler: " + error.message);
       return false;
+    }
+  }
+
+  // NEU: Sichere View-Initialisierung
+  initializeViews() {
+    console.log("Initializing views...");
+    
+    try {
+      // Prüfe jede View-Klasse einzeln
+      if (typeof OverviewView !== "undefined") {
+        this.views.overview = new OverviewView();
+        console.log("✓ OverviewView initialized");
+      } else {
+        console.error("✗ OverviewView not found");
+        throw new Error("OverviewView not available");
+      }
+
+      if (typeof EntryView !== "undefined") {
+        this.views.entry = new EntryView();
+        console.log("✓ EntryView initialized");
+      } else {
+        console.error("✗ EntryView not found");
+        throw new Error("EntryView not available");
+      }
+
+      if (typeof TeamsView !== "undefined") {
+        this.views.teams = new TeamsView();
+        console.log("✓ TeamsView initialized");
+      } else {
+        console.error("✗ TeamsView not found");
+        throw new Error("TeamsView not available");
+      }
+
+      if (typeof SettingsView !== "undefined") {
+        this.views.settings = new SettingsView();
+        console.log("✓ SettingsView initialized");
+      } else {
+        console.error("✗ SettingsView not found");
+        throw new Error("SettingsView not available");
+      }
+
+      console.log("All views initialized successfully");
+    } catch (error) {
+      console.error("Error initializing views:", error);
+      throw error;
     }
   }
 
@@ -50,75 +93,70 @@ class App {
   }
 
   showView(viewName) {
-  if (!this.isInitialized) {
-    console.warn("App not initialized");
-    return;
-  }
-
-  if (!this.views[viewName]) {
-    console.error("View not available:", viewName);
-    return;
-  }
-
-  try {
-    console.log("Showing view:", viewName);
-
-    // Update tab selection
-    document.querySelectorAll(".tab-item").forEach((item) => {
-      item.classList.remove("active");
-      if (item.getAttribute("data-tab") === viewName) {
-        item.classList.add("active");
-      }
-    });
-
-    // Clear navigation buttons UND verstecke Panel
-    const navButtons = document.getElementById("navButtons");
-    const buttonPanel = document.getElementById("buttonPanel");
-    
-    if (navButtons) {
-      navButtons.innerHTML = "";
-    }
-    if (buttonPanel) {
-      buttonPanel.style.display = 'none'; // Verstecken bis View es einblendet
-    }
-
-    // Update content
-    const mainContent = document.getElementById("mainContent");
-    if (!mainContent) {
-      console.error("Main content element not found");
+    if (!this.isInitialized) {
+      console.warn("App not initialized");
       return;
     }
 
-    mainContent.innerHTML = "";
-
-    const viewContent = this.views[viewName].render();
-    if (viewContent) {
-      mainContent.appendChild(viewContent);
-      this.currentView = viewName;
-      console.log("View loaded successfully:", viewName);
-    } else {
-      mainContent.innerHTML =
-        '<div class="card"><p>Ansicht konnte nicht geladen werden.</p></div>';
+    if (!this.views[viewName]) {
+      console.error("View not available:", viewName);
+      return;
     }
-  } catch (error) {
-    console.error("Error showing view:", error);
-    const mainContent = document.getElementById("mainContent");
-    if (mainContent) {
-      mainContent.innerHTML = `<div class="card"><p style="color: red;">Fehler beim Laden der Ansicht: ${error.message}</p></div>`;
+
+    try {
+      console.log("Showing view:", viewName);
+
+      // Update tab selection
+      document.querySelectorAll(".tab-item").forEach((item) => {
+        item.classList.remove("active");
+        if (item.getAttribute("data-tab") === viewName) {
+          item.classList.add("active");
+        }
+      });
+
+      // Clear navigation buttons
+      const navButtons = document.getElementById("navButtons");
+      if (navButtons) {
+        navButtons.innerHTML = "";
+      }
+
+      // Update content
+      const mainContent = document.getElementById("mainContent");
+      if (!mainContent) {
+        console.error("Main content element not found");
+        return;
+      }
+
+      mainContent.innerHTML = "";
+
+      const viewContent = this.views[viewName].render();
+      if (viewContent) {
+        mainContent.appendChild(viewContent);
+        this.currentView = viewName;
+        console.log("View loaded successfully:", viewName);
+      } else {
+        mainContent.innerHTML =
+          '<div class="card"><p>Ansicht konnte nicht geladen werden.</p></div>';
+      }
+    } catch (error) {
+      console.error("Error showing view:", error);
+      const mainContent = document.getElementById("mainContent");
+      if (mainContent) {
+        mainContent.innerHTML = `<div class="card"><p style="color: red;">Fehler beim Laden der Ansicht: ${error.message}</p></div>`;
+      }
     }
   }
-}
 
   showError(message) {
     const mainContent = document.getElementById("mainContent");
     if (mainContent) {
       mainContent.innerHTML = `
-			<div class="card" style="text-align: center;">
-			<h3 style="color: red;">Fehler</h3>
-			<p>${message}</p>
-			<button class="btn btn-primary" onclick="location.reload()">Neu laden</button>
-			</div>
-			`;
+        <div class="card" style="text-align: center;">
+          <h3 style="color: red;">Fehler</h3>
+          <p>${message}</p>
+          <button class="btn btn-primary" onclick="location.reload()">Neu laden</button>
+        </div>
+      `;
     }
   }
 
@@ -165,17 +203,17 @@ function initApp() {
     const mainContent = document.getElementById("mainContent");
     if (mainContent) {
       mainContent.innerHTML = `
-			<div class="card" style="text-align: center; margin-top: 50px;">
-			<h3 style="color: red;">Fehler beim Laden</h3>
-			<p>${error.message}</p>
-			<p style="font-size: 14px; color: #666; margin-top: 16px;">
-			Überprüfen Sie die Browser-Konsole für weitere Details.
-			</p>
-			<button class="btn btn-primary" onclick="location.reload()" style="margin-top: 16px;">
-			Neu laden
-			</button>
-			</div>
-			`;
+        <div class="card" style="text-align: center; margin-top: 50px;">
+          <h3 style="color: red;">Fehler beim Laden</h3>
+          <p>${error.message}</p>
+          <p style="font-size: 14px; color: #666; margin-top: 16px;">
+            Überprüfen Sie die Browser-Konsole für weitere Details.
+          </p>
+          <button class="btn btn-primary" onclick="location.reload()" style="margin-top: 16px;">
+            Neu laden
+          </button>
+        </div>
+      `;
     }
   }
 }
@@ -286,11 +324,27 @@ function showUpdateAvailable(newWorker) {
   }, 10000);
 }
 
+// Debug-Test beim Laden
+console.log("=== FINAL DEBUG CHECK ===");
+console.log("Available classes:");
+console.log("- OverviewView:", typeof OverviewView !== 'undefined' ? "✓" : "✗");
+console.log("- EntryView:", typeof EntryView !== 'undefined' ? "✓" : "✗");
+console.log("- TeamsView:", typeof TeamsView !== 'undefined' ? "✓" : "✗");
+console.log("- SettingsView:", typeof SettingsView !== 'undefined' ? "✓" : "✗");
+console.log("- labelPrinter:", typeof labelPrinter !== 'undefined' ? "✓" : "✗");
+console.log("- window.labelPrinter:", typeof window.labelPrinter !== 'undefined' ? "✓" : "✗");
+console.log("- storage:", typeof storage !== 'undefined' ? "✓" : "✗");
+console.log("- UIUtils:", typeof UIUtils !== 'undefined' ? "✓" : "✗");
+
 // Offline/Online Status anzeigen
 window.addEventListener('online', () => {
-  UIUtils.showSuccessMessage('🌐 Verbindung wiederhergestellt');
+  if (typeof UIUtils !== 'undefined') {
+    UIUtils.showSuccessMessage('🌐 Verbindung wiederhergestellt');
+  }
 });
 
 window.addEventListener('offline', () => {
-  UIUtils.showSuccessMessage('📵 Offline-Modus aktiviert');
+  if (typeof UIUtils !== 'undefined') {
+    UIUtils.showSuccessMessage('📵 Offline-Modus aktiviert');
+  }
 });
