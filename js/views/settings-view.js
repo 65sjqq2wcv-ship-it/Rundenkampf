@@ -461,9 +461,7 @@ class SettingsView {
 
   // GEÄNDERT: setupLabelSettingsEventListeners für Input-Felder
   setupLabelSettingsEventListeners() {
-    console.log(
-      "Setting up label settings event listeners (INPUT FIELDS ONLY)...",
-    );
+    console.log("Setting up FIXED label settings event listeners...");
 
     const inputConfigs = [
       {
@@ -542,46 +540,30 @@ class SettingsView {
           }
         }
 
-        // Input-Validierung
-        input.addEventListener("input", (e) => {
-          let value = parseFloat(e.target.value);
-          if (isNaN(value)) return;
-          if (value < config.min) e.target.value = config.min;
-          if (value > config.max) e.target.value = config.max;
-          if (config.decimals === 0) {
-            e.target.value = Math.round(parseFloat(e.target.value));
-          }
-        });
+        // ENTFERNT: Die problematischen input und keypress Event-Listener
 
-        // Verhindere ungültige Zeichen
-        input.addEventListener("keypress", (e) => {
-          const char = String.fromCharCode(e.which);
-          const currentValue = e.target.value;
-
-          if (
-            !/[0-9.]/.test(char) &&
-            ![8, 9, 13, 27, 46, 37, 38, 39, 40].includes(e.which)
-          ) {
-            e.preventDefault();
-            return;
-          }
-
-          if (
-            char === "." &&
-            (currentValue.includes(".") || config.decimals === 0)
-          ) {
-            e.preventDefault();
-            return;
-          }
-        });
-
-        // Formatierung beim Verlassen
+        // NUR Validierung beim Verlassen des Feldes (blur)
         input.addEventListener("blur", (e) => {
-          const value = parseFloat(e.target.value);
-          if (!isNaN(value)) {
-            e.target.value =
-              config.decimals === 0 ? Math.round(value) : value.toFixed(1);
+          let value = parseFloat(e.target.value);
+
+          // Falls ungültiger Wert, setze auf Minimum
+          if (isNaN(value) || value < config.min) {
+            value = config.min;
+          } else if (value > config.max) {
+            value = config.max;
           }
+
+          // Formatiere den Wert
+          e.target.value =
+            config.decimals === 0 ? Math.round(value) : value.toFixed(1);
+        });
+
+        // Optional: Wert beim Focus selektieren für einfacheres Überschreiben
+        input.addEventListener("focus", (e) => {
+          // Kurze Verzögerung, damit der Focus-Event korrekt funktioniert
+          setTimeout(() => {
+            e.target.select();
+          }, 50);
         });
       }
     });
