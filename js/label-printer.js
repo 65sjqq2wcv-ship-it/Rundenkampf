@@ -173,45 +173,50 @@ class LabelPrinter {
   // =================================================================
 
   prepareLabelData(filteredTeams, filteredStandaloneShooters) {
-    const labelData = [];
-    const settings = storage.getLabelSettings();
+  const labelData = [];
+  const settings = storage.getLabelSettings();
 
-    console.log("Label settings:", settings);
+  console.log("=== PREPARE LABEL DATA ===");
+  console.log("Teams:", filteredTeams.length);
+  console.log("Standalone shooters:", filteredStandaloneShooters.length);
+  console.log("Copies per label:", settings.copies);
 
-    // Teams: Mannschaftsname + Schützennamen
-    filteredTeams.forEach((team) => {
-      console.log(
-        `Processing team: ${team.name} with ${team.shooters.length} shooters`,
-      );
-      team.shooters.forEach((shooter) => {
+  // Teams: Mannschaftsname + Schützennamen
+  filteredTeams.forEach((team) => {
+    console.log(`Processing team: ${team.name} with ${team.shooters.length} shooters`);
+    team.shooters.forEach((shooter) => {
+      if (shooter && shooter.name && shooter.name.trim()) { // NUR gültige Schützen
         for (let i = 0; i < settings.copies; i++) {
           labelData.push({
             type: "team",
-            teamName: team.name,
-            shooterName: shooter.name,
-            displayText1: team.name,
-            displayText2: shooter.name,
+            teamName: team.name.trim(),
+            shooterName: shooter.name.trim(),
+            displayText1: team.name.trim(),
+            displayText2: shooter.name.trim(),
           });
         }
-      });
+      }
     });
+  });
 
-    // Einzelschützen: Nur Name
-    filteredStandaloneShooters.forEach((shooter) => {
+  // Einzelschützen: Nur Name
+  filteredStandaloneShooters.forEach((shooter) => {
+    if (shooter && shooter.name && shooter.name.trim()) { // NUR gültige Schützen
       console.log(`Processing standalone shooter: ${shooter.name}`);
       for (let i = 0; i < settings.copies; i++) {
         labelData.push({
           type: "standalone",
-          shooterName: shooter.name,
-          displayText1: shooter.name,
+          shooterName: shooter.name.trim(),
+          displayText1: shooter.name.trim(),
           displayText2: "",
         });
       }
-    });
+    }
+  });
 
-    console.log(`Prepared ${labelData.length} labels`);
-    return labelData;
-  }
+  console.log(`=== RESULT: ${labelData.length} valid labels prepared ===`);
+  return labelData;
+}
 
   createLabelHTML(labelData, cssStyles) {
     const settings = storage.getLabelSettings();
@@ -278,79 +283,80 @@ class LabelPrinter {
   // =================================================================
 
   createLabelGrid(labels, settings) {
-    // Filtere alle echten Inhalte (keine leeren Labels)
-    const contentLabels = labels.filter((label) => label.type !== "empty");
+  // NUR echte Labels (keine leeren)
+  const contentLabels = labels.filter((label) => 
+    label && 
+    label.type !== "empty" && 
+    (label.displayText1 || label.displayText2)
+  );
 
-    if (contentLabels.length === 0) {
-      console.log("No content labels found");
-      return ""; // Gib gar nichts zurück wenn keine Inhalte
-    }
+  console.log("=== CREATE LABEL GRID ===");
+  console.log("Input labels:", labels.length);
+  console.log("Content labels after filtering:", contentLabels.length);
+  console.log("Settings - Columns:", settings.columns, "Rows:", settings.rows);
 
-    let html = "";
-    let labelIndex = 0;
-    let skipRemaining = settings.skipLabels;
-
-    const labelsPerPage = settings.columns * settings.rows;
-    const totalLabels = contentLabels.length + skipRemaining;
-    const totalPages = Math.ceil(totalLabels / labelsPerPage);
-
-    console.log(
-      `Content labels: ${contentLabels.length}, Skip: ${skipRemaining}, Pages needed: ${totalPages}`,
-    );
-
-    for (let page = 0; page < totalPages; page++) {
-      // Prüfe ob diese Seite Inhalt haben wird
-      let pageWillHaveContent = false;
-      let tempLabelIndex = labelIndex;
-      let tempSkipRemaining = skipRemaining;
-
-      for (let i = 0; i < labelsPerPage; i++) {
-        if (tempSkipRemaining > 0) {
-          tempSkipRemaining--;
-        } else if (tempLabelIndex < contentLabels.length) {
-          pageWillHaveContent = true;
-          tempLabelIndex++;
-        }
-      }
-
-      // Überspringe Seiten ohne Inhalt
-      if (!pageWillHaveContent) {
-        console.log(`Skipping empty page ${page + 1}`);
-        continue;
-      }
-
-      html += '<div class="label-page">';
-
-      for (let row = 0; row < settings.rows; row++) {
-        html += '<div class="label-row">';
-
-        for (let col = 0; col < settings.columns; col++) {
-          if (skipRemaining > 0) {
-            // Übersprungene Position
-            html += '<div class="label empty-label"></div>';
-            skipRemaining--;
-          } else if (labelIndex < contentLabels.length) {
-            // Echter Inhalt
-            const label = contentLabels[labelIndex];
-            html += this.createSingleLabel(label, settings);
-            labelIndex++;
-          } else {
-            // Leere Position zum Auffüllen
-            html += '<div class="label empty-label"></div>';
-          }
-        }
-
-        html += "</div>";
-      }
-
-      html += "</div>";
-    }
-
-    console.log(
-      `Generated ${totalPages} pages with content, processed ${labelIndex} labels`,
-    );
-    return html;
+  if (contentLabels.length === 0) {
+    console.log("No content labels found");
+    return "";
   }
+
+  const labelsPerPage = settings.columns * settings.rows;
+  const totalPages = Math.ceil(contentLabels.length / labelsPerPage);
+  
+  console.log(`Labels per page: ${labelsPerPage}`);
+  console.log(`Total pages needed: ${totalPages}`);
+  console.log(`Content labels: ${contentLabels.length}`);
+
+  let html = "";
+  let labelIndex = 0;
+
+  // SICHERE SCHLEIFE - nur für Seiten mit garantiertem Inhalt
+  for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+    const labelsOnThisPage = Math.min(labelsPerPage, contentLabels.length - labelIndex);
+    
+    console.log(`Creating page ${pageIndex + 1}/${totalPages} with ${labelsOnThisPage} labels`);
+    
+    if (labelsOnThisPage <= 0) {
+      console.log("Skipping page with no labels");
+      break;
+    }
+
+    html += '<div class="label-page">\n';
+    
+    let pagePosition = 0;
+    
+    // Zeilen erstellen
+    for (let row = 0; row < settings.rows; row++) {
+      html += '  <div class="label-row">\n';
+      
+      // Spalten erstellen
+      for (let col = 0; col < settings.columns; col++) {
+        if (labelIndex < contentLabels.length && pagePosition < labelsOnThisPage) {
+          // Echtes Label
+          const label = contentLabels[labelIndex];
+          html += this.createSingleLabel(label, settings);
+          labelIndex++;
+        } else {
+          // Leerer Platz zum Auffüllen
+          html += '    <div class="label empty-label"></div>\n';
+        }
+        pagePosition++;
+      }
+      
+      html += '  </div>\n';
+      
+      // Wenn alle Labels dieser Seite verarbeitet sind, breche ab
+      if (pagePosition >= labelsOnThisPage) {
+        break;
+      }
+    }
+    
+    html += '</div>\n';
+  }
+
+  console.log(`=== GRID COMPLETE: ${totalPages} pages created, ${labelIndex} labels processed ===`);
+  return html;
+}
 
   // =================================================================
   // EINZELNES LABEL ERSTELLEN
@@ -411,184 +417,208 @@ class LabelPrinter {
   // =================================================================
 
   getFallbackCSS() {
-    const settings = storage.getLabelSettings();
+  const settings = storage.getLabelSettings();
 
-    const pageWidth =
-      210.0 - (settings.marginLeft || 0.0) - (settings.marginRight || 0.0);
-    const availableWidth =
-      pageWidth - (settings.columns - 1) * (settings.labelSpacing || 0.0);
-    const labelWidth = Math.min(
-      settings.labelWidth,
-      availableWidth / settings.columns,
-    );
+  const pageWidth =
+    210.0 - (settings.marginLeft || 0.0) - (settings.marginRight || 0.0);
+  const availableWidth =
+    pageWidth - (settings.columns - 1) * (settings.labelSpacing || 0.0);
+  const labelWidth = Math.min(
+    settings.labelWidth,
+    availableWidth / settings.columns,
+  );
 
-    // NEU: Rahmen-Stil basierend auf Einstellung
-    const borderStyle = settings.showBorders ? '1px solid #ccc' : 'none';
+  // Rahmen-Stil basierend auf Einstellung
+  const borderStyle = settings.showBorders ? '1px solid #ccc' : 'none';
 
-    return `
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  return `
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
+  body {
+    font-family: 'Verdana', 'Calibri', 'Segoe UI', Arial, sans-serif;
+    background: white;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+    text-rendering: optimizeLegibility;
+  }
+
+  .label-container {
+    width: 210mm;
+    margin: 0 auto;
+    background: white;
+    padding-top: ${(settings.marginTop || 0.0).toFixed(1)}mm;
+    padding-bottom: ${(settings.marginBottom || 0.0).toFixed(1)}mm;
+    padding-left: ${(settings.marginLeft || 0.0).toFixed(1)}mm;
+    padding-right: ${(settings.marginRight || 0.0).toFixed(1)}mm;
+  }
+
+  .label-page {
+    width: 100%;
+    background: white;
+    min-height: 10mm;
+  }
+
+  .label-page:not(:last-child) {
+    page-break-after: always;
+  }
+
+  /* NEU: Robuste Behandlung leerer Seiten */
+  .label-page:empty {
+    display: none !important;
+    height: 0 !important;
+    page-break-after: avoid !important;
+  }
+
+  /* NEU: Verhindere Seiten die nur leere Labels haben */
+  .label-page:not(:has(.label:not(.empty-label))) {
+    display: none !important;
+    height: 0 !important;
+    page-break-after: avoid !important;
+  }
+
+  /* NEU: Verhindere Page-Breaks nach der letzten Seite */
+  .label-page:last-of-type {
+    page-break-after: avoid !important;
+  }
+
+  .label-row {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    margin-bottom: ${(settings.labelSpacing || 0.0).toFixed(1)}mm;
+    gap: ${(settings.labelSpacing || 0.0).toFixed(1)}mm;
+  }
+
+  .label {
+    width: ${labelWidth.toFixed(1)}mm;
+    height: ${settings.labelHeight.toFixed(1)}mm;
+    border: ${borderStyle};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    break-inside: avoid;
+    flex-shrink: 0;
+  }
+
+  .empty-label {
+    border: none;
+    background: transparent;
+  }
+
+  .label-content {
+    padding: 1.5mm;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1mm;
+  }
+
+  .label-text {
+    width: 100%;
+    text-align: center;
+    
+    /* INTELLIGENTER TEXTUMBRUCH */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: normal;
+    hyphens: none;
+    
+    /* MEHRZEILIGKEIT ERMÖGLICHEN */
+    white-space: normal;
+    line-height: 1.2;
+    
+    /* SCHRIFT-OPTIMIERUNG */
+    text-rendering: optimizeLegibility;
+    -webkit-font-feature-settings: "liga" 1, "kern" 1;
+    font-feature-settings: "liga" 1, "kern" 1;
+    letter-spacing: 0em;
+    
+    /* OVERFLOW HANDLING */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
+  .label-text.primary {
+    font-size: ${this.calculatePrimaryFontSize(settings).toFixed(1)}pt;
+    font-weight: 600;
+    color: #000;
+    margin-bottom: 0.5mm;
+    
+    /* PRIMÄRER TEXT: MAXIMAL 2 ZEILEN */
+    -webkit-line-clamp: 2;
+    max-height: ${(this.calculatePrimaryFontSize(settings) * 1.2 * 2 * 1.33).toFixed(1)}px;
+  }
+
+  .label-text.secondary {
+    font-size: ${this.calculateSecondaryFontSize(settings).toFixed(1)}pt;
+    font-weight: 500;
+    color: #000;
+    
+    /* SEKUNDÄRER TEXT: MAXIMAL 2 ZEILEN */
+    -webkit-line-clamp: 2;
+    max-height: ${(this.calculateSecondaryFontSize(settings) * 1.2 * 2 * 1.33).toFixed(1)}px;
+  }
+
+  @media print {
     body {
-      font-family: 'Verdana', 'Calibri', 'Segoe UI', Arial, sans-serif;
-      background: white;
-      margin: 0;
-      padding: 0;
-      font-size: 12px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
       -webkit-font-smoothing: subpixel-antialiased;
       -moz-osx-font-smoothing: auto;
-      text-rendering: optimizeLegibility;
+      text-rendering: geometricPrecision;
     }
-
-    .label-container {
-      width: 210mm;
-      margin: 0 auto;
-      background: white;
-      padding-top: ${(settings.marginTop || 0.0).toFixed(1)}mm;
-      padding-bottom: ${(settings.marginBottom || 0.0).toFixed(1)}mm;
-      padding-left: ${(settings.marginLeft || 0.0).toFixed(1)}mm;
-      padding-right: ${(settings.marginRight || 0.0).toFixed(1)}mm;
-    }
-
-    .label-page {
-      width: 100%;
-      background: white;
-      min-height: 10mm;
-    }
-
+    
     .label-page:not(:last-child) {
       page-break-after: always;
     }
-
+    
+    /* NEU: Verstärkte Behandlung leerer Seiten beim Drucken */
     .label-page:empty {
-      display: none;
+      display: none !important;
+      height: 0 !important;
+      page-break-after: avoid !important;
     }
-
-    .label-row {
-      display: flex;
-      width: 100%;
-      justify-content: flex-start;
-      margin-bottom: ${(settings.labelSpacing || 0.0).toFixed(1)}mm;
-      gap: ${(settings.labelSpacing || 0.0).toFixed(1)}mm;
+    
+    .label-page:not(:has(.label:not(.empty-label))) {
+      display: none !important;
+      height: 0 !important;
+      page-break-after: avoid !important;
     }
 
     .label {
-      width: ${labelWidth.toFixed(1)}mm;
-      height: ${settings.labelHeight.toFixed(1)}mm;
-      border: ${borderStyle};
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: white;
       break-inside: avoid;
-      flex-shrink: 0;
-    }
-
-    .empty-label {
-      border: none;
-      background: transparent;
-    }
-
-    .label-content {
-      padding: 1.5mm;
-      text-align: center;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 1mm;
+      page-break-inside: avoid;
     }
 
     .label-text {
-      width: 100%;
-      text-align: center;
-      
-      /* INTELLIGENTER TEXTUMBRUCH */
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      word-break: normal;
-      hyphens: none;
-      
-      /* MEHRZEILIGKEIT ERMÖGLICHEN */
-      white-space: normal;
-      line-height: 1.2;
-      
-      /* SCHRIFT-OPTIMIERUNG */
-      text-rendering: optimizeLegibility;
-      -webkit-font-feature-settings: "liga" 1, "kern" 1;
-      font-feature-settings: "liga" 1, "kern" 1;
-      letter-spacing: 0em;
-      
-      /* OVERFLOW HANDLING */
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
+      text-rendering: geometricPrecision;
+      -webkit-font-smoothing: antialiased;
     }
-
+    
     .label-text.primary {
-      font-size: ${this.calculatePrimaryFontSize(settings).toFixed(1)}pt;
       font-weight: 600;
-      color: #000;
-      margin-bottom: 0.5mm;
-      
-      /* PRIMÄRER TEXT: MAXIMAL 2 ZEILEN */
-      -webkit-line-clamp: 2;
-      max-height: ${(this.calculatePrimaryFontSize(settings) * 1.2 * 2 * 1.33).toFixed(1)}px;
     }
-
+    
     .label-text.secondary {
-      font-size: ${this.calculateSecondaryFontSize(settings).toFixed(1)}pt;
       font-weight: 500;
-      color: #000;
-      
-      /* SEKUNDÄRER TEXT: MAXIMAL 2 ZEILEN */
-      -webkit-line-clamp: 2;
-      max-height: ${(this.calculateSecondaryFontSize(settings) * 1.2 * 2 * 1.33).toFixed(1)}px;
     }
-
-    @media print {
-      body {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-        -webkit-font-smoothing: subpixel-antialiased;
-        -moz-osx-font-smoothing: auto;
-        text-rendering: geometricPrecision;
-      }
-      
-      .label-page:not(:last-child) {
-        page-break-after: always;
-      }
-      
-      .label-page:empty {
-        display: none !important;
-      }
-
-      .label {
-        break-inside: avoid;
-        page-break-inside: avoid;
-      }
-
-      .label-text {
-        text-rendering: geometricPrecision;
-        -webkit-font-smoothing: antialiased;
-      }
-      
-      .label-text.primary {
-        font-weight: 600;
-      }
-      
-      .label-text.secondary {
-        font-weight: 500;
-      }
-    }
-  `;
   }
+`;
+}
 
   // =================================================================
   // SCHRIFTGRÖSSEN-BERECHNUNG
@@ -630,39 +660,47 @@ class LabelPrinter {
   previewLabels() {
     try {
       console.log("previewLabels() called");
-      
+
       const filteredTeams = storage.getFilteredTeams();
-      const filteredStandaloneShooters = storage.getFilteredStandaloneShooters();
-      
+      const filteredStandaloneShooters =
+        storage.getFilteredStandaloneShooters();
+
       console.log("Filtered teams:", filteredTeams.length);
-      console.log("Filtered standalone shooters:", filteredStandaloneShooters.length);
-      
+      console.log(
+        "Filtered standalone shooters:",
+        filteredStandaloneShooters.length,
+      );
+
       const labelData = this.prepareLabelData(
         filteredTeams,
         filteredStandaloneShooters,
       );
-      
+
       console.log("Label data prepared:", labelData.length, "labels");
-      
+
       if (labelData.length === 0) {
-        UIUtils.showError("Keine Daten für Vorschau verfügbar. Fügen Sie Teams oder Einzelschützen hinzu.");
+        UIUtils.showError(
+          "Keine Daten für Vorschau verfügbar. Fügen Sie Teams oder Einzelschützen hinzu.",
+        );
         return;
       }
-      
+
       // CSS immer frisch laden für Vorschau
       const css = this.getFallbackCSS();
       const html = this.createLabelHTML(labelData, css);
-      
+
       console.log("HTML created, opening preview window");
 
       // Öffne in neuem Fenster
       const newWindow = window.open("", "_blank", "width=800,height=600");
-      
+
       if (!newWindow) {
-        UIUtils.showError("Popup-Blocker verhindert Vorschau. Bitte erlauben Sie Popups für diese Seite.");
+        UIUtils.showError(
+          "Popup-Blocker verhindert Vorschau. Bitte erlauben Sie Popups für diese Seite.",
+        );
         return;
       }
-      
+
       newWindow.document.write(html);
       newWindow.document.close();
 
@@ -716,10 +754,10 @@ class LabelPrinter {
 // =================================================================
 
 // Prüfe ob labelPrinter bereits existiert
-if (typeof window.labelPrinter === 'undefined') {
+if (typeof window.labelPrinter === "undefined") {
   // Globale Instanz erstellen
   window.labelPrinter = new LabelPrinter();
-  
+
   // Globale Funktionen
   window.printLabels = function () {
     window.labelPrinter.printLabels();

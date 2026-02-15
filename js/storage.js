@@ -556,13 +556,17 @@ class Storage {
     return this.settings.clubLogo || null;
   }
 
-  deleteLogo() {
-    if (this.settings.clubLogo) {
-      delete this.settings.clubLogo;
+  // NEU: Logo löschen - Diese Methode fehlte!
+  removeLogo() {
+    try {
+      this.settings.clubLogo = null;
       this.save();
+      console.log("Logo removed successfully");
       return true;
+    } catch (error) {
+      console.error("Error removing logo:", error);
+      throw new Error("Logo löschen fehlgeschlagen: " + error.message);
     }
-    return false;
   }
 
   // NEU: Filter-Management für Einzelschützen
