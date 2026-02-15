@@ -307,20 +307,15 @@ class SettingsView {
     </div>
     
     <div class="form-row">
-      <label style="display: block; margin-bottom: 4px; font-weight: 500;">
-        Anzahl Kopien
-      </label>
-      <input type="number" id="copiesInput" min="1" max="5" step="1" 
+          <label style="display: block; margin-bottom: 4px; font-weight: 500;">
+            Anzahl Kopien
+          </label>
+          <input type="number" id="copiesInput" min="1" max="5" step="1" 
              value="${labelSettings.copies}" 
              style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
-    </div>
-</div>
-      </div>
-
-      <div class="form-row">
-        <button class="btn btn-secondary" id="previewLabelsBtn" style="width: 100%; margin-bottom: 8px;">
-            🔍 Vorschau
-       </button>
+        </div>
+     </div>
+     
      </div>
      <div class="form-row">
        <button class="btn btn-primary" id="saveLabelSettingsBtn" style="width: 100%;">
@@ -595,27 +590,6 @@ class SettingsView {
     const bordersCheckbox = document.getElementById("showBordersCheckbox");
     if (bordersCheckbox) {
       bordersCheckbox.checked = currentSettings.showBorders || false;
-    }
-
-    // Vorschau Button
-    const previewBtn = document.getElementById("previewLabelsBtn");
-    if (previewBtn) {
-      previewBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-
-        const printer = window.labelPrinter || labelPrinter;
-
-        if (printer && typeof printer.previewLabels === "function") {
-          try {
-            printer.previewLabels();
-          } catch (error) {
-            console.error("Error calling previewLabels:", error);
-            UIUtils.showError("Fehler bei der Vorschau: " + error.message);
-          }
-        } else {
-          UIUtils.showError("Label-Printer noch nicht verfügbar.");
-        }
-      });
     }
 
     // Speichern Button
