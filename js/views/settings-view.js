@@ -73,10 +73,10 @@ class SettingsView {
       <div class="form-section">
         <div class="form-row">
           <select id="competitionTypeSelect" class="form-input">
-            <option value="$${CompetitionType.PRAEZISION_DUELL}" $${storage.selectedCompetitionType === CompetitionType.PRAEZISION_DUELL ? "selected" : ""}>
+            <option value="${CompetitionType.PRAEZISION_DUELL}" ${storage.selectedCompetitionType === CompetitionType.PRAEZISION_DUELL ? "selected" : ""}>
               ${CompetitionType.PRAEZISION_DUELL}
             </option>
-            <option value="$${CompetitionType.ANNEX_SCHEIBE}" $${storage.selectedCompetitionType === CompetitionType.ANNEX_SCHEIBE ? "selected" : ""}>
+            <option value="${CompetitionType.ANNEX_SCHEIBE}" ${storage.selectedCompetitionType === CompetitionType.ANNEX_SCHEIBE ? "selected" : ""}>
               ${CompetitionType.ANNEX_SCHEIBE}
             </option>
           </select>
@@ -638,7 +638,7 @@ class SettingsView {
           key !== "showBorders" &&
           (isNaN(value) || value === null || value === undefined)
         ) {
-          throw new Error(`Ungültiger Wert für $${key}: $${value}`);
+          throw new Error(`Ungültiger Wert für ${key}: ${value}`);
         }
       }
 
