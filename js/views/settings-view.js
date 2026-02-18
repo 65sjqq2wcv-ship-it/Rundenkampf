@@ -1029,6 +1029,10 @@ class SettingsView {
     }
   }
 
+  // =================================================================
+  // ERWEITERTE IMPORT/EXPORT FUNKTIONEN MIT MERGE
+  // =================================================================
+
   showImportSettings() {
     const content = document.createElement("div");
     content.innerHTML = `
@@ -1036,26 +1040,52 @@ class SettingsView {
       <div class="form-section-header">Wiederherstellen eines Backup</div>
       <div class="form-row">
         <p style="margin-bottom: 12px; font-size: 14px; color: #666;">
-          Wählen Sie eine zuvor exportierte Backup-Datei aus.<br>
-          <strong>Achtung:</strong> Bei einem Restore werden ALLE aktuellen Daten überschrieben!
+          Wählen Sie eine zuvor exportierte Backup-Datei aus.
         </p>
         <input type="file" id="settingsFileInput" accept=".json" class="form-input" style="padding: 8px;">
+      </div>
+      
+      <!-- NEU: Import-Modi -->
+      <div class="form-row" style="margin-top: 16px;">
+        <div style="font-weight: 600; margin-bottom: 8px;">Import-Modus:</div>
+        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+          <input type="radio" name="importMode" value="replace" checked>
+          <div>
+            <strong>🔄 Vollständiger Restore</strong><br>
+            <small style="color: #666;">Alle aktuellen Daten werden überschrieben</small>
+          </div>
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px;">
+          <input type="radio" name="importMode" value="merge">
+          <div>
+            <strong>🔀 Intelligenter Merge</strong><br>
+            <small style="color: #666;">Neue Daten hinzufügen, bestehende behalten</small>
+          </div>
+        </label>
       </div>
     </div>
     
     <div class="form-section">
       <div class="form-section-header">Vorschau</div>
-      <div id="settingsPreview" style="max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; background: #f8f9fa; padding: 8px; border-radius: 4px;">
+      <div id="settingsPreview" style="max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; background: #f8f9fa; padding: 8px; border-radius: 4px;">
         Keine Datei ausgewählt
+      </div>
+    </div>
+    
+    <!-- NEU: Merge-Details -->
+    <div class="form-section" id="mergeDetails" style="display: none;">
+      <div class="form-section-header">🔀 Merge-Vorschau</div>
+      <div id="mergePreview" style="max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; background: #e8f5e8; padding: 8px; border-radius: 4px; border: 1px solid #4caf50;">
+        <!-- Wird dynamisch gefüllt -->
       </div>
     </div>
   `;
 
-    const modal = new ModalComponent("Restore", content);
+    const modal = new ModalComponent("Import / Merge", content);
 
     modal.addAction("Abbrechen", null, false, false);
     modal.addAction(
-      "Restore",
+      "Importieren",
       () => {
         this.processSettingsImport();
       },
@@ -1065,14 +1095,32 @@ class SettingsView {
 
     modal.show();
 
-    // Setup file input handler
+    // Setup event handlers
     setTimeout(() => {
       const fileInput = document.getElementById("settingsFileInput");
+      const importModeRadios = document.querySelectorAll('input[name="importMode"]');
+
       if (fileInput) {
         fileInput.addEventListener("change", (e) => {
           this.previewSettingsFile(e.target.files[0]);
         });
       }
+
+      // Radio button handler für Merge-Details
+      importModeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          const mergeDetailsSection = document.getElementById('mergeDetails');
+          if (radio.value === 'merge' && radio.checked) {
+            mergeDetailsSection.style.display = 'block';
+            // Merge-Vorschau neu generieren wenn Datei bereits gewählt
+            if (fileInput.files[0]) {
+              this.generateMergePreview(fileInput.files[0]);
+            }
+          } else {
+            mergeDetailsSection.style.display = 'none';
+          }
+        });
+      });
     }, 100);
   }
 
@@ -1089,19 +1137,12 @@ class SettingsView {
 
         // Export-Informationen
         if (settingsData.exportDate) {
-          const exportDate = new Date(settingsData.exportDate).toLocaleString(
-            "de-DE",
-          );
+          const exportDate = new Date(settingsData.exportDate).toLocaleString("de-DE");
           preview += `📅 <strong>Export-Datum:</strong> ${exportDate}<br>`;
         }
 
         if (settingsData.exportVersion) {
           preview += `🏷️ <strong>Version:</strong> ${settingsData.exportVersion}<br>`;
-        }
-
-        // NEU: Label-Einstellungen Preview
-        if (settingsData.labelSettings) {
-          preview += `🏷️ <strong>Label-Einstellungen:</strong> Enthalten<br>`;
         }
 
         // Backup-Typ erkennen
@@ -1111,29 +1152,17 @@ class SettingsView {
           preview += `⚙️ <strong>Backup-Typ:</strong> Nur Einstellungen<br><br>`;
         }
 
-        // TEAMS UND ERGEBNISSE (NEU)
+        // TEAMS UND ERGEBNISSE
         if (settingsData.teams && settingsData.teams.length > 0) {
           preview += `👥 <strong>Teams:</strong> ${settingsData.teams.length} Einträge<br>`;
         }
 
-        if (
-          settingsData.standaloneShooters &&
-          settingsData.standaloneShooters.length > 0
-        ) {
+        if (settingsData.standaloneShooters && settingsData.standaloneShooters.length > 0) {
           preview += `👤 <strong>Einzelschützen:</strong> ${settingsData.standaloneShooters.length} Einträge<br>`;
         }
 
         if (settingsData.results && settingsData.results.length > 0) {
           preview += `🎯 <strong>Ergebnisse:</strong> ${settingsData.results.length} Einträge<br>`;
-        }
-
-        // Trennlinie wenn Daten vorhanden sind
-        if (
-          settingsData.teams ||
-          settingsData.standaloneShooters ||
-          settingsData.results
-        ) {
-          preview += `<br>`;
         }
 
         // EINSTELLUNGEN
@@ -1145,18 +1174,11 @@ class SettingsView {
           preview += `📋 <strong>Aktuelle Disziplin:</strong> ${settingsData.selectedDiscipline}<br>`;
         }
 
-        if (
-          settingsData.availableDisciplines &&
-          settingsData.availableDisciplines.length > 0
-        ) {
+        if (settingsData.availableDisciplines && settingsData.availableDisciplines.length > 0) {
           preview += `📝 <strong>Disziplinen:</strong> ${settingsData.availableDisciplines.length} Einträge<br>`;
         }
 
-        // Waffen-Vorschau
-        if (
-          settingsData.availableWeapons &&
-          settingsData.availableWeapons.length > 0
-        ) {
+        if (settingsData.availableWeapons && settingsData.availableWeapons.length > 0) {
           preview += `🔫 <strong>Waffen:</strong> ${settingsData.availableWeapons.length} Einträge<br>`;
         }
 
@@ -1164,19 +1186,21 @@ class SettingsView {
           preview += `🖼️ <strong>Vereinslogo:</strong> Enthalten<br>`;
         }
 
-        // Filter-Einstellungen (NEU)
-        if (settingsData.visibleTeamIds) {
-          preview += `🔍 <strong>Team-Filter:</strong> ${settingsData.visibleTeamIds.length} Teams sichtbar<br>`;
-        }
-
-        if (settingsData.visibleShooterIds) {
-          preview += `🔍 <strong>Schützen-Filter:</strong> ${settingsData.visibleShooterIds.length} Einzelschützen sichtbar<br>`;
+        if (settingsData.labelSettings) {
+          preview += `🏷️ <strong>Label-Einstellungen:</strong> Enthalten<br>`;
         }
 
         const previewDiv = document.getElementById("settingsPreview");
         if (previewDiv) {
           previewDiv.innerHTML = preview;
         }
+
+        // NEU: Merge-Vorschau generieren falls Merge-Modus aktiv
+        const mergeMode = document.querySelector('input[name="importMode"]:checked');
+        if (mergeMode && mergeMode.value === 'merge') {
+          this.generateMergePreview(file);
+        }
+
       } catch (error) {
         const previewDiv = document.getElementById("settingsPreview");
         if (previewDiv) {
@@ -1188,9 +1212,132 @@ class SettingsView {
     reader.readAsText(file, "UTF-8");
   }
 
+  // NEU: Merge-Vorschau generieren
+  generateMergePreview(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target.result;
+        const backupData = JSON.parse(content);
+        const mergeAnalysis = this.analyzeMerge(backupData);
+
+        let mergePreview = "<strong>🔀 Merge-Analyse:</strong><br><br>";
+
+        if (mergeAnalysis.newTeams.length > 0) {
+          mergePreview += `✅ <strong>Neue Teams:</strong> ${mergeAnalysis.newTeams.length}<br>`;
+          mergeAnalysis.newTeams.slice(0, 3).forEach(team => {
+            mergePreview += `&nbsp;&nbsp;&nbsp;• ${team}<br>`;
+          });
+          if (mergeAnalysis.newTeams.length > 3) {
+            mergePreview += `&nbsp;&nbsp;&nbsp;• ... und ${mergeAnalysis.newTeams.length - 3} weitere<br>`;
+          }
+          mergePreview += "<br>";
+        }
+
+        if (mergeAnalysis.newShooters.length > 0) {
+          mergePreview += `✅ <strong>Neue Einzelschützen:</strong> ${mergeAnalysis.newShooters.length}<br>`;
+          mergeAnalysis.newShooters.slice(0, 3).forEach(shooter => {
+            mergePreview += `&nbsp;&nbsp;&nbsp;• ${shooter}<br>`;
+          });
+          if (mergeAnalysis.newShooters.length > 3) {
+            mergePreview += `&nbsp;&nbsp;&nbsp;• ... und ${mergeAnalysis.newShooters.length - 3} weitere<br>`;
+          }
+          mergePreview += "<br>";
+        }
+
+        if (mergeAnalysis.newResults > 0) {
+          mergePreview += `✅ <strong>Neue Ergebnisse:</strong> ${mergeAnalysis.newResults}<br><br>`;
+        }
+
+        if (mergeAnalysis.skippedTeams.length > 0) {
+          mergePreview += `⚠️ <strong>Übersprungen (existieren bereits):</strong><br>`;
+          mergePreview += `&nbsp;&nbsp;&nbsp;Teams: ${mergeAnalysis.skippedTeams.length}<br>`;
+        }
+
+        if (mergeAnalysis.skippedShooters.length > 0) {
+          mergePreview += `&nbsp;&nbsp;&nbsp;Einzelschützen: ${mergeAnalysis.skippedShooters.length}<br>`;
+        }
+
+        if (mergeAnalysis.skippedResults > 0) {
+          mergePreview += `&nbsp;&nbsp;&nbsp;Ergebnisse: ${mergeAnalysis.skippedResults}<br><br>`;
+        }
+
+        mergePreview += `<strong>📝 Zusammenfassung:</strong><br>`;
+        mergePreview += `• Werden hinzugefügt: ${mergeAnalysis.newTeams.length + mergeAnalysis.newShooters.length + mergeAnalysis.newResults} Einträge<br>`;
+        mergePreview += `• Werden übersprungen: ${mergeAnalysis.skippedTeams.length + mergeAnalysis.skippedShooters.length + mergeAnalysis.skippedResults} Einträge<br>`;
+
+        const mergePreviewDiv = document.getElementById("mergePreview");
+        if (mergePreviewDiv) {
+          mergePreviewDiv.innerHTML = mergePreview;
+        }
+
+      } catch (error) {
+        console.error("Error generating merge preview:", error);
+      }
+    };
+
+    reader.readAsText(file, "UTF-8");
+  }
+
+  // NEU: Merge-Analyse
+  analyzeMerge(backupData) {
+    const analysis = {
+      newTeams: [],
+      newShooters: [],
+      newResults: 0,
+      skippedTeams: [],
+      skippedShooters: [],
+      skippedResults: 0
+    };
+
+    // Analysiere Teams
+    if (backupData.teams) {
+      backupData.teams.forEach(team => {
+        const existingTeam = storage.teams.find(t => t.name.toLowerCase() === team.name.toLowerCase());
+        if (existingTeam) {
+          analysis.skippedTeams.push(team.name);
+        } else {
+          analysis.newTeams.push(team.name);
+        }
+      });
+    }
+
+    // Analysiere Einzelschützen
+    if (backupData.standaloneShooters) {
+      backupData.standaloneShooters.forEach(shooter => {
+        const existingShooter = storage.standaloneShooters.find(s => s.name.toLowerCase() === shooter.name.toLowerCase());
+        if (existingShooter) {
+          analysis.skippedShooters.push(shooter.name);
+        } else {
+          analysis.newShooters.push(shooter.name);
+        }
+      });
+    }
+
+    // Analysiere Ergebnisse
+    if (backupData.results) {
+      backupData.results.forEach(result => {
+        const existingResult = storage.results.find(r =>
+          r.teamId === result.teamId &&
+          r.shooterId === result.shooterId &&
+          r.discipline === result.discipline
+        );
+
+        if (existingResult) {
+          analysis.skippedResults++;
+        } else {
+          analysis.newResults++;
+        }
+      });
+    }
+
+    return analysis;
+  }
+
   processSettingsImport() {
     const fileInput = document.getElementById("settingsFileInput");
     const file = fileInput?.files[0];
+    const importMode = document.querySelector('input[name="importMode"]:checked')?.value || 'replace';
 
     if (!file) {
       alert("Bitte wählen Sie eine Backup-Datei aus.");
@@ -1203,31 +1350,32 @@ class SettingsView {
         const content = e.target.result;
         const backupData = JSON.parse(content);
 
-        // Prüfe ob es ein vollständiges Backup ist
-        if (backupData.exportType === "complete") {
-          // Vollständiger Import über Storage
-          storage.importData(backupData);
-          UIUtils.showSuccessMessage("Backup wiederhergestellt!");
+        if (importMode === 'merge') {
+          // NEU: Merge-Import
+          this.performMergeImport(backupData);
         } else {
-          // Legacy: Nur Einstellungen importieren
-          if (backupData.availableDisciplines)
-            storage.availableDisciplines = backupData.availableDisciplines;
-          if (backupData.availableWeapons)
-            storage.availableWeapons = backupData.availableWeapons;
-          if (backupData.selectedDiscipline)
-            storage.selectedDiscipline = backupData.selectedDiscipline;
-          if (backupData.selectedCompetitionType)
-            storage.selectedCompetitionType =
-              backupData.selectedCompetitionType;
-          if (backupData.settings)
-            storage.settings = { ...storage.settings, ...backupData.settings };
+          // Bestehender Full-Import
+          if (backupData.exportType === "complete") {
+            storage.importData(backupData);
+            UIUtils.showSuccessMessage("Backup wiederhergestellt!");
+          } else {
+            // Legacy: Nur Einstellungen importieren
+            if (backupData.availableDisciplines)
+              storage.availableDisciplines = backupData.availableDisciplines;
+            if (backupData.availableWeapons)
+              storage.availableWeapons = backupData.availableWeapons;
+            if (backupData.selectedDiscipline)
+              storage.selectedDiscipline = backupData.selectedDiscipline;
+            if (backupData.selectedCompetitionType)
+              storage.selectedCompetitionType = backupData.selectedCompetitionType;
+            if (backupData.settings)
+              storage.settings = { ...storage.settings, ...backupData.settings };
+            if (backupData.labelSettings)
+              storage.saveLabelSettings(backupData.labelSettings);
 
-          // NEU: Label-Einstellungen importieren
-          if (backupData.labelSettings)
-            storage.saveLabelSettings(backupData.labelSettings);
-
-          storage.save();
-          UIUtils.showSuccessMessage("Einstellungen wiederhergestellt!");
+            storage.save();
+            UIUtils.showSuccessMessage("Einstellungen wiederhergestellt!");
+          }
         }
 
         // Ansicht aktualisieren
@@ -1239,6 +1387,110 @@ class SettingsView {
     };
 
     reader.readAsText(file, "UTF-8");
+  }
+
+  // NEU: Merge-Import durchführen
+  performMergeImport(backupData) {
+    let importedCount = 0;
+    let skippedCount = 0;
+
+    try {
+      // 1. Teams mergen
+      if (backupData.teams) {
+        backupData.teams.forEach(teamData => {
+          const existingTeam = storage.teams.find(t =>
+            t.name.toLowerCase() === teamData.name.toLowerCase()
+          );
+
+          if (!existingTeam) {
+            const newTeam = Team.fromJSON(teamData);
+            storage.teams.push(newTeam);
+            importedCount++;
+            console.log(`Merged new team: ${newTeam.name}`);
+          } else {
+            skippedCount++;
+            console.log(`Skipped existing team: ${teamData.name}`);
+          }
+        });
+      }
+
+      // 2. Einzelschützen mergen
+      if (backupData.standaloneShooters) {
+        backupData.standaloneShooters.forEach(shooterData => {
+          const existingShooter = storage.standaloneShooters.find(s =>
+            s.name.toLowerCase() === shooterData.name.toLowerCase()
+          );
+
+          if (!existingShooter) {
+            const newShooter = Shooter.fromJSON(shooterData);
+            storage.standaloneShooters.push(newShooter);
+            importedCount++;
+            console.log(`Merged new standalone shooter: ${newShooter.name}`);
+          } else {
+            skippedCount++;
+            console.log(`Skipped existing shooter: ${shooterData.name}`);
+          }
+        });
+      }
+
+      // 3. Ergebnisse mergen (nur neue hinzufügen)
+      if (backupData.results) {
+        backupData.results.forEach(resultData => {
+          const existingResult = storage.results.find(r =>
+            r.teamId === resultData.teamId &&
+            r.shooterId === resultData.shooterId &&
+            r.discipline === resultData.discipline
+          );
+
+          if (!existingResult) {
+            const newResult = ResultEntry.fromJSON(resultData);
+            storage.results.push(newResult);
+            importedCount++;
+            console.log(`Merged new result for shooter: ${resultData.shooterId}`);
+          } else {
+            skippedCount++;
+            console.log(`Skipped existing result for shooter: ${resultData.shooterId}`);
+          }
+        });
+      }
+
+      // 4. Einstellungen vorsichtig mergen (nur wenn noch nicht gesetzt)
+      if (backupData.availableDisciplines && storage.availableDisciplines.length === 0) {
+        storage.availableDisciplines = backupData.availableDisciplines;
+        importedCount++;
+      }
+
+      if (backupData.availableWeapons && storage.availableWeapons.length === 0) {
+        storage.availableWeapons = backupData.availableWeapons;
+        importedCount++;
+      }
+
+      if (backupData.selectedDiscipline && !storage.selectedDiscipline) {
+        storage.selectedDiscipline = backupData.selectedDiscipline;
+      }
+
+      if (backupData.selectedCompetitionType && !storage.selectedCompetitionType) {
+        storage.selectedCompetitionType = backupData.selectedCompetitionType;
+      }
+
+      // 5. Label-Einstellungen nur mergen wenn noch nicht gesetzt
+      if (backupData.labelSettings && !storage.settings.labelSettings) {
+        storage.saveLabelSettings(backupData.labelSettings);
+        importedCount++;
+      }
+
+      // Speichern
+      storage.save();
+
+      // Erfolgsmeldung
+      const message = `🔀 Merge erfolgreich! Importiert: ${importedCount}, Übersprungen: ${skippedCount}`;
+      UIUtils.showSuccessMessage(message);
+      console.log(`Merge completed: ${importedCount} imported, ${skippedCount} skipped`);
+
+    } catch (error) {
+      console.error("Merge error:", error);
+      throw new Error("Merge fehlgeschlagen: " + error.message);
+    }
   }
 
   importBackup() {

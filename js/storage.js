@@ -688,7 +688,7 @@ class Storage {
     };
   }
 
-  exportData() {
+  exportData(exportType = "complete") {
     return {
       teams: this.teams.map((t) => t.toJSON()),
       standaloneShooters: this.standaloneShooters.map((s) => s.toJSON()),
@@ -702,16 +702,15 @@ class Storage {
       visibleShooterIds: this.visibleShooterIds
         ? Array.from(this.visibleShooterIds)
         : null,
-
-      // DIESE ZEILEN HINZUFÜGEN:
       availableWeapons: this.availableWeapons,
       selectedWeapon: this.selectedWeapon,
       settings: this.settings,
-
-      // NEU: Label-Einstellungen explizit exportieren
       labelSettings: this.getLabelSettings(),
 
+      // NEU: Export-Metadaten
+      exportType: exportType,
       exportDate: new Date().toISOString(),
+      exportVersion: typeof APP_VERSION !== 'undefined' ? APP_VERSION : '1.98',
     };
   }
 
