@@ -173,50 +173,50 @@ class LabelPrinter {
   // =================================================================
 
   prepareLabelData(filteredTeams, filteredStandaloneShooters) {
-  const labelData = [];
-  const settings = storage.getLabelSettings();
+    const labelData = [];
+    const settings = storage.getLabelSettings();
 
-  console.log("=== PREPARE LABEL DATA ===");
-  console.log("Teams:", filteredTeams.length);
-  console.log("Standalone shooters:", filteredStandaloneShooters.length);
-  console.log("Copies per label:", settings.copies);
+    console.log("=== PREPARE LABEL DATA ===");
+    console.log("Teams:", filteredTeams.length);
+    console.log("Standalone shooters:", filteredStandaloneShooters.length);
+    console.log("Copies per label:", settings.copies);
 
-  // Teams: Mannschaftsname + Schützennamen
-  filteredTeams.forEach((team) => {
-    console.log(`Processing team: ${team.name} with ${team.shooters.length} shooters`);
-    team.shooters.forEach((shooter) => {
+    // Teams: Mannschaftsname + Schützennamen
+    filteredTeams.forEach((team) => {
+      console.log(`Processing team: ${team.name} with ${team.shooters.length} shooters`);
+      team.shooters.forEach((shooter) => {
+        if (shooter && shooter.name && shooter.name.trim()) { // NUR gültige Schützen
+          for (let i = 0; i < settings.copies; i++) {
+            labelData.push({
+              type: "team",
+              teamName: team.name.trim(),
+              shooterName: shooter.name.trim(),
+              displayText1: team.name.trim(),
+              displayText2: shooter.name.trim(),
+            });
+          }
+        }
+      });
+    });
+
+    // Einzelschützen: Nur Name
+    filteredStandaloneShooters.forEach((shooter) => {
       if (shooter && shooter.name && shooter.name.trim()) { // NUR gültige Schützen
+        console.log(`Processing standalone shooter: ${shooter.name}`);
         for (let i = 0; i < settings.copies; i++) {
           labelData.push({
-            type: "team",
-            teamName: team.name.trim(),
+            type: "standalone",
             shooterName: shooter.name.trim(),
-            displayText1: team.name.trim(),
-            displayText2: shooter.name.trim(),
+            displayText1: shooter.name.trim(),
+            displayText2: "",
           });
         }
       }
     });
-  });
 
-  // Einzelschützen: Nur Name
-  filteredStandaloneShooters.forEach((shooter) => {
-    if (shooter && shooter.name && shooter.name.trim()) { // NUR gültige Schützen
-      console.log(`Processing standalone shooter: ${shooter.name}`);
-      for (let i = 0; i < settings.copies; i++) {
-        labelData.push({
-          type: "standalone",
-          shooterName: shooter.name.trim(),
-          displayText1: shooter.name.trim(),
-          displayText2: "",
-        });
-      }
-    }
-  });
-
-  console.log(`=== RESULT: ${labelData.length} valid labels prepared ===`);
-  return labelData;
-}
+    console.log(`=== RESULT: ${labelData.length} valid labels prepared ===`);
+    return labelData;
+  }
 
   createLabelHTML(labelData, cssStyles) {
     const settings = storage.getLabelSettings();
@@ -283,80 +283,73 @@ class LabelPrinter {
   // =================================================================
 
   createLabelGrid(labels, settings) {
-  // NUR echte Labels (keine leeren)
-  const contentLabels = labels.filter((label) => 
-    label && 
-    label.type !== "empty" && 
-    (label.displayText1 || label.displayText2)
-  );
+    console.log("=== CREATE LABEL GRID ===");
+    console.log("Input labels (with empty):", labels.length);
+    console.log("Skip labels:", settings.skipLabels);
+    console.log("Settings - Columns:", settings.columns, "Rows:", settings.rows);
 
-  console.log("=== CREATE LABEL GRID ===");
-  console.log("Input labels:", labels.length);
-  console.log("Content labels after filtering:", contentLabels.length);
-  console.log("Settings - Columns:", settings.columns, "Rows:", settings.rows);
-
-  if (contentLabels.length === 0) {
-    console.log("No content labels found");
-    return "";
-  }
-
-  const labelsPerPage = settings.columns * settings.rows;
-  const totalPages = Math.ceil(contentLabels.length / labelsPerPage);
-  
-  console.log(`Labels per page: ${labelsPerPage}`);
-  console.log(`Total pages needed: ${totalPages}`);
-  console.log(`Content labels: ${contentLabels.length}`);
-
-  let html = "";
-  let labelIndex = 0;
-
-  // SICHERE SCHLEIFE - nur für Seiten mit garantiertem Inhalt
-  for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
-    const labelsOnThisPage = Math.min(labelsPerPage, contentLabels.length - labelIndex);
-    
-    console.log(`Creating page ${pageIndex + 1}/${totalPages} with ${labelsOnThisPage} labels`);
-    
-    if (labelsOnThisPage <= 0) {
-      console.log("Skipping page with no labels");
-      break;
+    if (labels.length === 0) {
+      console.log("No labels found");
+      return "";
     }
 
-    html += '<div class="label-page">\n';
-    
-    let pagePosition = 0;
-    
-    // Zeilen erstellen
-    for (let row = 0; row < settings.rows; row++) {
-      html += '  <div class="label-row">\n';
-      
-      // Spalten erstellen
-      for (let col = 0; col < settings.columns; col++) {
-        if (labelIndex < contentLabels.length && pagePosition < labelsOnThisPage) {
-          // Echtes Label
-          const label = contentLabels[labelIndex];
-          html += this.createSingleLabel(label, settings);
-          labelIndex++;
-        } else {
-          // Leerer Platz zum Auffüllen
-          html += '    <div class="label empty-label"></div>\n';
-        }
-        pagePosition++;
-      }
-      
-      html += '  </div>\n';
-      
-      // Wenn alle Labels dieser Seite verarbeitet sind, breche ab
-      if (pagePosition >= labelsOnThisPage) {
+    const labelsPerPage = settings.columns * settings.rows;
+    const totalPages = Math.ceil(labels.length / labelsPerPage);
+
+    console.log(`Labels per page: ${labelsPerPage}`);
+    console.log(`Total pages needed: ${totalPages}`);
+    console.log(`Total labels: ${labels.length}`);
+
+    let html = "";
+    let labelIndex = 0;
+
+    // KORRIGIERTE LOGIK: ALLE Labels verarbeiten (inkl. empty)
+    for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+      const labelsOnThisPage = Math.min(labelsPerPage, labels.length - labelIndex);
+
+      console.log(`Creating page ${pageIndex + 1}/${totalPages} with ${labelsOnThisPage} labels`);
+
+      if (labelsOnThisPage <= 0) {
+        console.log("Skipping page with no labels");
         break;
       }
-    }
-    
-    html += '</div>\n';
-  }
 
-  console.log(`=== GRID COMPLETE: ${totalPages} pages created, ${labelIndex} labels processed ===`);
-  return html;
-}
+      html += '<div class="label-page">\n';
+
+      let pagePosition = 0;
+
+      // Zeilen erstellen
+      for (let row = 0; row < settings.rows; row++) {
+        html += '  <div class="label-row">\n';
+
+        // Spalten erstellen
+        for (let col = 0; col < settings.columns; col++) {
+          if (labelIndex < labels.length && pagePosition < labelsOnThisPage) {
+            // Label verarbeiten (echt oder leer)
+            const label = labels[labelIndex];
+            html += this.createSingleLabel(label, settings);
+            labelIndex++;
+          } else {
+            // Platz zum Auffüllen der Seite
+            html += '    <div class="label empty-label"></div>\n';
+          }
+          pagePosition++;
+        }
+
+        html += '  </div>\n';
+
+        // Wenn alle Labels dieser Seite verarbeitet sind, breche ab
+        if (pagePosition >= labelsOnThisPage) {
+          break;
+        }
+      }
+
+      html += '</div>\n';
+    }
+
+    console.log(`=== GRID COMPLETE: ${totalPages} pages created, ${labelIndex} labels processed ===`);
+    return html;
+  }
 
   // =================================================================
   // EINZELNES LABEL ERSTELLEN
@@ -417,21 +410,21 @@ class LabelPrinter {
   // =================================================================
 
   getFallbackCSS() {
-  const settings = storage.getLabelSettings();
+    const settings = storage.getLabelSettings();
 
-  const pageWidth =
-    210.0 - (settings.marginLeft || 0.0) - (settings.marginRight || 0.0);
-  const availableWidth =
-    pageWidth - (settings.columns - 1) * (settings.labelSpacing || 0.0);
-  const labelWidth = Math.min(
-    settings.labelWidth,
-    availableWidth / settings.columns,
-  );
+    const pageWidth =
+      210.0 - (settings.marginLeft || 0.0) - (settings.marginRight || 0.0);
+    const availableWidth =
+      pageWidth - (settings.columns - 1) * (settings.labelSpacing || 0.0);
+    const labelWidth = Math.min(
+      settings.labelWidth,
+      availableWidth / settings.columns,
+    );
 
-  // Rahmen-Stil basierend auf Einstellung
-  const borderStyle = settings.showBorders ? '1px solid #ccc' : 'none';
+    // Rahmen-Stil basierend auf Einstellung
+    const borderStyle = settings.showBorders ? '1px solid #ccc' : 'none';
 
-  return `
+    return `
   * {
     margin: 0;
     padding: 0;
@@ -618,7 +611,7 @@ class LabelPrinter {
     }
   }
 `;
-}
+  }
 
   // =================================================================
   // SCHRIFTGRÖSSEN-BERECHNUNG

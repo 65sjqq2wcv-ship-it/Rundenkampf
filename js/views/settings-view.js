@@ -509,70 +509,22 @@ class SettingsView {
     }
   }
 
-  // GEÄNDERT: setupLabelSettingsEventListeners für Input-Felder
+  // VERBESSERT: Live-Validierung + bessere UX
   setupLabelSettingsEventListeners() {
-    console.log("Setting up FIXED label settings event listeners...");
+    console.log("Setting up IMPROVED label settings event listeners...");
 
     const inputConfigs = [
-      {
-        id: "labelWidthInput",
-        setting: "labelWidth",
-        min: 30.0,
-        max: 100.0,
-        decimals: 1,
-      },
-      {
-        id: "labelHeightInput",
-        setting: "labelHeight",
-        min: 15.0,
-        max: 60.0,
-        decimals: 1,
-      },
-      {
-        id: "marginTopInput",
-        setting: "marginTop",
-        min: 0.0,
-        max: 30.0,
-        decimals: 1,
-      },
-      {
-        id: "marginBottomInput",
-        setting: "marginBottom",
-        min: 0.0,
-        max: 30.0,
-        decimals: 1,
-      },
-      {
-        id: "marginLeftInput",
-        setting: "marginLeft",
-        min: 0.0,
-        max: 30.0,
-        decimals: 1,
-      },
-      {
-        id: "marginRightInput",
-        setting: "marginRight",
-        min: 0.0,
-        max: 30.0,
-        decimals: 1,
-      },
+      { id: "labelWidthInput", setting: "labelWidth", min: 30.0, max: 100.0, decimals: 1 },
+      { id: "labelHeightInput", setting: "labelHeight", min: 15.0, max: 60.0, decimals: 1 },
+      { id: "marginTopInput", setting: "marginTop", min: 0.0, max: 30.0, decimals: 1 },
+      { id: "marginBottomInput", setting: "marginBottom", min: 0.0, max: 30.0, decimals: 1 },
+      { id: "marginLeftInput", setting: "marginLeft", min: 0.0, max: 30.0, decimals: 1 },
+      { id: "marginRightInput", setting: "marginRight", min: 0.0, max: 30.0, decimals: 1 },
       { id: "columnsInput", setting: "columns", min: 1, max: 4, decimals: 0 },
       { id: "rowsInput", setting: "rows", min: 1, max: 20, decimals: 0 },
-      {
-        id: "skipLabelsInput",
-        setting: "skipLabels",
-        min: 0,
-        max: 50,
-        decimals: 0,
-      },
+      { id: "skipLabelsInput", setting: "skipLabels", min: 0, max: 50, decimals: 0 },
       { id: "copiesInput", setting: "copies", min: 1, max: 5, decimals: 0 },
-      {
-        id: "labelSpacingInput",
-        setting: "labelSpacing",
-        min: 0.0,
-        max: 10.0,
-        decimals: 1,
-      },
+      { id: "labelSpacingInput", setting: "labelSpacing", min: 0.0, max: 10.0, decimals: 1 },
     ];
 
     const currentSettings = storage.getLabelSettings();
@@ -590,35 +542,65 @@ class SettingsView {
           }
         }
 
-        // ENTFERNT: Die problematischen input und keypress Event-Listener
+        // NEU: Input-Validierung mit visueller Rückmeldung
+        input.addEventListener("input", (e) => {
+          const value = parseFloat(e.target.value);
 
-        // NUR Validierung beim Verlassen des Feldes (blur)
-        input.addEventListener("blur", (e) => {
-          let value = parseFloat(e.target.value);
+          // Entferne vorherige Fehler-Styles
+          input.style.borderColor = "#d1d1d6";
+          input.title = "";
 
-          // Falls ungültiger Wert, setze auf Minimum
-          if (isNaN(value) || value < config.min) {
-            value = config.min;
-          } else if (value > config.max) {
-            value = config.max;
+          if (!isNaN(value)) {
+            if (value < config.min || value > config.max) {
+              // Zeige Fehler
+              input.style.borderColor = "#ff3b30";
+              input.title = `Erlaubt: ${config.min} - ${config.max}`;
+            }
           }
-
-          // Formatiere den Wert
-          e.target.value =
-            config.decimals === 0 ? Math.round(value) : value.toFixed(1);
         });
 
-        // Optional: Wert beim Focus selektieren für einfacheres Überschreiben
+        // Blur-Validierung (korrigiert ungültige Werte)
+        // KORRIGIERT: Blur-Validierung mit Warnung vor Korrektur
+        input.addEventListener("blur", (e) => {
+          const originalValue = e.target.value;
+          let value = parseFloat(originalValue);
+          let corrected = false;
+
+          if (isNaN(value) || value < config.min) {
+            value = config.min;
+            corrected = true;
+          } else if (value > config.max) {
+            value = config.max;
+            corrected = true;
+          }
+
+          // Formatiere den korrigierten Wert
+          const formattedValue = config.decimals === 0 ? Math.round(value) : value.toFixed(1);
+
+          // WICHTIG: Zeige Warnung BEVOR korrigiert wird
+          if (corrected && originalValue !== formattedValue) {
+            const fieldName = config.id.replace('Input', '').replace(/([A-Z])/g, ' $1').toLowerCase();
+            UIUtils.showError(
+              `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} wurde von ${originalValue} auf ${formattedValue} korrigiert. Erlaubt: ${config.min} - ${config.max}`
+            );
+          }
+
+          // Jetzt korrigieren
+          e.target.value = formattedValue;
+
+          // Entferne Fehler-Styles
+          e.target.style.borderColor = "#d1d1d6";
+          e.target.title = "";
+        });
+
+        // Focus-Selektion
         input.addEventListener("focus", (e) => {
-          // Kurze Verzögerung, damit der Focus-Event korrekt funktioniert
-          setTimeout(() => {
-            e.target.select();
-          }, 50);
+          setTimeout(() => e.target.select(), 50);
         });
       }
     });
 
-    // Checkbox für Rahmen
+    // Checkbox
     const bordersCheckbox = document.getElementById("showBordersCheckbox");
     if (bordersCheckbox) {
       bordersCheckbox.checked = currentSettings.showBorders || false;
@@ -634,43 +616,56 @@ class SettingsView {
     }
   }
 
-  // GEÄNDERT: saveLabelSettings für Input-Felder
+  // GEÄNDERT: Robuste saveLabelSettings mit detaillierter Validierung
   saveLabelSettings() {
     try {
       const settings = {
-        labelWidth: parseFloat(
-          document.getElementById("labelWidthInput").value,
-        ),
-        labelHeight: parseFloat(
-          document.getElementById("labelHeightInput").value,
-        ),
+        labelWidth: parseFloat(document.getElementById("labelWidthInput").value),
+        labelHeight: parseFloat(document.getElementById("labelHeightInput").value),
         marginTop: parseFloat(document.getElementById("marginTopInput").value),
-        marginBottom: parseFloat(
-          document.getElementById("marginBottomInput").value,
-        ),
-        marginLeft: parseFloat(
-          document.getElementById("marginLeftInput").value,
-        ),
-        marginRight: parseFloat(
-          document.getElementById("marginRightInput").value,
-        ),
+        marginBottom: parseFloat(document.getElementById("marginBottomInput").value),
+        marginLeft: parseFloat(document.getElementById("marginLeftInput").value),
+        marginRight: parseFloat(document.getElementById("marginRightInput").value),
         columns: parseInt(document.getElementById("columnsInput").value),
         rows: parseInt(document.getElementById("rowsInput").value),
         skipLabels: parseInt(document.getElementById("skipLabelsInput").value),
         copies: parseInt(document.getElementById("copiesInput").value),
-        labelSpacing: parseFloat(
-          document.getElementById("labelSpacingInput").value,
-        ),
+        labelSpacing: parseFloat(document.getElementById("labelSpacingInput").value),
         showBorders: document.getElementById("showBordersCheckbox").checked,
       };
 
-      // Validiere die Settings
+      // ERWEITERTE Validierung mit spezifischen Fehlermeldungen
+      const validationRules = {
+        labelWidth: { min: 30.0, max: 100.0, name: "Label-Breite" },
+        labelHeight: { min: 15.0, max: 60.0, name: "Label-Höhe" },
+        marginTop: { min: 0.0, max: 30.0, name: "Rand oben" },
+        marginBottom: { min: 0.0, max: 30.0, name: "Rand unten" },
+        marginLeft: { min: 0.0, max: 30.0, name: "Rand links" },
+        marginRight: { min: 0.0, max: 30.0, name: "Rand rechts" },
+        columns: { min: 1, max: 4, name: "Spalten" },
+        rows: { min: 1, max: 20, name: "Zeilen" },
+        skipLabels: { min: 0, max: 50, name: "Überspringe Felder" },
+        copies: { min: 1, max: 5, name: "Anzahl Kopien" }, // WICHTIG: Max 5!
+        labelSpacing: { min: 0.0, max: 10.0, name: "Label-Abstand" },
+      };
+
+      // Validiere jeden Wert
       for (const [key, value] of Object.entries(settings)) {
-        if (
-          key !== "showBorders" &&
-          (isNaN(value) || value === null || value === undefined)
-        ) {
-          throw new Error(`Ungültiger Wert für ${key}: ${value}`);
+        if (key === "showBorders") continue;
+
+        const rule = validationRules[key];
+        if (!rule) continue;
+
+        if (isNaN(value) || value === null || value === undefined) {
+          throw new Error(`${rule.name} muss eine gültige Zahl sein.`);
+        }
+
+        if (value < rule.min) {
+          throw new Error(`${rule.name} muss mindestens ${rule.min} sein.`);
+        }
+
+        if (value > rule.max) {
+          throw new Error(`${rule.name} darf maximal ${rule.max} sein. (Eingabe: ${value})`);
         }
       }
 
@@ -682,7 +677,7 @@ class SettingsView {
       }
 
       UIUtils.showSuccessMessage(
-        "Label-Einstellungen gespeichert - Änderungen sind sofort aktiv",
+        "Label-Einstellungen gespeichert - Änderungen sind sofort aktiv"
       );
     } catch (error) {
       console.error("Error saving label settings:", error);
