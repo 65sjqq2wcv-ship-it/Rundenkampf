@@ -688,6 +688,8 @@ class Storage {
     };
   }
 
+  // In storage.js - exportData Methode erweitern:
+
   exportData(exportType = "complete") {
     return {
       teams: this.teams.map((t) => t.toJSON()),
@@ -705,7 +707,7 @@ class Storage {
       availableWeapons: this.availableWeapons,
       selectedWeapon: this.selectedWeapon,
       settings: this.settings,
-      labelSettings: this.getLabelSettings(),
+      labelSettings: this.getLabelSettings(), // ← NEU: DIESE ZEILE HINZUFÜGEN
 
       // NEU: Export-Metadaten
       exportType: exportType,
