@@ -6,44 +6,26 @@ class TeamsView {
 
   render() {
     const container = document.createElement("div");
-    container.style.cssText = "padding-bottom: 20px;"; // Zusätzlicher Container-Abstand
+    container.style.cssText = "padding-bottom: 20px;";
 
     try {
-      // Setup navigation buttons
       this.setupNavButtons();
 
-      // Teams List
       if (storage.teams.length > 0) {
         const teamsSection = this.createTeamsList();
         container.appendChild(teamsSection);
       }
 
-      // Standalone Shooters List
       if (storage.standaloneShooters.length > 0) {
         const shootersSection = this.createStandaloneShootersList();
         container.appendChild(shootersSection);
       }
 
-      // Empty state
       if (
         storage.teams.length === 0 &&
         storage.standaloneShooters.length === 0
       ) {
-        const emptyState = document.createElement("div");
-        emptyState.className = "card empty-state";
-        emptyState.style.cssText = "margin-bottom: 30px;";
-        emptyState.innerHTML = `
-				<h3>Keine Teams oder Schützen</h3>
-				<p style="margin: 16px 0;">Fügen Sie Ihr erstes Team oder Einzelschützen hinzu.</p>
-				<div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
-				<button class="btn btn-primary" style="width: 50%; height: 70px;" onclick="app.views.teams.addTeam()">
-				Team hinzufügen
-				</button>
-				<button class="btn btn-secondary" style="width: 50%; height: 70px;" onclick="app.views.teams.addStandaloneShooter()">
-				Einzelschütze hinzufügen
-				</button>
-				</div>
-				`;
+        const emptyState = this.createEmptyState(); // ✅ SICHERHEITSFX: Ausgelagert
         container.appendChild(emptyState);
       }
     } catch (error) {
@@ -56,13 +38,50 @@ class TeamsView {
     return container;
   }
 
+  // ✅ SICHERHEITSFIX: Sichere Empty State Erstellung
+  createEmptyState() {
+    const emptyState = document.createElement("div");
+    emptyState.className = "card empty-state";
+    emptyState.style.cssText = "margin-bottom: 30px;";
+
+    const title = document.createElement("h3");
+    title.textContent = "Keine Teams oder Schützen";
+    emptyState.appendChild(title);
+
+    const description = document.createElement("p");
+    description.textContent = "Fügen Sie Ihr erstes Team oder Einzelschützen hinzu.";
+    description.style.cssText = "margin: 16px 0;";
+    emptyState.appendChild(description);
+
+    const buttonContainer = document.createElement("div");
+    buttonContainer.style.cssText = "display: flex; gap: 12px; justify-content: center; margin-top: 20px;";
+
+    // ✅ SICHERHEITSFIX: onclick durch addEventListener ersetzt
+    const teamBtn = document.createElement("button");
+    teamBtn.className = "btn btn-primary";
+    teamBtn.textContent = "Team hinzufügen";
+    teamBtn.style.cssText = "width: 50%; height: 70px;";
+    teamBtn.addEventListener("click", () => this.addTeam());
+
+    const shooterBtn = document.createElement("button");
+    shooterBtn.className = "btn btn-secondary";
+    shooterBtn.textContent = "Einzelschütze hinzufügen";
+    shooterBtn.style.cssText = "width: 50%; height: 70px;";
+    shooterBtn.addEventListener("click", () => this.addStandaloneShooter());
+
+    buttonContainer.appendChild(teamBtn);
+    buttonContainer.appendChild(shooterBtn);
+    emptyState.appendChild(buttonContainer);
+
+    return emptyState;
+  }
+
   setupNavButtons() {
     setTimeout(() => {
       const navButtons = document.getElementById("navButtons");
       if (navButtons) {
         navButtons.innerHTML = "";
         
-        // Einzelschütze Button
         const shooterBtn = document.createElement("button");
         shooterBtn.className = "nav-btn";
         shooterBtn.textContent = "👤";
@@ -70,7 +89,6 @@ class TeamsView {
         shooterBtn.addEventListener("click", () => this.addStandaloneShooter());
         navButtons.appendChild(shooterBtn);
 
-        // Team Button
         const teamBtn = document.createElement("button");
         teamBtn.className = "nav-btn";
         teamBtn.textContent = "➕";
@@ -106,7 +124,6 @@ class TeamsView {
       subtitle.className = "list-item-subtitle";
       if (team.shooters.length > 0) {
         const shooterNames = team.shooters.map((s) => s.name).join(", ");
-        // Fixed: Remove the template string and use direct assignment
         subtitle.textContent = `${team.shooters.length} Schützen: ${shooterNames}`;
       } else {
         subtitle.textContent = "Keine Schützen";
@@ -160,7 +177,6 @@ class TeamsView {
     return shootersSection;
   }
 
-  // Team Management
   addTeam() {
     const team = new Team("", []);
     this.showTeamEditModal(team, true);
@@ -173,36 +189,30 @@ class TeamsView {
   showTeamEditModal(team, isNew = false) {
     const content = document.createElement("div");
     content.innerHTML = `
-		<div class="form-section">
-		<div class="form-row">
-		<input type="text" id="teamNameInput" class="form-input" placeholder="Mannschaftsname" value="${UIUtils.escapeHtml(
-      team.name
-    )}">
-		</div>
-		</div>
-		
-		<div class="form-section">
-		<div class="form-section-header">Schützen</div>
-		<div id="shootersList"></div>
-		<button class="btn btn-secondary" id="addShooterBtn" style="width: 100%; margin-top: 8px;">
-		Schütze hinzufügen
-		</button>
-		</div>
-		
-		${
-      !isNew
-        ? `
-		<div class="form-section">
-		<div class="form-row">
-		<button class="btn btn-danger" id="deleteTeamBtn" style="width: 100%;">
-		Mannschaft löschen
-		</button>
-		</div>
-		</div>
-		`
-        : ""
-    }
-		`;
+      <div class="form-section">
+        <div class="form-row">
+          <input type="text" id="teamNameInput" class="form-input" placeholder="Mannschaftsname" value="${UIUtils.escapeHtml(team.name)}">
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <div class="form-section-header">Schützen</div>
+        <div id="shootersList"></div>
+        <button class="btn btn-secondary" id="addShooterBtn" style="width: 100%; margin-top: 8px;">
+          Schütze hinzufügen
+        </button>
+      </div>
+      
+      ${!isNew ? `
+        <div class="form-section">
+          <div class="form-row">
+            <button class="btn btn-danger" id="deleteTeamBtn" style="width: 100%;">
+              Mannschaft löschen
+            </button>
+          </div>
+        </div>
+      ` : ""}
+    `;
 
     const modal = new ModalComponent(
       isNew ? "Neue Mannschaft" : "Mannschaft bearbeiten",
@@ -221,18 +231,16 @@ class TeamsView {
 
     modal.show();
 
-    // Setup event handlers
     setTimeout(() => {
       this.updateShootersList(team);
 
       const addShooterBtn = document.getElementById("addShooterBtn");
       if (addShooterBtn) {
         addShooterBtn.addEventListener("click", () => {
-          // PRÜFUNG: Maximal 4 Schützen pro Mannschaft
-    if (team.shooters.length >= 4) {
-      UIUtils.showError("Eine Mannschaft darf maximal 4 Schützen haben.");
-      return;
-    }
+          if (team.shooters.length >= 4) {
+            UIUtils.showError("Eine Mannschaft darf maximal 4 Schützen haben.");
+            return;
+          }
           const newShooter = new Shooter("");
           team.shooters.push(newShooter);
           this.updateShootersList(team);
@@ -250,7 +258,6 @@ class TeamsView {
             storage.deleteTeam(team.id);
             UIUtils.showSuccessMessage("Mannschaft gelöscht");
 
-            // NEU: Modal explizit schließen
             const modal = document.querySelector('.modal');
             if (modal) {
               modal.remove();
@@ -263,53 +270,62 @@ class TeamsView {
     }, 100);
   }
 
+  // ✅ HAUPTSICHERHEITSFIX: onclick durch addEventListener ersetzt
   updateShootersList(team) {
-  const shootersList = document.getElementById("shootersList");
-  const addShooterBtn = document.getElementById("addShooterBtn");
+    const shootersList = document.getElementById("shootersList");
+    const addShooterBtn = document.getElementById("addShooterBtn");
 
-  if (!shootersList) return;
+    if (!shootersList) return;
 
-  shootersList.innerHTML = "";
+    shootersList.innerHTML = "";
 
-  team.shooters.forEach((shooter, index) => {
-    const shooterDiv = document.createElement("div");
-    shooterDiv.className = "form-row";
-    shooterDiv.style.cssText = "display: flex; gap: 8px; align-items: center;";
+    team.shooters.forEach((shooter, index) => {
+      const shooterDiv = document.createElement("div");
+      shooterDiv.className = "form-row";
+      shooterDiv.style.cssText = "display: flex; gap: 8px; align-items: center;";
 
-    shooterDiv.innerHTML = `
-		<input type="text" 
-		placeholder="Schützenname" 
-		value="${UIUtils.escapeHtml(shooter.name)}" 
-		style="flex: 1; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px;"
-		onchange="this.shooter.name = this.value.trim()">
-		<button class="btn btn-danger btn-small" 
-		style="padding: 8px 12px;" 
-		onclick="app.views.teams.removeShooter('${team.id}', ${index})">
-		Löschen
-		</button>
-		`;
+      // ✅ SICHERHEITSFIX: Input Element sicher erstellen
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "Schützenname";
+      input.value = UIUtils.escapeHtml(shooter.name);
+      input.style.cssText = "flex: 1; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px;";
+      
+      // ✅ SICHERHEITSFIX: addEventListener statt onchange in innerHTML
+      input.addEventListener("change", (e) => {
+        shooter.name = e.target.value.trim();
+      });
 
-    const input = shooterDiv.querySelector("input");
-    input.shooter = shooter;
+      // ✅ SICHERHEITSFIX: Button Element sicher erstellen  
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "btn btn-danger btn-small";
+      deleteBtn.textContent = "Löschen";
+      deleteBtn.style.cssText = "padding: 8px 12px;";
+      
+      // ✅ SICHERHEITSFIX: addEventListener statt onclick in innerHTML
+      deleteBtn.addEventListener("click", () => {
+        this.removeShooter(team.id, index);
+      });
 
-    shootersList.appendChild(shooterDiv);
-  });
+      shooterDiv.appendChild(input);
+      shooterDiv.appendChild(deleteBtn);
+      shootersList.appendChild(shooterDiv);
+    });
 
-  // KORREKTUR: Maximal 4 Schützen statt 5
-  if (addShooterBtn) {
-    if (team.shooters.length >= 4) {
-      addShooterBtn.textContent = "Maximum erreicht (4 Schützen)";
-      addShooterBtn.disabled = true;
-      addShooterBtn.style.opacity = "0.5";
-    } else {
-      addShooterBtn.textContent = `Schütze hinzufügen (${team.shooters.length}/4)`;
-      addShooterBtn.disabled = false;
-      addShooterBtn.style.opacity = "1";
+    // Button-Status Update (unverändert)
+    if (addShooterBtn) {
+      if (team.shooters.length >= 4) {
+        addShooterBtn.textContent = "Maximum erreicht (4 Schützen)";
+        addShooterBtn.disabled = true;
+        addShooterBtn.style.opacity = "0.5";
+      } else {
+        addShooterBtn.textContent = `Schütze hinzufügen (${team.shooters.length}/4)`;
+        addShooterBtn.disabled = false;
+        addShooterBtn.style.opacity = "1";
+      }
     }
   }
-}
 
-  // removeShooter Methode erweitern um Button-Status zu aktualisieren:
   removeShooter(teamId, shooterIndex) {
     const team = storage.teams.find((t) => t.id === teamId);
     if (team && team.shooters[shooterIndex]) {
@@ -320,15 +336,9 @@ class TeamsView {
           `Möchten Sie den Schützen "${shooter.name}" wirklich entfernen?`
         )
       ) {
-        // Delete results for this shooter
         storage.deleteResultsForShooter(shooter.id);
-
-        // Remove from team
         team.shooters.splice(shooterIndex, 1);
-
-        // Update the list immediately (dies aktualisiert auch den Button-Status)
         this.updateShootersList(team);
-
         UIUtils.showSuccessMessage("Schütze entfernt");
       }
     }
@@ -346,6 +356,12 @@ class TeamsView {
         return;
       }
 
+      team.shooters.forEach((shooter, index) => {
+        if (!shooter.name || !shooter.name.trim()) {
+          throw new Error(`Schütze ${index + 1} benötigt einen Namen.`);
+        }
+      });
+
       if (isNew) {
         storage.addTeam(team);
         UIUtils.showSuccessMessage("Mannschaft hinzugefügt");
@@ -361,43 +377,37 @@ class TeamsView {
     }
   }
 
-  // Standalone Shooter Management
   addStandaloneShooter() {
     const shooter = new Shooter("");
-    this.showStandaloneShooterModal(shooter, true);
+    this.showStandaloneShooterEditModal(shooter, true);
   }
 
   editStandaloneShooter(shooter) {
-    this.showStandaloneShooterModal(shooter, false);
+    this.showStandaloneShooterEditModal(shooter, false);
   }
 
-  showStandaloneShooterModal(shooter, isNew = false) {
+  showStandaloneShooterEditModal(shooter, isNew = false) {
     const content = document.createElement("div");
     content.innerHTML = `
-		<div class="form-section">
-		<div class="form-row">
-		<input type="text" id="shooterNameInput" class="form-input" placeholder="Schützenname" value="${UIUtils.escapeHtml(
-      shooter.name
-    )}">
-		</div>
-		</div>
-		
-		${!isNew
-        ? `
-		<div class="form-section">
-		<div class="form-row">
-		<button class="btn btn-danger" id="deleteShooterBtn" style="width: 100%;">
-		Schütze löschen
-		</button>
-		</div>
-		</div>
-		`
-        : ""
-      }
-		`;
+      <div class="form-section">
+        <div class="form-row">
+          <input type="text" id="shooterNameInput" class="form-input" placeholder="Schützenname" value="${UIUtils.escapeHtml(shooter.name)}">
+        </div>
+      </div>
+      
+      ${!isNew ? `
+        <div class="form-section">
+          <div class="form-row">
+            <button class="btn btn-danger" id="deleteShooterBtn" style="width: 100%;">
+              Einzelschütze löschen
+            </button>
+          </div>
+        </div>
+      ` : ""}
+    `;
 
     const modal = new ModalComponent(
-      isNew ? "Neuer Einzelschütze" : "Schütze bearbeiten",
+      isNew ? "Neuer Einzelschütze" : "Einzelschütze bearbeiten",
       content
     );
 
@@ -413,20 +423,18 @@ class TeamsView {
 
     modal.show();
 
-    // Setup event handlers
     setTimeout(() => {
       const deleteShooterBtn = document.getElementById("deleteShooterBtn");
       if (deleteShooterBtn && !isNew) {
         deleteShooterBtn.addEventListener("click", () => {
           if (
             confirm(
-              `Möchten Sie den Schützen "${shooter.name}" wirklich löschen?`
+              `Möchten Sie den Einzelschützen "${shooter.name}" wirklich löschen?`
             )
           ) {
             storage.deleteStandaloneShooter(shooter.id);
-            UIUtils.showSuccessMessage("Schütze gelöscht");
+            UIUtils.showSuccessMessage("Einzelschütze gelöscht");
 
-            // NEU: Modal explizit schließen
             const modal = document.querySelector('.modal');
             if (modal) {
               modal.remove();
@@ -469,9 +477,7 @@ class TeamsView {
   createErrorCard(message) {
     const card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = `<p style="color: red;">${UIUtils.escapeHtml(
-      message
-    )}</p>`;
+    card.innerHTML = `<p style="color: red;">${UIUtils.escapeHtml(message)}</p>`;
     return card;
   }
 }

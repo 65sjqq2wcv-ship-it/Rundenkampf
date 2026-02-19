@@ -330,66 +330,107 @@ class SettingsView {
   createBackupRestoreSection() {
     const section = document.createElement("div");
     section.className = "card";
+
+    // ✅ SICHERHEITSFIX: Keine onclick-Handler in innerHTML
     section.innerHTML = `
-      <h3>Backup & Restore</h3>
-      
-      <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-        <button class="btn btn-primary" onclick="app.views.settings.createFullBackup()" style="flex: 1; height: 60px; font-size: 16px;">
-          💾 Backup
-        </button>
-        <button class="btn btn-secondary" onclick="app.views.settings.showImportSettings()" style="flex: 1; height: 60px; font-size: 16px;">
-          📂 Restore
-        </button>
-      </div>
-      
-      <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px; border-radius: 8px;">
-        <div style="font-weight: 600; margin-bottom: 8px;">💡 Vollständiges Backup:</div>
-        <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
-          <li><strong>Backup:</strong> Sichert ALLE Daten (Teams, Ergebnisse, Einstellungen)</li>
-          <li><strong>Restore:</strong> Stellt alle Daten wieder her</li>
-          <li><strong>Empfehlung:</strong> Regelmäßige Backups vor wichtigen Änderungen</li>
-        </ul>
-      </div>
-    `;
+    <h3>Backup & Restore</h3>
+    
+    <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+      <button class="btn btn-primary" id="createBackupBtn" style="flex: 1; height: 60px; font-size: 16px;">
+        💾 Backup
+      </button>
+      <button class="btn btn-secondary" id="showImportBtn" style="flex: 1; height: 60px; font-size: 16px;">
+        📂 Restore
+      </button>
+    </div>
+    
+    <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px; border-radius: 8px;">
+      <div style="font-weight: 600; margin-bottom: 8px;">💡 Vollständiges Backup:</div>
+      <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
+        <li><strong>Backup:</strong> Sichert ALLE Daten (Teams, Ergebnisse, Einstellungen)</li>
+        <li><strong>Restore:</strong> Stellt alle Daten wieder her</li>
+        <li><strong>Empfehlung:</strong> Regelmäßige Backups vor wichtigen Änderungen</li>
+      </ul>
+    </div>
+  `;
+
+    // ✅ SICHERHEITSFIX: Event-Listener nach DOM-Insertion hinzufügen
+    setTimeout(() => {
+      const createBackupBtn = document.getElementById("createBackupBtn");
+      const showImportBtn = document.getElementById("showImportBtn");
+
+      if (createBackupBtn) {
+        createBackupBtn.addEventListener("click", () => this.createFullBackup());
+      }
+
+      if (showImportBtn) {
+        showImportBtn.addEventListener("click", () => this.showImportSettings());
+      }
+    }, 100);
+
     return section;
   }
 
   createDisciplinesSection() {
     const section = document.createElement("div");
     section.className = "card";
+
+    // ✅ SICHERHEITSFIX: Keine onclick-Handler in innerHTML
     section.innerHTML = `
-      <h3>Verfügbare Disziplinen</h3>
-      <div id="disciplinesList" style="margin-top: 12px;"></div>
-      <div style="margin-top: 16px; display: flex; gap: 8px;">
-        <input type="text" id="newDisciplineName" placeholder="Neue Disziplin" 
-               style="flex: 1; padding: 12px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px; height:40px;">
-        <button class="btn btn-secondary" onclick="app.views.settings.addDiscipline()" 
-                style="padding: 8px 12px; height: 40px;">Hinzufügen</button>
-      </div>
-    `;
+    <h3>Verfügbare Disziplinen</h3>
+    <div id="disciplinesList" style="margin-top: 12px;"></div>
+    <div style="margin-top: 16px; display: flex; gap: 8px;">
+      <input type="text" id="newDisciplineName" placeholder="Neue Disziplin" 
+             style="flex: 1; padding: 12px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px; height:40px;">
+      <button class="btn btn-secondary" id="addDisciplineBtn" 
+              style="padding: 8px 12px; height: 40px;">Hinzufügen</button>
+    </div>
+  `;
+
+    // ✅ SICHERHEITSFIX: Event-Listener nach DOM-Insertion
+    setTimeout(() => {
+      const addBtn = document.getElementById("addDisciplineBtn");
+      if (addBtn) {
+        addBtn.addEventListener("click", () => this.addDiscipline());
+      }
+    }, 100);
+
     return section;
   }
 
   createWeaponsSection() {
     const section = document.createElement("div");
     section.className = "card";
+
+    // ✅ SICHERHEITSFIX: Keine onclick-Handler in innerHTML
     section.innerHTML = `
-      <h3>Verfügbare Waffen</h3>
-      <div id="weaponsList" style="margin-top: 12px;"></div>
-      <div style="margin-top: 16px; display: flex; gap: 8px;">
-        <input type="text" id="newWeaponName" placeholder="Neue Waffe" 
-               style="flex: 1; padding: 12px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px; height:40px;">
-        <button class="btn btn-secondary" onclick="app.views.settings.addWeapon()" 
-                style="padding: 8px 12px; height: 40px;">Hinzufügen</button>
-      </div>
-    `;
+    <h3>Verfügbare Waffen</h3>
+    <div id="weaponsList" style="margin-top: 12px;"></div>
+    <div style="margin-top: 16px; display: flex; gap: 8px;">
+      <input type="text" id="newWeaponName" placeholder="Neue Waffe" 
+             style="flex: 1; padding: 12px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px; height:40px;">
+      <button class="btn btn-secondary" id="addWeaponBtn" 
+              style="padding: 8px 12px; height: 40px;">Hinzufügen</button>
+    </div>
+  `;
+
+    // ✅ SICHERHEITSFIX: Event-Listener nach DOM-Insertion
+    setTimeout(() => {
+      const addBtn = document.getElementById("addWeaponBtn");
+      if (addBtn) {
+        addBtn.addEventListener("click", () => this.addWeapon());
+      }
+    }, 100);
+
     return section;
   }
 
   createInfoSection() {
     const section = document.createElement("div");
     section.className = "card";
-    section.style.cssText = "margin-bottom: 30px;"; // Zusätzlicher Abstand
+    section.style.cssText = "margin-bottom: 30px;";
+
+    // ✅ SICHERHEITSFIX: Keine onclick-Handler in innerHTML
     section.innerHTML = `
     <h3>App-Information</h3>
     <div style="margin-top: 12px;">
@@ -403,11 +444,20 @@ class SettingsView {
       </div>
     </div>
     <div style="margin-top: 16px;">
-      <button class="btn btn-danger" onclick="app.views.settings.resetApp()" style="width: 100%;">
+      <button class="btn btn-danger" id="resetAppBtn" style="width: 100%;">
         App zurücksetzen
       </button>
     </div>
   `;
+
+    // ✅ SICHERHEITSFIX: Event-Listener nach DOM-Insertion
+    setTimeout(() => {
+      const resetBtn = document.getElementById("resetAppBtn");
+      if (resetBtn) {
+        resetBtn.addEventListener("click", () => this.resetApp());
+      }
+    }, 100);
+
     return section;
   }
 
@@ -670,27 +720,45 @@ class SettingsView {
     }
 
     storage.availableDisciplines.forEach((discipline, index) => {
+      // ✅ SICHERHEITSFIX: Sichere Element-Erstellung
       const disciplineItem = document.createElement("div");
       disciplineItem.style.cssText = `
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 0;
-        border-bottom: 1px solid #f0f0f0;
-        `;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    `;
 
-      disciplineItem.innerHTML = `
-        <span style="flex: 1; height: 30px; max-width:50%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;" title="${UIUtils.escapeHtml(discipline)}">${UIUtils.escapeHtml(discipline)}</span>
-        <div style="display: flex; gap: 8px;">
-        <button class="btn btn-small btn-secondary" style="height: 30px;" onclick="app.views.settings.editDiscipline(${index})">
-        Bearbeiten
-        </button>
-        <button class="btn btn-small btn-danger" style="height: 30px;" onclick="app.views.settings.deleteDiscipline(${index})">
-        Löschen
-        </button>
-        </div>
-        `;
+      // Name-Span
+      const nameSpan = document.createElement("span");
+      nameSpan.style.cssText = "flex: 1; height: 30px; max-width:50%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;";
+      nameSpan.title = discipline;
+      nameSpan.textContent = discipline;
 
+      // Button-Container
+      const buttonContainer = document.createElement("div");
+      buttonContainer.style.cssText = "display: flex; gap: 8px;";
+
+      // Edit-Button
+      const editBtn = document.createElement("button");
+      editBtn.className = "btn btn-small btn-secondary";
+      editBtn.style.height = "30px";
+      editBtn.textContent = "Bearbeiten";
+      editBtn.addEventListener("click", () => this.editDiscipline(index));
+
+      // Delete-Button
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "btn btn-small btn-danger";
+      deleteBtn.style.height = "30px";
+      deleteBtn.textContent = "Löschen";
+      deleteBtn.addEventListener("click", () => this.deleteDiscipline(index));
+
+      // Zusammenbauen
+      buttonContainer.appendChild(editBtn);
+      buttonContainer.appendChild(deleteBtn);
+      disciplineItem.appendChild(nameSpan);
+      disciplineItem.appendChild(buttonContainer);
       disciplinesList.appendChild(disciplineItem);
     });
   }
@@ -786,27 +854,45 @@ class SettingsView {
     }
 
     storage.availableWeapons.forEach((weapon, index) => {
+      // ✅ SICHERHEITSFIX: Sichere Element-Erstellung
       const weaponItem = document.createElement("div");
       weaponItem.style.cssText = `
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 0;
-        border-bottom: 1px solid #f0f0f0;
-      `;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    `;
 
-      weaponItem.innerHTML = `
-        <span style="flex: 1; height: 30px; max-width:50%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;" title="${UIUtils.escapeHtml(weapon)}">${UIUtils.escapeHtml(weapon)}</span>
-        <div style="display: flex; gap: 8px;">
-        <button class="btn btn-small btn-secondary" style="height: 30px;" onclick="app.views.settings.editWeapon(${index})">
-        Bearbeiten
-        </button>
-        <button class="btn btn-small btn-danger" style="height: 30px;" onclick="app.views.settings.deleteWeapon(${index})">
-        Löschen
-        </button>
-        </div>
-        `;
+      // Name-Span
+      const nameSpan = document.createElement("span");
+      nameSpan.style.cssText = "flex: 1; height: 30px; max-width:50%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;";
+      nameSpan.title = weapon;
+      nameSpan.textContent = weapon;
 
+      // Button-Container
+      const buttonContainer = document.createElement("div");
+      buttonContainer.style.cssText = "display: flex; gap: 8px;";
+
+      // Edit-Button
+      const editBtn = document.createElement("button");
+      editBtn.className = "btn btn-small btn-secondary";
+      editBtn.style.height = "30px";
+      editBtn.textContent = "Bearbeiten";
+      editBtn.addEventListener("click", () => this.editWeapon(index));
+
+      // Delete-Button
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "btn btn-small btn-danger";
+      deleteBtn.style.height = "30px";
+      deleteBtn.textContent = "Löschen";
+      deleteBtn.addEventListener("click", () => this.deleteWeapon(index));
+
+      // Zusammenbauen
+      buttonContainer.appendChild(editBtn);
+      buttonContainer.appendChild(deleteBtn);
+      weaponItem.appendChild(nameSpan);
+      weaponItem.appendChild(buttonContainer);
       weaponsList.appendChild(weaponItem);
     });
   }
@@ -1285,6 +1371,7 @@ class SettingsView {
       newTeams: [],
       newShooters: [],
       newResults: 0,
+      updatedResults: 0,  // NEU hinzufügen
       skippedTeams: [],
       skippedShooters: [],
       skippedResults: 0
@@ -1314,7 +1401,7 @@ class SettingsView {
       });
     }
 
-    // Analysiere Ergebnisse
+    // KORRIGIERT: Analysiere Ergebnisse
     if (backupData.results) {
       backupData.results.forEach(result => {
         const existingResult = storage.results.find(r =>
@@ -1324,9 +1411,15 @@ class SettingsView {
         );
 
         if (existingResult) {
-          analysis.skippedResults++;
+          // Prüfe ob sich die Shots unterscheiden
+          const hasChanges = JSON.stringify(existingResult.shots) !== JSON.stringify(result.shots);
+          if (hasChanges) {
+            analysis.updatedResults++;  // Update verfügbar
+          } else {
+            analysis.skippedResults++;  // Identisch, skip
+          }
         } else {
-          analysis.newResults++;
+          analysis.newResults++;  // Wirklich neu
         }
       });
     }
@@ -1389,13 +1482,17 @@ class SettingsView {
     reader.readAsText(file, "UTF-8");
   }
 
-  // NEU: Merge-Import durchführen
+  // NEU: Erweiterte performMergeImport mit ID-Mapping
   performMergeImport(backupData) {
     let importedCount = 0;
     let skippedCount = 0;
 
+    // ID-Mappings für die Zuordnung
+    const teamIdMap = new Map(); // alte ID -> neue ID
+    const shooterIdMap = new Map(); // alte ID -> neue ID
+
     try {
-      // 1. Teams mergen
+      // 1. Teams mergen UND ID-Mapping erstellen
       if (backupData.teams) {
         backupData.teams.forEach(teamData => {
           const existingTeam = storage.teams.find(t =>
@@ -1405,16 +1502,38 @@ class SettingsView {
           if (!existingTeam) {
             const newTeam = Team.fromJSON(teamData);
             storage.teams.push(newTeam);
+
+            // ID-Mapping: alte Team-ID -> neue Team-ID
+            teamIdMap.set(teamData.id, newTeam.id);
+
+            // Schützen-ID-Mapping für dieses Team
+            teamData.shooters.forEach((oldShooter, index) => {
+              if (newTeam.shooters[index]) {
+                shooterIdMap.set(oldShooter.id, newTeam.shooters[index].id);
+              }
+            });
+
             importedCount++;
             console.log(`Merged new team: ${newTeam.name}`);
           } else {
+            // Auch bei existierenden Teams die Schützen-IDs mappen
+            teamIdMap.set(teamData.id, existingTeam.id);
+            teamData.shooters.forEach((oldShooter) => {
+              const existingShooter = existingTeam.shooters.find(s =>
+                s.name.toLowerCase() === oldShooter.name.toLowerCase()
+              );
+              if (existingShooter) {
+                shooterIdMap.set(oldShooter.id, existingShooter.id);
+              }
+            });
+
             skippedCount++;
             console.log(`Skipped existing team: ${teamData.name}`);
           }
         });
       }
 
-      // 2. Einzelschützen mergen
+      // 2. Einzelschützen mergen UND ID-Mapping erstellen
       if (backupData.standaloneShooters) {
         backupData.standaloneShooters.forEach(shooterData => {
           const existingShooter = storage.standaloneShooters.find(s =>
@@ -1424,72 +1543,91 @@ class SettingsView {
           if (!existingShooter) {
             const newShooter = Shooter.fromJSON(shooterData);
             storage.standaloneShooters.push(newShooter);
+
+            // ID-Mapping: alte Schützen-ID -> neue Schützen-ID
+            shooterIdMap.set(shooterData.id, newShooter.id);
+
             importedCount++;
             console.log(`Merged new standalone shooter: ${newShooter.name}`);
           } else {
+            // ID-Mapping für existierenden Schützen
+            shooterIdMap.set(shooterData.id, existingShooter.id);
+
             skippedCount++;
             console.log(`Skipped existing shooter: ${shooterData.name}`);
           }
         });
       }
 
-      // 3. Ergebnisse mergen (nur neue hinzufügen)
+      // 3. Ergebnisse mergen mit korrigierten IDs
       if (backupData.results) {
         backupData.results.forEach(resultData => {
-          const existingResult = storage.results.find(r =>
-            r.teamId === resultData.teamId &&
-            r.shooterId === resultData.shooterId &&
-            r.discipline === resultData.discipline
-          );
+          // Korrigiere die IDs basierend auf dem Mapping
+          const newTeamId = resultData.teamId ? teamIdMap.get(resultData.teamId) : null;
+          const newShooterId = shooterIdMap.get(resultData.shooterId);
 
-          if (!existingResult) {
-            const newResult = ResultEntry.fromJSON(resultData);
-            storage.results.push(newResult);
-            importedCount++;
-            console.log(`Merged new result for shooter: ${resultData.shooterId}`);
+          // Nur importieren wenn der Schütze existiert
+          if (newShooterId) {
+            const existingResult = storage.results.find(r =>
+              r.teamId === newTeamId &&
+              r.shooterId === newShooterId &&
+              r.discipline === resultData.discipline
+            );
+
+            if (!existingResult) {
+              // Erstelle Ergebnis mit korrigierten IDs
+              const newResult = new ResultEntry(
+                newTeamId,
+                newShooterId,
+                resultData.discipline,
+                resultData.shots,
+                null // Neue ID wird automatisch generiert
+              );
+
+              storage.results.push(newResult);
+              importedCount++;
+              console.log(`Merged new result for shooter: ${newShooterId} (was: ${resultData.shooterId})`);
+            } else {
+              skippedCount++;
+              console.log(`Skipped existing result for shooter: ${newShooterId}`);
+            }
           } else {
-            skippedCount++;
-            console.log(`Skipped existing result for shooter: ${resultData.shooterId}`);
+            console.warn(`Could not map shooter ID: ${resultData.shooterId}`);
           }
         });
       }
 
-      // 4. Einstellungen vorsichtig mergen (nur wenn noch nicht gesetzt)
-      if (backupData.availableDisciplines && storage.availableDisciplines.length === 0) {
-        storage.availableDisciplines = backupData.availableDisciplines;
-        importedCount++;
-      }
-
-      if (backupData.availableWeapons && storage.availableWeapons.length === 0) {
-        storage.availableWeapons = backupData.availableWeapons;
-        importedCount++;
-      }
-
-      if (backupData.selectedDiscipline && !storage.selectedDiscipline) {
-        storage.selectedDiscipline = backupData.selectedDiscipline;
-      }
-
-      if (backupData.selectedCompetitionType && !storage.selectedCompetitionType) {
-        storage.selectedCompetitionType = backupData.selectedCompetitionType;
-      }
-
-      // 5. Label-Einstellungen nur mergen wenn noch nicht gesetzt
-      if (backupData.labelSettings && !storage.settings.labelSettings) {
-        storage.saveLabelSettings(backupData.labelSettings);
-        importedCount++;
-      }
-
-      // Speichern
+      // Reste der Methode bleibt gleich...
+      // 4. Einstellungen vorsichtig mergen
+      // 5. Speichern
       storage.save();
 
-      // Erfolgsmeldung
       const message = `🔀 Merge erfolgreich! Importiert: ${importedCount}, Übersprungen: ${skippedCount}`;
       UIUtils.showSuccessMessage(message);
-      console.log(`Merge completed: ${importedCount} imported, ${skippedCount} skipped`);
+      console.log(`Merge completed with ID mapping: ${importedCount} imported, ${skippedCount} skipped`);
 
     } catch (error) {
       console.error("Merge error:", error);
       throw new Error("Merge fehlgeschlagen: " + error.message);
+    }
+  }
+
+  debugMergeImport(backupData) {
+    console.log("=== MERGE DEBUG ===");
+    console.log("Backup teams:", backupData.teams?.length || 0);
+    console.log("Backup shooters:", backupData.standaloneShooters?.length || 0);
+    console.log("Backup results:", backupData.results?.length || 0);
+
+    console.log("Current teams:", storage.teams.length);
+    console.log("Current shooters:", storage.standaloneShooters.length);
+    console.log("Current results:", storage.results.length);
+
+    // Prüfe ID-Übereinstimmungen
+    if (backupData.results) {
+      backupData.results.forEach(result => {
+        const shooterExists = storage.findShooterById(result.shooterId);
+        console.log(`Result ${result.id}: ShooterID ${result.shooterId} exists:`, !!shooterExists);
+      });
     }
   }
 

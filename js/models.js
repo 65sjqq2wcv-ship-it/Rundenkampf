@@ -1,4 +1,44 @@
-// Enums und Konstanten
+// =================================================================
+// MODELS - Sichere ID-Generierung für alle Entitäten
+// =================================================================
+
+// ✅ SICHERHEITSFIX: Kollisionssichere ID-Generierung
+class SecureIDGenerator {
+  constructor() {
+    this.counter = 0;
+    this.lastTimestamp = 0;
+  }
+
+  generate(prefix = "entity") {
+    const timestamp = Date.now();
+    
+    // Verhindere identische Timestamps durch Counter-Increment
+    if (timestamp === this.lastTimestamp) {
+      this.counter++;
+    } else {
+      this.counter = 0;
+      this.lastTimestamp = timestamp;
+    }
+    
+    // Kombination aus:
+    // 1. Timestamp (Millisekunden)
+    // 2. Performance-Counter (Mikrosekunden) 
+    // 3. Interner Counter (für gleiche Millisekunde)
+    // 4. Random (für zusätzliche Sicherheit)
+    const performanceNow = Math.round((performance.now() * 1000) % 1000000); // 6 Stellen
+    const random = Math.random().toString(36).substr(2, 9);
+    
+    return `${prefix}_${timestamp}_${performanceNow}_${this.counter}_${random}`;
+  }
+}
+
+// Globale sichere ID-Generator Instanz
+const secureIdGenerator = new SecureIDGenerator();
+
+// =================================================================
+// ENUMS UND KONSTANTEN (unverändert)
+// =================================================================
+
 const Discipline = {
   PRAEZISION: "Präzision",
   DUELL: "Duell",
@@ -10,7 +50,7 @@ const CompetitionType = {
   ANNEX_SCHEIBE: "Annex",
 };
 
-// Utility Functions
+// Utility Functions (unverändert)
 function getCompetitionType(discipline) {
   switch (discipline) {
     case Discipline.PRAEZISION:
@@ -23,17 +63,19 @@ function getCompetitionType(discipline) {
   }
 }
 
-// Model Classes
+// =================================================================
+// MODEL CLASSES mit sicherer ID-Generierung
+// =================================================================
+
 class Shooter {
   constructor(name, id = null) {
-    this.id = id || this.generateId();
+    this.id = id || this.generateId(); // ✅ Weiterhin exakt gleiche API
     this.name = name;
   }
 
+  // ✅ SICHERHEITSFIX: Sichere ID-Generierung statt unsichere
   generateId() {
-    return (
-      "shooter_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9)
-    );
+    return secureIdGenerator.generate("shooter");
   }
 
   static fromJSON(json) {
@@ -50,15 +92,16 @@ class Shooter {
 
 class Team {
   constructor(name, shooters = [], id = null) {
-    this.id = id || this.generateId();
+    this.id = id || this.generateId(); // ✅ Weiterhin exakt gleiche API
     this.name = name;
     this.shooters = shooters.map((s) =>
       s instanceof Shooter ? s : Shooter.fromJSON(s)
     );
   }
 
+  // ✅ SICHERHEITSFIX: Sichere ID-Generierung statt unsichere
   generateId() {
-    return "team_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+    return secureIdGenerator.generate("team");
   }
 
   static fromJSON(json) {
@@ -77,17 +120,16 @@ class Team {
 
 class ResultEntry {
   constructor(teamId, shooterId, discipline, shots = null, id = null) {
-    this.id = id || this.generateId();
+    this.id = id || this.generateId(); // ✅ Weiterhin exakt gleiche API
     this.teamId = teamId; // null für Einzelschützen
     this.shooterId = shooterId;
     this.discipline = discipline;
     this.shots = shots || new Array(40).fill(null);
   }
 
+  // ✅ SICHERHEITSFIX: Sichere ID-Generierung statt unsichere
   generateId() {
-    return (
-      "result_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9)
-    );
+    return secureIdGenerator.generate("result");
   }
 
   total() {
@@ -116,7 +158,7 @@ class ResultEntry {
     };
   }
 
-  // In ResultEntry class hinzufügen:
+  // seriesSums Methode (unverändert)
   seriesSums() {
     if (this.discipline !== Discipline.ANNEX_SCHEIBE) {
       return [];
