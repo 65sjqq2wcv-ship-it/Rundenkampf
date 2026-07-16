@@ -42,14 +42,14 @@ class OverviewView {
         container.appendChild(soloCard);
       }
 
-      // Add team leaders and encounters cards if teams exist
-      if (filteredTeams.length > 0) {
-        const leadersCard = this.createAllTeamLeadersCard(filteredTeams);
+      // Add team leaders and encounters cards - unabhängig vom Filter, von ALLEN Teams
+      if (storage.teams.length > 0) {
+        const leadersCard = this.createAllTeamLeadersCard(storage.teams);
         if (leadersCard) {
           container.appendChild(leadersCard);
         }
 
-        const encountersCard = this.createAllEncountersCard(filteredTeams);
+        const encountersCard = this.createAllEncountersCard(storage.teams);
         if (encountersCard) {
           container.appendChild(encountersCard);
         }
@@ -925,6 +925,13 @@ class OverviewView {
       return null;
     }
 
+    // Sortiere Begegnungen nach Datum (DD.MM.YYYY -> chronologisch)
+    encountersList.sort((a, b) => {
+      const dateA = new Date(a.encounter.date.split(".").reverse().join("-"));
+      const dateB = new Date(b.encounter.date.split(".").reverse().join("-"));
+      return dateA - dateB;
+    });
+
     const card = document.createElement("div");
     card.className = "card";
     card.style.cssText = "margin-bottom: 12px; padding: 12px; background: #fff8f0; border: 1px solid #ffc9a3;";
@@ -979,14 +986,6 @@ class OverviewView {
       emailDiv.style.cssText = "color: #0066cc;";
       emailDiv.innerHTML = `<a href="mailto:${UIUtils.escapeHtml(eventDirector.email)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(eventDirector.email)}</a>`;
       content.appendChild(emailDiv);
-    }
-
-    // Telefon
-    if (eventDirector.phone) {
-      const phoneDiv = document.createElement("div");
-      phoneDiv.style.cssText = "color: #0066cc;";
-      phoneDiv.innerHTML = `<a href="tel:${UIUtils.escapeHtml(eventDirector.phone)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(eventDirector.phone)}</a>`;
-      content.appendChild(phoneDiv);
     }
 
     card.appendChild(content);

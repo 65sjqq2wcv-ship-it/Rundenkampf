@@ -135,8 +135,8 @@ class PDFExporter {
     let eventDirectorHtml = "";
     if (eventDirector.name) {
       eventDirectorHtml = `
-                        <div class="info-row">
-                            <strong>Rundenkampfleiter:</strong> ${UIUtils.escapeHtml(eventDirector.name)}${eventDirector.email ? ` (${UIUtils.escapeHtml(eventDirector.email)})` : ""}${eventDirector.phone ? ` - ${UIUtils.escapeHtml(eventDirector.phone)}` : ""}
+                        <div class="info-row" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <strong>Rundenkampfleiter:</strong> ${UIUtils.escapeHtml(eventDirector.name)}${eventDirector.email ? ` (${UIUtils.escapeHtml(eventDirector.email)})` : ""}
                         </div>`;
     }
 
