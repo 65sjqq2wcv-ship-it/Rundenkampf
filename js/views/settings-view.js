@@ -32,6 +32,10 @@ class SettingsView {
       const labelSection = this.createLabelSettingsSection();
       container.appendChild(labelSection);
 
+      // NEU: Rundenkampfleiter Section
+      const eventDirectorSection = this.createEventDirectorSection();
+      container.appendChild(eventDirectorSection);
+
       // Backup/Restore Section
       const backupSection = this.createBackupRestoreSection();
       container.appendChild(backupSection);
@@ -52,6 +56,7 @@ class SettingsView {
       setTimeout(() => {
         this.setupEventListeners();
         this.setupLabelSettingsEventListeners(); // NEU: Label-Settings Event-Listeners
+        this.setupEventDirectorEventListeners(); // NEU: Event-Director Event-Listeners
         this.updateCurrentDisciplineSelect();
         this.updateDisciplinesList();
         this.updateWeaponsList();
@@ -422,6 +427,28 @@ class SettingsView {
       }
     }, 100);
 
+    return section;
+  }
+
+  createEventDirectorSection() {
+    const eventDirector = storage.settings.eventDirector || {};
+    const section = document.createElement("div");
+    section.className = "card";
+
+    section.innerHTML = `
+      <h3>Rundenkampfleiter</h3>
+      <div class="form-section">
+        <div class="form-row">
+          <input type="text" id="eventDirectorNameInput" class="form-input" placeholder="Name" value="${UIUtils.escapeHtml(eventDirector.name || "")}">
+        </div>
+        <div class="form-row">
+          <input type="email" id="eventDirectorEmailInput" class="form-input" placeholder="eMail" value="${UIUtils.escapeHtml(eventDirector.email || "")}">
+        </div>
+        <div class="form-row">
+          <input type="tel" id="eventDirectorPhoneInput" class="form-input" placeholder="Telefon" value="${UIUtils.escapeHtml(eventDirector.phone || "")}">
+        </div>
+      </div>
+    `;
     return section;
   }
 
@@ -1698,6 +1725,29 @@ class SettingsView {
         console.error("Error resetting app:", error);
         alert("Fehler beim Zurücksetzen: " + error.message);
       }
+    }
+  }
+
+  setupEventDirectorEventListeners() {
+    const nameInput = document.getElementById("eventDirectorNameInput");
+    const emailInput = document.getElementById("eventDirectorEmailInput");
+    const phoneInput = document.getElementById("eventDirectorPhoneInput");
+
+    if (nameInput && emailInput && phoneInput) {
+      const saveEventDirector = () => {
+        if (!storage.settings.eventDirector) {
+          storage.settings.eventDirector = {};
+        }
+        storage.settings.eventDirector.name = (nameInput.value || "").trim();
+        storage.settings.eventDirector.email = (emailInput.value || "").trim();
+        storage.settings.eventDirector.phone = (phoneInput.value || "").trim();
+        storage.save();
+        UIUtils.showSuccessMessage("Rundenkampfleiter gespeichert");
+      };
+
+      nameInput.addEventListener("change", saveEventDirector);
+      emailInput.addEventListener("change", saveEventDirector);
+      phoneInput.addEventListener("change", saveEventDirector);
     }
   }
 }

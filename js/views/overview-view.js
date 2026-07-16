@@ -17,6 +17,12 @@ class OverviewView {
         container.appendChild(infoCard);
       }
 
+      // Event Director info card
+      const eventDirectorCard = this.createEventDirectorCard();
+      if (eventDirectorCard) {
+        container.appendChild(eventDirectorCard);
+      }
+
       // Teams overview
       const filteredTeams = storage.getFilteredTeams();
 
@@ -34,6 +40,19 @@ class OverviewView {
       if (filteredStandaloneShooters.length > 0) {
         const soloCard = this.createSoloShootersCard();
         container.appendChild(soloCard);
+      }
+
+      // Add team leaders and encounters cards if teams exist
+      if (filteredTeams.length > 0) {
+        const leadersCard = this.createAllTeamLeadersCard(filteredTeams);
+        if (leadersCard) {
+          container.appendChild(leadersCard);
+        }
+
+        const encountersCard = this.createAllEncountersCard(filteredTeams);
+        if (encountersCard) {
+          container.appendChild(encountersCard);
+        }
       }
 
       // Empty state only if NO filtered teams AND no filtered standalone shooters
@@ -833,5 +852,144 @@ class OverviewView {
         "PDF-Exporter nicht verfügbar. Bitte laden Sie die Seite neu.",
       );
     }
+  }
+
+  createAllTeamLeadersCard(filteredTeams) {
+    const teamLeaders = filteredTeams
+      .filter((team) => team.teamLeader && team.teamLeader.name)
+      .map((team) => ({ team, leader: team.teamLeader }));
+
+    if (teamLeaders.length === 0) {
+      return null;
+    }
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.cssText = "margin-bottom: 12px; padding: 12px; background: #f0f8ff; border: 1px solid #b3d9ff;";
+
+    const header = document.createElement("h4");
+    header.style.cssText = "margin: 0 0 8px 0; color: #333; font-size: 14px;";
+    header.textContent = `Mannschaftsführer (${teamLeaders.length})`;
+    card.appendChild(header);
+
+    const list = document.createElement("div");
+    list.style.cssText = "font-size: 13px; line-height: 1.5;";
+
+    teamLeaders.forEach((item, index) => {
+      const { team, leader } = item;
+      const container = document.createElement("div");
+      container.style.cssText = `padding: 6px 0; ${index < teamLeaders.length - 1 ? 'border-bottom: 1px solid #d9ecff; padding-bottom: 8px;' : ''}`;
+      
+      // Name und Team
+      const nameLine = document.createElement("div");
+      nameLine.innerHTML = `<strong>${UIUtils.escapeHtml(leader.name)}</strong> (${UIUtils.escapeHtml(team.name)})`;
+      container.appendChild(nameLine);
+
+      // eMail
+      if (leader.email) {
+        const emailLine = document.createElement("div");
+        emailLine.style.cssText = "color: #0066cc;";
+        emailLine.innerHTML = `<a href="mailto:${UIUtils.escapeHtml(leader.email)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(leader.email)}</a>`;
+        container.appendChild(emailLine);
+      }
+
+      // Telefon
+      if (leader.phone) {
+        const phoneLine = document.createElement("div");
+        phoneLine.style.cssText = "color: #0066cc;";
+        phoneLine.innerHTML = `<a href="tel:${UIUtils.escapeHtml(leader.phone)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(leader.phone)}</a>`;
+        container.appendChild(phoneLine);
+      }
+      
+      list.appendChild(container);
+    });
+
+    card.appendChild(list);
+    return card;
+  }
+
+  createAllEncountersCard(filteredTeams) {
+    let totalEncounters = 0;
+    const encountersList = [];
+
+    filteredTeams.forEach((team) => {
+      if (team.encounters && team.encounters.length > 0) {
+        team.encounters.forEach((encounter) => {
+          encountersList.push({ team, encounter });
+          totalEncounters++;
+        });
+      }
+    });
+
+    if (totalEncounters === 0) {
+      return null;
+    }
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.cssText = "margin-bottom: 12px; padding: 12px; background: #fff8f0; border: 1px solid #ffc9a3;";
+
+    const header = document.createElement("h4");
+    header.style.cssText = "margin: 0 0 8px 0; color: #333; font-size: 14px;";
+    header.textContent = `Begegnungen (${totalEncounters})`;
+    card.appendChild(header);
+
+    const list = document.createElement("div");
+    list.style.cssText = "font-size: 13px; line-height: 1.5;";
+
+    encountersList.forEach((item, index) => {
+      const { team, encounter } = item;
+      const row = document.createElement("div");
+      row.style.cssText = `padding: 4px 0; ${index < encountersList.length - 1 ? 'border-bottom: 1px solid #ffe0cc;' : ''}`;
+      row.innerHTML = `<strong>${UIUtils.escapeHtml(encounter.date)}</strong> ${UIUtils.escapeHtml(encounter.opponent)} gegen ${UIUtils.escapeHtml(team.name)}`;
+      list.appendChild(row);
+    });
+
+    card.appendChild(list);
+    return card;
+  }
+
+  createEventDirectorCard() {
+    const eventDirector = storage.settings.eventDirector || {};
+    if (!eventDirector.name) {
+      return null;
+    }
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.cssText = "margin-bottom: 12px; padding: 12px; background: #fff0f5; border: 1px solid #ffb3d9;";
+
+    const header = document.createElement("h4");
+    header.style.cssText = "margin: 0 0 8px 0; color: #333; font-size: 14px;";
+    header.textContent = "Rundenkampfleiter";
+    card.appendChild(header);
+
+    const content = document.createElement("div");
+    content.style.cssText = "font-size: 13px; line-height: 1.5;";
+
+    // Name
+    const nameDiv = document.createElement("div");
+    nameDiv.style.cssText = "font-weight: 600; color: #333; margin-bottom: 4px;";
+    nameDiv.textContent = UIUtils.escapeHtml(eventDirector.name);
+    content.appendChild(nameDiv);
+
+    // eMail
+    if (eventDirector.email) {
+      const emailDiv = document.createElement("div");
+      emailDiv.style.cssText = "color: #0066cc;";
+      emailDiv.innerHTML = `<a href="mailto:${UIUtils.escapeHtml(eventDirector.email)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(eventDirector.email)}</a>`;
+      content.appendChild(emailDiv);
+    }
+
+    // Telefon
+    if (eventDirector.phone) {
+      const phoneDiv = document.createElement("div");
+      phoneDiv.style.cssText = "color: #0066cc;";
+      phoneDiv.innerHTML = `<a href="tel:${UIUtils.escapeHtml(eventDirector.phone)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(eventDirector.phone)}</a>`;
+      content.appendChild(phoneDiv);
+    }
+
+    card.appendChild(content);
+    return card;
   }
 }

@@ -14,6 +14,11 @@ class Storage {
     this.settings = {
       overlayScale: 3.0, // Default-Wert
       overlayOpacity: 0.8, // NEU: Default-Transparenz
+      eventDirector: {
+        name: "",
+        email: "",
+        phone: ""
+      }
     };
 
     // defaultLabelSettings mit Dezimalwerten:

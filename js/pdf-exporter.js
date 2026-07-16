@@ -131,6 +131,15 @@ class PDFExporter {
                 <div>LOGO</div>
             </div>`;
 
+    const eventDirector = storage.settings.eventDirector || {};
+    let eventDirectorHtml = "";
+    if (eventDirector.name) {
+      eventDirectorHtml = `
+                        <div class="info-row">
+                            <strong>Rundenkampfleiter:</strong> ${UIUtils.escapeHtml(eventDirector.name)}${eventDirector.email ? ` (${UIUtils.escapeHtml(eventDirector.email)})` : ""}${eventDirector.phone ? ` - ${UIUtils.escapeHtml(eventDirector.phone)}` : ""}
+                        </div>`;
+    }
+
     return `
         <header class="pdf-header">
             <div class="header-content">
@@ -150,6 +159,7 @@ class PDFExporter {
       "de-DE"
     )}
                         </div>
+                        ${eventDirectorHtml}
                     </div>
                 </div>
             </div>

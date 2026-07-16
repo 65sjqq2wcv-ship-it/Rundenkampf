@@ -120,6 +120,23 @@ class TeamsView {
       title.textContent = team.name;
       content.appendChild(title);
 
+      // Mannschaftsführer-Informationen
+      const leaderInfo = document.createElement("div");
+      leaderInfo.className = "list-item-subtitle";
+      if (team.teamLeader?.name) {
+        let leaderText = `Führung: ${UIUtils.escapeHtml(team.teamLeader.name)}`;
+        if (team.teamLeader.email) {
+          leaderText += ` (${UIUtils.escapeHtml(team.teamLeader.email)})`;
+        }
+        if (team.teamLeader.phone) {
+          leaderText += ` - ${UIUtils.escapeHtml(team.teamLeader.phone)}`;
+        }
+        leaderInfo.textContent = leaderText;
+      } else {
+        leaderInfo.textContent = "Keine Mannschaftsführer-Info";
+      }
+      content.appendChild(leaderInfo);
+
       const subtitle = document.createElement("div");
       subtitle.className = "list-item-subtitle";
       if (team.shooters.length > 0) {
@@ -196,10 +213,31 @@ class TeamsView {
       </div>
       
       <div class="form-section">
+        <div class="form-section-header">Mannschaftsführer</div>
+        <div class="form-row">
+          <input type="text" id="teamLeaderNameInput" class="form-input" placeholder="Name" value="${UIUtils.escapeHtml(team.teamLeader?.name || "")}">
+        </div>
+        <div class="form-row">
+          <input type="email" id="teamLeaderEmailInput" class="form-input" placeholder="eMail" value="${UIUtils.escapeHtml(team.teamLeader?.email || "")}">
+        </div>
+        <div class="form-row">
+          <input type="tel" id="teamLeaderPhoneInput" class="form-input" placeholder="Telefon" value="${UIUtils.escapeHtml(team.teamLeader?.phone || "")}">
+        </div>
+      </div>
+      
+      <div class="form-section">
         <div class="form-section-header">Schützen</div>
         <div id="shootersList"></div>
         <button class="btn btn-secondary" id="addShooterBtn" style="width: 100%; margin-top: 8px;">
           Schütze hinzufügen
+        </button>
+      </div>
+      
+      <div class="form-section">
+        <div class="form-section-header">Begegnungen</div>
+        <div id="encountersList"></div>
+        <button class="btn btn-secondary" id="addEncounterBtn" style="width: 100%; margin-top: 8px;">
+          Begegnung hinzufügen
         </button>
       </div>
       
@@ -233,6 +271,7 @@ class TeamsView {
 
     setTimeout(() => {
       this.updateShootersList(team);
+      this.updateEncountersList(team);
 
       const addShooterBtn = document.getElementById("addShooterBtn");
       if (addShooterBtn) {
@@ -244,6 +283,15 @@ class TeamsView {
           const newShooter = new Shooter("");
           team.shooters.push(newShooter);
           this.updateShootersList(team);
+        });
+      }
+
+      const addEncounterBtn = document.getElementById("addEncounterBtn");
+      if (addEncounterBtn) {
+        addEncounterBtn.addEventListener("click", () => {
+          const newEncounter = new Encounter("", "");
+          team.encounters.push(newEncounter);
+          this.updateEncountersList(team);
         });
       }
 
@@ -344,6 +392,99 @@ class TeamsView {
     }
   }
 
+  updateEncountersList(team) {
+    const encountersList = document.getElementById("encountersList");
+    const addEncounterBtn = document.getElementById("addEncounterBtn");
+
+    if (!encountersList) return;
+
+    encountersList.innerHTML = "";
+
+    team.encounters.forEach((encounter, index) => {
+      const encounterDiv = document.createElement("div");
+      encounterDiv.className = "form-row";
+      encounterDiv.style.cssText = "display: flex; gap: 8px; align-items: center;";
+
+      const dateInput = document.createElement("input");
+      dateInput.type = "date";
+      dateInput.placeholder = "Datum";
+      // Konvertiere DD.MM.YYYY zu YYYY-MM-DD für Input
+      if (encounter.date) {
+        const parts = encounter.date.split(".");
+        if (parts.length === 3) {
+          dateInput.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+      }
+      dateInput.style.cssText = "flex: 0.8; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px;";
+
+      dateInput.addEventListener("change", (e) => {
+        // Konvertiere YYYY-MM-DD zurück zu DD.MM.YYYY
+        if (e.target.value) {
+          const parts = e.target.value.split("-");
+          encounter.date = `${parts[2]}.${parts[1]}.${parts[0]}`;
+        }
+      });
+
+      // Dropdown für Gegner-Teams
+      const opponentSelect = document.createElement("select");
+      opponentSelect.style.cssText = "flex: 1; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px;";
+
+      // Leere Option
+      const emptyOption = document.createElement("option");
+      emptyOption.value = "";
+      emptyOption.textContent = "Gegner wählen";
+      opponentSelect.appendChild(emptyOption);
+
+      // Alle anderen Teams hinzufügen
+      storage.teams.forEach((otherTeam) => {
+        if (otherTeam.id !== team.id) {
+          const option = document.createElement("option");
+          option.value = otherTeam.name;
+          option.textContent = otherTeam.name;
+          if (otherTeam.name === encounter.opponent) {
+            option.selected = true;
+          }
+          opponentSelect.appendChild(option);
+        }
+      });
+
+      opponentSelect.addEventListener("change", (e) => {
+        encounter.opponent = e.target.value;
+      });
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "btn btn-danger btn-small";
+      deleteBtn.textContent = "Löschen";
+      deleteBtn.style.cssText = "padding: 8px 12px;";
+
+      deleteBtn.addEventListener("click", () => {
+        this.removeEncounter(team.id, index);
+      });
+
+      encounterDiv.appendChild(dateInput);
+      encounterDiv.appendChild(opponentSelect);
+      encounterDiv.appendChild(deleteBtn);
+      encountersList.appendChild(encounterDiv);
+    });
+  }
+
+  removeEncounter(teamId, encounterIndex) {
+    const team = storage.teams.find((t) => t.id === teamId);
+    if (team && team.encounters[encounterIndex]) {
+      const encounter = team.encounters[encounterIndex];
+
+      if (
+        confirm(
+          `Möchten Sie die Begegnung vom ${encounter.date} gegen ${encounter.opponent} wirklich löschen?`
+        )
+      ) {
+        team.encounters.splice(encounterIndex, 1);
+        this.updateEncountersList(team);
+        UIUtils.showSuccessMessage("Begegnung gelöscht");
+      }
+    }
+  }
+
   saveTeam(team, isNew) {
     try {
       const teamNameInput = document.getElementById("teamNameInput");
@@ -354,6 +495,21 @@ class TeamsView {
       if (!team.name) {
         alert("Bitte geben Sie einen Mannschaftsnamen ein.");
         return;
+      }
+
+      // Mannschaftsführer speichern
+      team.teamLeader.name = (document.getElementById("teamLeaderNameInput")?.value || "").trim();
+      team.teamLeader.email = (document.getElementById("teamLeaderEmailInput")?.value || "").trim();
+      team.teamLeader.phone = (document.getElementById("teamLeaderPhoneInput")?.value || "").trim();
+
+      // Mannschaftsführer automatisch als Schütze hinzufügen (falls noch nicht vorhanden)
+      if (team.teamLeader.name) {
+        const shooterExists = team.shooters.some(
+          (shooter) => shooter.name.toLowerCase() === team.teamLeader.name.toLowerCase()
+        );
+        if (!shooterExists && team.shooters.length < 4) {
+          team.shooters.push(new Shooter(team.teamLeader.name));
+        }
       }
 
       team.shooters.forEach((shooter, index) => {
