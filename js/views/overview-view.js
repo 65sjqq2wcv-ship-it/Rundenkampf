@@ -977,14 +977,14 @@ class OverviewView {
 
     // Name
     const nameDiv = document.createElement("div");
-    nameDiv.style.cssText = "font-weight: 600; color: #333; margin-bottom: 4px;";
+    nameDiv.style.cssText = "font-weight: 600; color: #333; margin-bottom: 6px;";
     nameDiv.textContent = UIUtils.escapeHtml(eventDirector.name);
     content.appendChild(nameDiv);
 
     // eMail
     if (eventDirector.email) {
       const emailDiv = document.createElement("div");
-      emailDiv.style.cssText = "color: #0066cc;";
+      emailDiv.style.cssText = "color: #0066cc; margin-bottom: 4px;";
       emailDiv.innerHTML = `<span style="color: #000;">eMail:</span> <a href="mailto:${UIUtils.escapeHtml(eventDirector.email)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(eventDirector.email)}</a>`;
       content.appendChild(emailDiv);
     }

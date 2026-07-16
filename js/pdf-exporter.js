@@ -135,9 +135,24 @@ class PDFExporter {
     let eventDirectorHtml = "";
     if (eventDirector.name) {
       eventDirectorHtml = `
-                        <div class="info-row" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            <strong>Rundenkampfleiter:</strong> ${UIUtils.escapeHtml(eventDirector.name)}${eventDirector.email ? ` (${UIUtils.escapeHtml(eventDirector.email)})` : ""}
+                        <div class="info-row">
+                            <strong>Rundenkampfleiter:</strong>
+                        </div>
+                        <div class="info-row" style="margin-left: 40px; margin-top: -3px;">
+                            ${UIUtils.escapeHtml(eventDirector.name)}
                         </div>`;
+      if (eventDirector.email) {
+        eventDirectorHtml += `
+                        <div class="info-row" style="margin-left: 40px;">
+                            eMail: ${UIUtils.escapeHtml(eventDirector.email)}
+                        </div>`;
+      }
+      if (eventDirector.phone) {
+        eventDirectorHtml += `
+                        <div class="info-row" style="margin-left: 40px;">
+                            Telefon: ${UIUtils.escapeHtml(eventDirector.phone)}
+                        </div>`;
+      }
     }
 
     return `
