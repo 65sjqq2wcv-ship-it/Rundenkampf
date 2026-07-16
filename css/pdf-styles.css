@@ -98,7 +98,9 @@ body {
 
 .info-row {
   margin-bottom: 3px;
-  font-size: 12px;
+  font-size: 12px !important;
+  font-weight: normal;
+  display: block;
 }
 
 /* =================================================================

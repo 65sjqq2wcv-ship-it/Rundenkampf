@@ -889,7 +889,7 @@ class OverviewView {
       if (leader.email) {
         const emailLine = document.createElement("div");
         emailLine.style.cssText = "color: #0066cc;";
-        emailLine.innerHTML = `<a href="mailto:${UIUtils.escapeHtml(leader.email)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(leader.email)}</a>`;
+        emailLine.innerHTML = `<span style="color: #000;">eMail:</span> <a href="mailto:${UIUtils.escapeHtml(leader.email)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(leader.email)}</a>`;
         container.appendChild(emailLine);
       }
 
@@ -897,7 +897,7 @@ class OverviewView {
       if (leader.phone) {
         const phoneLine = document.createElement("div");
         phoneLine.style.cssText = "color: #0066cc;";
-        phoneLine.innerHTML = `<a href="tel:${UIUtils.escapeHtml(leader.phone)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(leader.phone)}</a>`;
+        phoneLine.innerHTML = `<span style="color: #000;">Telefon:</span> <a href="tel:${UIUtils.escapeHtml(leader.phone)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(leader.phone)}</a>`;
         container.appendChild(phoneLine);
       }
       
@@ -985,8 +985,16 @@ class OverviewView {
     if (eventDirector.email) {
       const emailDiv = document.createElement("div");
       emailDiv.style.cssText = "color: #0066cc;";
-      emailDiv.innerHTML = `<a href="mailto:${UIUtils.escapeHtml(eventDirector.email)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(eventDirector.email)}</a>`;
+      emailDiv.innerHTML = `<span style="color: #000;">eMail:</span> <a href="mailto:${UIUtils.escapeHtml(eventDirector.email)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(eventDirector.email)}</a>`;
       content.appendChild(emailDiv);
+    }
+
+    // Telefon
+    if (eventDirector.phone) {
+      const phoneDiv = document.createElement("div");
+      phoneDiv.style.cssText = "color: #0066cc;";
+      phoneDiv.innerHTML = `<span style="color: #000;">Telefon:</span> <a href="tel:${UIUtils.escapeHtml(eventDirector.phone)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(eventDirector.phone)}</a>`;
+      content.appendChild(phoneDiv);
     }
 
     card.appendChild(content);
