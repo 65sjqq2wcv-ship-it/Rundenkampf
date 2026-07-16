@@ -948,7 +948,7 @@ class OverviewView {
       const { team, encounter } = item;
       const row = document.createElement("div");
       row.style.cssText = `padding: 4px 0; ${index < encountersList.length - 1 ? 'border-bottom: 1px solid #ffe0cc;' : ''}`;
-      const dateShort = encounter.date.substring(0, 5) + encounter.date.slice(-2); // DD.MM.YY
+      const dateShort = encounter.date.substring(0, 5) + "." + encounter.date.slice(-2); // DD.MM.YY
       row.innerHTML = `<strong>${UIUtils.escapeHtml(dateShort)}</strong> ${UIUtils.escapeHtml(team.name)} gegen ${UIUtils.escapeHtml(encounter.opponent)}`;
       list.appendChild(row);
     });
