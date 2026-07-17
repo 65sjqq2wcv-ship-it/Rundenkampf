@@ -560,16 +560,16 @@ class PDFExporter {
         .team-title { font-size: 12px; font-weight: bold; color: #333; margin-bottom: 4px; display: flex; align-items: baseline; gap: 6px; }
         .team-count { font-size: 10px; font-weight: normal; color: #666; }
         .team-info-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 9px; background-color: #f5f5f5; border-left: 2px solid #333; }
-        .team-info-label { font-weight: bold; padding: 3px 4px; width: 15%; }
-        .team-info-name { padding: 3px 4px; width: 35%; }
-        .team-info-phone-label { font-weight: bold; padding: 3px 4px; width: 15%; }
-        .team-info-phone { padding: 3px 4px; width: 35%; }
+        .team-info-label { font-weight: bold; padding: 2px 3px; width: 15%; }
+        .team-info-name { padding: 2px 3px; width: 35%; }
+        .team-info-phone-label { font-weight: bold; padding: 2px 3px; width: 15%; }
+        .team-info-phone { padding: 2px 3px; width: 35%; }
         
         /* TABLE STYLES */
         .results-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; page-break-inside: avoid; font-size: 10px; }
-        .results-table th, .results-table td { padding: 4px 3px; border: 1px solid #999; text-align: center; }
+        .results-table th, .results-table td { padding: 2px 2px; border: 1px solid #999; text-align: center; }
         .results-table th { background-color: #d3d3d3; font-weight: bold; }
-        .name-header, .name-cell { text-align: left; width: 45%; }
+        .name-header, .name-cell { text-align: left; width: 45%; font-size: 8px; }
         .scheiben-header, .scheiben-cell { width: 6%; }
         .score-header, .score-cell { width: 12%; }
         .series-header, .series-cell { width: 10%; }
@@ -578,7 +578,7 @@ class PDFExporter {
         .table-row { background-color: white; }
         .table-row.zebra { background-color: #f9f9f9; }
         .table-row.worst-shooter { background-color: #ffcccc; }
-        .total-row { background-color: #d3d3d3; font-weight: bold; }
+        .total-row { background-color: #d3d3d3; font-weight: bold; font-size: 8px; }
         .total-label { text-align: left; font-weight: bold; }
         .total-value { text-align: center; font-weight: bold; }
         

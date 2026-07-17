@@ -159,23 +159,23 @@ body {
 
 .team-info-label {
   font-weight: bold;
-  padding: 3px 4px;
+  padding: 2px 3px;
   width: 15%;
 }
 
 .team-info-name {
-  padding: 3px 4px;
+  padding: 2px 3px;
   width: 35%;
 }
 
 .team-info-phone-label {
   font-weight: bold;
-  padding: 3px 4px;
+  padding: 2px 3px;
   width: 15%;
 }
 
 .team-info-phone {
-  padding: 3px 4px;
+  padding: 2px 3px;
   width: 35%;
 }
   display: block;
@@ -197,7 +197,7 @@ body {
 
 .results-table th,
 .results-table td {
-  padding: 3px 2px;
+  padding: 2px 2px;
   border: 1px solid #999;
   text-align: center;
 }
@@ -252,6 +252,7 @@ body {
 .total-row {
   background-color: #d3d3d3;
   font-weight: bold;
+  font-size: 8px;
 }
 
 .total-label {
