@@ -11,9 +11,12 @@ class Storage {
     this.selectedCompetitionType = CompetitionType.PRAEZISION_DUELL;
     this.availableWeapons = [];
     this.selectedWeapon = null; // Default ist "leer"
+    this.availableVenues = [];
+    this.selectedVenue = null;
     this.settings = {
       overlayScale: 3.0, // Default-Wert
       overlayOpacity: 0.8, // NEU: Default-Transparenz
+      clubName: "Sportschützenkreis Germersheim e.V.",
       eventDirector: {
         name: "",
         email: "",
@@ -104,6 +107,46 @@ class Storage {
     return false;
   }
 
+  // Wettkampforte Management
+  defaultVenues() {
+    return ["Germersheim"];
+  }
+
+  addVenue(venue) {
+    if (!venue || !venue.trim()) {
+      throw new Error("Wettkampfort muss einen Namen haben");
+    }
+
+    const trimmed = venue.trim();
+    if (!this.availableVenues.includes(trimmed)) {
+      this.availableVenues.push(trimmed);
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
+  updateVenue(index, newVenue) {
+    if (index >= 0 && index < this.availableVenues.length) {
+      const trimmed = newVenue.trim();
+      if (trimmed) {
+        this.availableVenues[index] = trimmed;
+        this.save();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  deleteVenue(index) {
+    if (index >= 0 && index < this.availableVenues.length) {
+      this.availableVenues.splice(index, 1);
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
   // Standarddisziplinen
   defaultDisciplines() {
     return [
@@ -129,9 +172,12 @@ class Storage {
       this.selectedCompetitionType = CompetitionType.PRAEZISION_DUELL;
       this.availableWeapons = this.defaultWeapons();
       this.selectedWeapon = null;
+      this.availableVenues = this.defaultVenues();
+      this.selectedVenue = this.availableVenues[0];
       this.settings = {
         overlayScale: 3.0,
-        overlayOpacity: 0.8, // NEU
+        overlayOpacity: 0.8,
+        clubName: "Sportschützenkreis Germersheim e.V.",
       };
       this.visibleTeamIds = null;
       this.visibleShooterIds = null; // NEU
@@ -166,6 +212,9 @@ class Storage {
 
         this.availableWeapons = data.availableWeapons || this.defaultWeapons();
         this.selectedWeapon = data.selectedWeapon || null;
+
+        this.availableVenues = data.availableVenues || this.defaultVenues();
+        this.selectedVenue = data.selectedVenue || this.availableVenues[0];
 
         console.log(
           "Data loaded successfully. Logo present:",
@@ -241,8 +290,10 @@ class Storage {
           : null,
         availableDisciplines: this.availableDisciplines,
         availableWeapons: this.availableWeapons, // NEU
+        availableVenues: this.availableVenues,
         selectedDiscipline: this.selectedDiscipline,
         selectedCompetitionType: this.selectedCompetitionType,
+        selectedVenue: this.selectedVenue,
         settings: this.settings,
       };
 
@@ -290,8 +341,11 @@ class Storage {
                 ? Array.from(this.visibleShooterIds)
                 : null,
               availableDisciplines: this.availableDisciplines,
+              availableWeapons: this.availableWeapons,
+              availableVenues: this.availableVenues,
               selectedDiscipline: this.selectedDiscipline,
               selectedCompetitionType: this.selectedCompetitionType,
+              selectedVenue: this.selectedVenue,
               settings: this.settings,
             };
             localStorage.setItem(
@@ -711,6 +765,8 @@ class Storage {
         : null,
       availableWeapons: this.availableWeapons,
       selectedWeapon: this.selectedWeapon,
+      availableVenues: this.availableVenues,
+      selectedVenue: this.selectedVenue,
       settings: this.settings,
       labelSettings: this.getLabelSettings(), // ← NEU: DIESE ZEILE HINZUFÜGEN
 
@@ -744,6 +800,8 @@ class Storage {
       // FEHLENDE ZEILEN HINZUFÜGEN:
       if (data.availableWeapons) this.availableWeapons = data.availableWeapons;
       if (data.selectedWeapon) this.selectedWeapon = data.selectedWeapon;
+      if (data.availableVenues) this.availableVenues = data.availableVenues;
+      if (data.selectedVenue) this.selectedVenue = data.selectedVenue;
       if (data.settings) this.settings = { ...this.settings, ...data.settings };
 
       // NEU: Label-Einstellungen importieren

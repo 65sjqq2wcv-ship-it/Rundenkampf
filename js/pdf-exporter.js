@@ -132,28 +132,6 @@ class PDFExporter {
             </div>`;
 
     const eventDirector = storage.settings.eventDirector || {};
-    let eventDirectorHtml = "";
-    if (eventDirector.name) {
-      eventDirectorHtml = `
-                        <div class="info-row">
-                            <strong>Rundenkampfleiter:</strong>
-                        </div>
-                        <div class="info-row" style="margin-left: 40px; margin-top: -3px;">
-                            ${UIUtils.escapeHtml(eventDirector.name)}
-                        </div>`;
-      if (eventDirector.email) {
-        eventDirectorHtml += `
-                        <div class="info-row" style="margin-left: 40px;">
-                            eMail: ${UIUtils.escapeHtml(eventDirector.email)}
-                        </div>`;
-      }
-      if (eventDirector.phone) {
-        eventDirectorHtml += `
-                        <div class="info-row" style="margin-left: 40px;">
-                            Telefon: ${UIUtils.escapeHtml(eventDirector.phone)}
-                        </div>`;
-      }
-    }
 
     return `
         <header class="pdf-header">
@@ -162,22 +140,36 @@ class PDFExporter {
                     ${logoHtml}
                 </div>
                 <div class="title-container">
+                    <h2 class="club-name">${UIUtils.escapeHtml(storage.settings.clubName || "Sportschützenkreis Germersheim e.V.")}</h2>
                     <h1 class="main-title">Rundenkampfbericht</h1>
-                    <div class="subtitle-info">
-                        <div class="info-row">
-                            <strong>Disziplin:</strong> ${UIUtils.escapeHtml(
-      storage.selectedDiscipline || "Nicht gewählt"
-    )}
-                        </div>
-                        <div class="info-row">
-                            <strong>Wettkampfdatum:</strong> ${new Date().toLocaleDateString(
-      "de-DE"
-    )}
-                        </div>
-                        ${eventDirectorHtml}
-                    </div>
                 </div>
             </div>
+            
+            <table class="info-table">
+                <tr>
+                    <td class="info-label">Disziplin:</td>
+                    <td class="info-value">${UIUtils.escapeHtml(storage.selectedDiscipline || "Nicht gewählt")}</td>
+                    <td class="info-label">Rundenkampfleiter:</td>
+                    <td class="info-value">${UIUtils.escapeHtml(eventDirector.name || "")}</td>
+                </tr>
+                <tr>
+                    <td class="info-label"></td>
+                    <td class="info-value"></td>
+                    <td class="info-label">Tel:</td>
+                    <td class="info-value">${UIUtils.escapeHtml(eventDirector.phone || "")}</td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                    <td class="info-label">E-mail:</td>
+                    <td class="info-value">${UIUtils.escapeHtml(eventDirector.email || "")}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Wettkampfort:</td>
+                    <td class="info-value">${UIUtils.escapeHtml(storage.selectedVenue || "")}</td>
+                    <td class="info-label">Wettkampfdatum:</td>
+                    <td class="info-value">${new Date().toLocaleDateString("de-DE")}</td>
+                </tr>
+            </table>
         </header>
         `;
   }
@@ -204,12 +196,31 @@ class PDFExporter {
   createFooter() {
     return `
         <footer class="pdf-footer">
-            <div class="footer-line"></div>
-            <p class="footer-text">
-                Die Mannschaftsführer bestätigen, dass alle Mannschaftschützen gemäß 
-                Rundenkampfordnung startberechtigt waren und der Wettkampf nach SpO des 
-                DSB in Verbindung mit der RKO des PSSB durchgeführt wurde.
-            </p>
+            <div class="signature-section">
+                <table class="signature-table">
+                    <tr>
+                        <td class="signature-cell">
+                            <div class="signature-label">Mannschaftsführer Standverein</div>
+                            <div class="signature-line"></div>
+                        </td>
+                        <td class="signature-cell">
+                            <div class="signature-label">Mannschaftsführer Gastverein</div>
+                            <div class="signature-line"></div>
+                        </td>
+                        <td class="signature-cell">
+                            <div class="signature-label">evl. Schießleiter</div>
+                            <div class="signature-line"></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="footer-note">
+                <p>
+                    Die Mannschaftsführer bestätigen mit ihrer Unterschrift, dass alle Mannschaftschützen 
+                    gemäß Rundenkampfordnung startberechtigt waren und der Wettkampf nach SpO des 
+                    DSB in Verbindung mit der RKO des PSSB durchgeführt wurde.
+                </p>
+            </div>
         </footer>
         `;
   }
@@ -222,6 +233,18 @@ class PDFExporter {
     const shooterData = this.prepareShooterData(team, competitionType);
     const worstShooterId = this.getWorstShooterId(team, competitionType);
     const teamTotal = storage.calculateTeamTotal(team, competitionType);
+
+    // Team info section
+    const teamLeader = team.teamLeader || {};
+    let teamInfoHtml = `
+        <div class="team-info">
+            <strong>Standmannschaft:</strong>
+            <br/>
+            <span class="team-leader">${UIUtils.escapeHtml(teamLeader.name || "")}</span>
+            <br/>
+            ${teamLeader.phone ? `<span>MF - Tel.: ${UIUtils.escapeHtml(teamLeader.phone)}</span>` : ""}
+        </div>
+    `;
 
     let tableHtml;
     if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
@@ -241,6 +264,7 @@ class PDFExporter {
                 <span class="team-count">(${team.shooters.length
       } Schützen)</span>
             </h2>
+            ${teamInfoHtml}
             ${tableHtml}
         </section>
         `;
@@ -302,6 +326,7 @@ class PDFExporter {
 
       rows += `
           <tr class="${rowClass}">
+              <td class="scheiben-cell">${index + 1}</td>
               <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
               <td class="score-cell">${precision}</td>
               <td class="score-cell">${duell}</td>
@@ -314,10 +339,11 @@ class PDFExporter {
         <table class="results-table">
             <thead>
                 <tr class="header-row">
-                    <th class="name-header">Name</th>
-                    <th class="score-header">Präzision</th>
+                    <th class="scheiben-header">Scheiben-Nr.</th>
+                    <th class="name-header">Name Vorname (Blockschrift)</th>
+                    <th class="score-header">Präz.</th>
                     <th class="score-header">Duell</th>
-                    <th class="total-header">Gesamt</th>
+                    <th class="total-header">gesamt</th>
                 </tr>
             </thead>
             <tbody>
@@ -362,6 +388,7 @@ class PDFExporter {
 
       rows += `
           <tr class="${rowClass}">
+              <td class="scheiben-cell">${index + 1}</td>
               <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
               ${seriesCells}
               <td class="total-cell">${total}</td>
@@ -373,13 +400,14 @@ class PDFExporter {
         <table class="results-table">
             <thead>
                 <tr class="header-row">
-                    <th class="name-header">Name</th>
+                    <th class="scheiben-header">Scheiben-Nr.</th>
+                    <th class="name-header">Name Vorname (Blockschrift)</th>
                     <th class="series-header">Serie 1</th>
                     <th class="series-header">Serie 2</th>
                     <th class="series-header">Serie 3</th>
                     <th class="series-header">Serie 4</th>
                     <th class="series-header">Serie 5</th>
-                    <th class="total-header">Gesamt</th>
+                    <th class="total-header">gesamt</th>
                 </tr>
             </thead>
             <tbody>
@@ -407,6 +435,7 @@ class PDFExporter {
 
       rows += `
           <tr class="${rowClass}">
+              <td class="scheiben-cell">${index + 1}</td>
               <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
               <td class="score-cell">${precision}</td>
               <td class="score-cell">${duell}</td>
@@ -418,7 +447,7 @@ class PDFExporter {
     // Team total row
     rows += `
         <tr class="total-row">
-            <td class="total-label">Mannschaft Gesamt:</td>
+            <td colspan="2" class="total-label">Mannschaft Gesamt:</td>
             <td colspan="2"></td>
             <td class="total-value">${teamTotal}</td>
         </tr>
@@ -428,10 +457,11 @@ class PDFExporter {
         <table class="results-table">
             <thead>
                 <tr class="header-row">
-                    <th class="name-header">Name</th>
-                    <th class="score-header">Präzision</th>
+                    <th class="scheiben-header">Scheiben-Nr.</th>
+                    <th class="name-header">Name Vorname (Blockschrift)</th>
+                    <th class="score-header">Präz.</th>
                     <th class="score-header">Duell</th>
-                    <th class="total-header">Gesamt</th>
+                    <th class="total-header">gesamt</th>
                 </tr>
             </thead>
             <tbody>
@@ -461,6 +491,7 @@ class PDFExporter {
 
       rows += `
           <tr class="${rowClass}">
+              <td class="scheiben-cell">${index + 1}</td>
               <td class="name-cell">${UIUtils.escapeHtml(shooter.name)}</td>
               ${seriesCells}
               <td class="total-cell">${total}</td>
@@ -471,7 +502,7 @@ class PDFExporter {
     // Team total row
     rows += `
         <tr class="total-row">
-            <td class="total-label">Mannschaft Gesamt:</td>
+            <td colspan="2" class="total-label">Mannschaft Gesamt:</td>
             <td colspan="5"></td>
             <td class="total-value">${teamTotal}</td>
         </tr>
@@ -481,13 +512,14 @@ class PDFExporter {
         <table class="results-table">
             <thead>
                 <tr class="header-row">
-                    <th class="name-header">Name</th>
+                    <th class="scheiben-header">Scheiben-Nr.</th>
+                    <th class="name-header">Name Vorname (Blockschrift)</th>
                     <th class="series-header">Serie 1</th>
                     <th class="series-header">Serie 2</th>
                     <th class="series-header">Serie 3</th>
                     <th class="series-header">Serie 4</th>
                     <th class="series-header">Serie 5</th>
-                    <th class="total-header">Gesamt</th>
+                    <th class="total-header">gesamt</th>
                 </tr>
             </thead>
             <tbody>
@@ -504,43 +536,64 @@ class PDFExporter {
   getFallbackCSS() {
     return `
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; color: #333; background: white; }
-        .pdf-container { max-width: 100%; margin: 0 auto; padding: 20px; }
-        .pdf-header { margin-bottom: 30px; }
-        .header-content { display: flex; align-items: flex-start; gap: 20px; }
-        .logo-container { flex-shrink: 0; width: 80px; height: 80px; }
-        .logo { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
-        .logo-placeholder { width: 100%; height: 100%; background: #4CAF50; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 9px; text-align: center; line-height: 1.1; }
+        body { font-family: Arial, sans-serif; font-size: 11px; line-height: 1.3; color: #333; background: white; }
+        .pdf-container { max-width: 100%; margin: 0 auto; padding: 15px; }
+        
+        /* HEADER STYLES */
+        .pdf-header { margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 15px; }
+        .header-content { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 12px; }
+        .logo-container { flex-shrink: 0; width: 60px; height: 60px; }
+        .logo { width: 100%; height: 100%; object-fit: contain; border-radius: 4px; }
+        .logo-placeholder { width: 100%; height: 100%; background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; font-weight: bold; font-size: 8px; text-align: center; line-height: 1; }
         .title-container { flex: 1; }
-        .main-title { font-size: 24px; font-weight: bold; color: #333; margin-bottom: 12px; }
-        .subtitle-info { font-size: 14px; color: #555; }
-        .info-row { margin-bottom: 6px; }
-        .pdf-main { margin-bottom: 40px; }
-        .team-section, .solo-section { margin-bottom: 25px; break-inside: avoid; }
-        .team-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 12px; display: flex; align-items: baseline; gap: 8px; }
-        .team-count { font-size: 12px; font-weight: normal; color: #666; }
-        .results-table { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; break-inside: avoid; }
-        .results-table th, .results-table td { padding: 8px 6px; text-align: center; border: none; }
-        .results-table th { background-color: #e9ecef; font-weight: bold; font-size: 14px; color: #495057; }
-        .header-row th:first-child { border-top-left-radius: 14px; }
-        .header-row th:last-child { border-top-right-radius: 14px; }
-        .name-header, .name-cell { text-align: left; width: 40%; }
-        .score-header, .score-cell { width: 20%; text-align: center; }
-        .series-header, .series-cell { width: 12%; text-align: center; }
-        .total-header, .total-cell { text-align: right; width: 20%; font-weight: bold; }
-        .table-row { background-color:rgb(255, 255, 255); border: 0px; }
-        .table-row.zebra { background-color: #f8f9fa; border: 0px; }
-        .table-row.worst-shooter { background-color: #ffebee !important; color: #d32f2f !important; }
-        .worst-shooter .name-cell, .worst-shooter .total-cell { font-weight: italic; }
-        .total-row { background-color: #e9ecef !important; font-weight: bold;}
-        .total-row td:first-child { border-bottom-left-radius: 12px; }
-        .total-row td:last-child { border-bottom-right-radius: 12px; }
-        .total-label { text-align: left; font-size: 14px !important; font-weight: bold; }
-        .total-value { text-align: left; font-weight: bold; font-size: 14px !important; }
+        .club-name { font-size: 12px; font-weight: normal; color: #333; margin-bottom: 2px; }
+        .main-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 8px; }
+        
+        /* INFO TABLE */
+        .info-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 10px; }
+        .info-table td { padding: 3px 4px; border: 1px solid #999; }
+        .info-label { font-weight: bold; width: 25%; text-align: left; background-color: #e0e0e0; }
+        .info-value { text-align: left; width: 25%; }
+        
+        /* MAIN CONTENT */
+        .pdf-main { margin-bottom: 30px; }
+        .team-section { margin-bottom: 20px; page-break-inside: avoid; }
+        .team-title { font-size: 12px; font-weight: bold; color: #333; margin-bottom: 4px; display: flex; align-items: baseline; gap: 6px; }
+        .team-count { font-size: 10px; font-weight: normal; color: #666; }
+        .team-info { font-size: 10px; margin-bottom: 8px; padding: 4px; background-color: #f5f5f5; border-left: 2px solid #333; }
+        .team-leader { font-weight: bold; }
+        
+        /* TABLE STYLES */
+        .results-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; page-break-inside: avoid; font-size: 10px; }
+        .results-table th, .results-table td { padding: 4px 3px; border: 1px solid #999; text-align: center; }
+        .results-table th { background-color: #d3d3d3; font-weight: bold; }
+        .name-header, .name-cell { text-align: left; width: 45%; }
+        .scheiben-header, .scheiben-cell { width: 6%; }
+        .score-header, .score-cell { width: 12%; }
+        .series-header, .series-cell { width: 10%; }
+        .total-header, .total-cell { width: 12%; font-weight: bold; }
+        
+        .table-row { background-color: white; }
+        .table-row.zebra { background-color: #f9f9f9; }
+        .table-row.worst-shooter { background-color: #ffcccc; }
+        .total-row { background-color: #d3d3d3; font-weight: bold; }
+        .total-label { text-align: left; font-weight: bold; }
+        .total-value { text-align: center; font-weight: bold; }
+        
+        /* FOOTER */
         .pdf-footer { margin-top: 30px; page-break-inside: avoid; }
-        .footer-line { height: 1px; background-color: #666; margin-bottom: 12px; }
-        .footer-text { font-size: 10px; line-height: 1.4; color: #666; text-align: justify; max-width: 100%; font-style: italic; }
-        @media print { .team-section, .results-table { page-break-inside: avoid; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+        .signature-section { margin-bottom: 15px; }
+        .signature-table { width: 100%; border-collapse: collapse; }
+        .signature-cell { width: 33%; text-align: center; padding: 10px 5px; }
+        .signature-label { font-size: 9px; font-weight: normal; margin-bottom: 25px; }
+        .signature-line { border-bottom: 1px solid #333; height: 20px; }
+        .footer-note { font-size: 9px; line-height: 1.3; color: #666; text-align: justify; margin-top: 10px; }
+        .footer-note p { margin: 0; }
+        
+        @media print { 
+            .team-section, .results-table { page-break-inside: avoid; } 
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
         `;
   }
 

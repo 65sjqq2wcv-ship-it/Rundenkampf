@@ -20,6 +20,10 @@ class SettingsView {
       const currentDisciplineSection = this.createCurrentDisciplineSection();
       container.appendChild(currentDisciplineSection);
 
+      // Current Venue Section
+      const currentVenueSection = this.createCurrentVenueSection();
+      container.appendChild(currentVenueSection);
+
       // Overlay Scale Section
       const overlayScaleSection = this.createOverlayScaleSection();
       container.appendChild(overlayScaleSection);
@@ -27,6 +31,10 @@ class SettingsView {
       // Logo Upload Section
       const logoSection = this.createLogoUploadSection();
       container.appendChild(logoSection);
+
+      // NEU: Clubname Section
+      const clubNameSection = this.createClubNameSection();
+      container.appendChild(clubNameSection);
 
       // NEU: Label-Einstellungen Section
       const labelSection = this.createLabelSettingsSection();
@@ -48,6 +56,10 @@ class SettingsView {
       const weaponsSection = this.createWeaponsSection();
       container.appendChild(weaponsSection);
 
+      // Venues Section
+      const venuesSection = this.createVenuesSection();
+      container.appendChild(venuesSection);
+
       // Info Section
       const infoSection = this.createInfoSection();
       container.appendChild(infoSection);
@@ -55,11 +67,14 @@ class SettingsView {
       // Setup event listeners after render - ERWEITERT
       setTimeout(() => {
         this.setupEventListeners();
+        this.setupClubNameEventListener(); // NEU: Club-Name Event-Listener
         this.setupLabelSettingsEventListeners(); // NEU: Label-Settings Event-Listeners
         this.setupEventDirectorEventListeners(); // NEU: Event-Director Event-Listeners
         this.updateCurrentDisciplineSelect();
+        this.updateCurrentVenueSelect();
         this.updateDisciplinesList();
         this.updateWeaponsList();
+        this.updateVenuesList();
         this.updateLogoPreview();
       }, 100);
     } catch (error) {
@@ -99,6 +114,22 @@ class SettingsView {
       <div class="form-section">
         <div class="form-row">
           <select id="currentDisciplineSelect" class="form-input">
+            <option value="">Keine ausgewählt</option>
+          </select>
+        </div>
+      </div>
+    `;
+    return section;
+  }
+
+  createCurrentVenueSection() {
+    const section = document.createElement("div");
+    section.className = "card";
+    section.innerHTML = `
+      <h3>Aktueller Wettkampfort</h3>
+      <div class="form-section">
+        <div class="form-row">
+          <select id="currentVenueSelect" class="form-input">
             <option value="">Keine ausgewählt</option>
           </select>
         </div>
@@ -430,6 +461,49 @@ class SettingsView {
     return section;
   }
 
+  createVenuesSection() {
+    const section = document.createElement("div");
+    section.className = "card";
+
+    // ✅ SICHERHEITSFIX: Keine onclick-Handler in innerHTML
+    section.innerHTML = `
+    <h3>Wettkampforte</h3>
+    <div id="venuesList" style="margin-top: 12px;"></div>
+    <div style="margin-top: 16px; display: flex; gap: 8px;">
+      <input type="text" id="newVenueName" placeholder="Neuer Wettkampfort" 
+             style="flex: 1; padding: 12px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px; height:40px;">
+      <button class="btn btn-secondary" id="addVenueBtn" 
+              style="padding: 8px 12px; height: 40px;">Hinzufügen</button>
+    </div>
+  `;
+
+    // ✅ SICHERHEITSFIX: Event-Listener nach DOM-Insertion
+    setTimeout(() => {
+      const addBtn = document.getElementById("addVenueBtn");
+      if (addBtn) {
+        addBtn.addEventListener("click", () => this.addVenue());
+      }
+    }, 100);
+
+    return section;
+  }
+
+  createClubNameSection() {
+    const clubName = storage.settings.clubName || "Sportschützenkreis Germersheim e.V.";
+    const section = document.createElement("div");
+    section.className = "card";
+
+    section.innerHTML = `
+      <h3>Vereinsname</h3>
+      <div class="form-section">
+        <div class="form-row">
+          <input type="text" id="clubNameInput" class="form-input" placeholder="Vereinsname" value="${UIUtils.escapeHtml(clubName)}">
+        </div>
+      </div>
+    `;
+    return section;
+  }
+
   createEventDirectorSection() {
     const eventDirector = storage.settings.eventDirector || {};
     const section = document.createElement("div");
@@ -508,6 +582,17 @@ class SettingsView {
         storage.selectedDiscipline = e.target.value;
         storage.save();
         UIUtils.showSuccessMessage("Aktuelle Disziplin geändert");
+      });
+    }
+
+    const currentVenueSelect = document.getElementById(
+      "currentVenueSelect",
+    );
+    if (currentVenueSelect) {
+      currentVenueSelect.addEventListener("change", (e) => {
+        storage.selectedVenue = e.target.value;
+        storage.save();
+        UIUtils.showSuccessMessage("Aktueller Wettkampfort geändert");
       });
     }
 
@@ -723,6 +808,23 @@ class SettingsView {
       option.value = discipline;
       option.textContent = discipline;
       if (discipline === storage.selectedDiscipline) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+  }
+
+  updateCurrentVenueSelect() {
+    const select = document.getElementById("currentVenueSelect");
+    if (!select) return;
+
+    select.innerHTML = '<option value="">Keine ausgewählt</option>';
+
+    storage.availableVenues.forEach((venue) => {
+      const option = document.createElement("option");
+      option.value = venue;
+      option.textContent = venue;
+      if (venue === storage.selectedVenue) {
         option.selected = true;
       }
       select.appendChild(option);
@@ -987,6 +1089,135 @@ class SettingsView {
       console.error("Error deleting weapon:", error);
       alert("Fehler beim Löschen der Waffe: " + error.message);
     }
+  }
+
+  addVenue() {
+    try {
+      const nameInput = document.getElementById("newVenueName");
+      const name = nameInput.value.trim();
+
+      if (!name) {
+        alert("Bitte geben Sie einen Namen für den Wettkampfort ein.");
+        return;
+      }
+
+      if (storage.availableVenues.includes(name)) {
+        alert("Dieser Wettkampfort existiert bereits.");
+        return;
+      }
+
+      storage.addVenue(name);
+      nameInput.value = "";
+      this.updateVenuesList();
+      this.updateCurrentVenueSelect();
+
+      UIUtils.showSuccessMessage("Wettkampfort hinzugefügt");
+    } catch (error) {
+      console.error("Error adding venue:", error);
+      alert("Fehler beim Hinzufügen des Wettkampforts: " + error.message);
+    }
+  }
+
+  editVenue(index) {
+    try {
+      const currentName = storage.availableVenues[index];
+      const newName = prompt("Wettkampfort bearbeiten:", currentName);
+
+      if (newName === null) return;
+
+      const trimmedName = newName.trim();
+      if (!trimmedName) {
+        alert("Wettkampfort darf nicht leer sein.");
+        return;
+      }
+
+      if (trimmedName === currentName) return;
+
+      if (storage.availableVenues.includes(trimmedName)) {
+        alert("Dieser Wettkampfort existiert bereits.");
+        return;
+      }
+
+      storage.updateVenue(index, trimmedName);
+      this.updateVenuesList();
+      this.updateCurrentVenueSelect();
+
+      UIUtils.showSuccessMessage("Wettkampfort bearbeitet");
+    } catch (error) {
+      console.error("Error editing venue:", error);
+      alert("Fehler beim Bearbeiten des Wettkampforts: " + error.message);
+    }
+  }
+
+  deleteVenue(index) {
+    try {
+      const venueName = storage.availableVenues[index];
+      if (confirm(`Möchten Sie den Wettkampfort "${venueName}" wirklich löschen?`)) {
+        storage.deleteVenue(index);
+        this.updateVenuesList();
+        this.updateCurrentVenueSelect();
+        UIUtils.showSuccessMessage("Wettkampfort gelöscht");
+      }
+    } catch (error) {
+      console.error("Error deleting venue:", error);
+      alert("Fehler beim Löschen des Wettkampforts: " + error.message);
+    }
+  }
+
+  updateVenuesList() {
+    const venuesList = document.getElementById("venuesList");
+    if (!venuesList) return;
+
+    venuesList.innerHTML = "";
+
+    if (storage.availableVenues.length === 0) {
+      venuesList.innerHTML =
+        '<p style="color: #8e8e93; font-style: italic;">Keine Wettkampforte vorhanden</p>';
+      return;
+    }
+
+    storage.availableVenues.forEach((venue, index) => {
+      // ✅ SICHERHEITSFIX: Sichere Element-Erstellung
+      const venueItem = document.createElement("div");
+      venueItem.style.cssText = `
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    `;
+
+      // Name-Span
+      const nameSpan = document.createElement("span");
+      nameSpan.style.cssText = "flex: 1; height: 30px; max-width:50%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 30px;";
+      nameSpan.title = venue;
+      nameSpan.textContent = venue;
+
+      // Button-Container
+      const buttonContainer = document.createElement("div");
+      buttonContainer.style.cssText = "display: flex; gap: 8px;";
+
+      // Edit-Button
+      const editBtn = document.createElement("button");
+      editBtn.className = "btn btn-small btn-secondary";
+      editBtn.style.height = "30px";
+      editBtn.textContent = "Bearbeiten";
+      editBtn.addEventListener("click", () => this.editVenue(index));
+
+      // Delete-Button
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "btn btn-small btn-danger";
+      deleteBtn.style.height = "30px";
+      deleteBtn.textContent = "Löschen";
+      deleteBtn.addEventListener("click", () => this.deleteVenue(index));
+
+      // Zusammenbauen
+      buttonContainer.appendChild(editBtn);
+      buttonContainer.appendChild(deleteBtn);
+      venueItem.appendChild(nameSpan);
+      venueItem.appendChild(buttonContainer);
+      venuesList.appendChild(venueItem);
+    });
   }
 
   updateLogoPreview() {
@@ -1725,6 +1956,20 @@ class SettingsView {
         console.error("Error resetting app:", error);
         alert("Fehler beim Zurücksetzen: " + error.message);
       }
+    }
+  }
+
+  setupClubNameEventListener() {
+    const clubNameInput = document.getElementById("clubNameInput");
+
+    if (clubNameInput) {
+      const saveClubName = () => {
+        storage.settings.clubName = (clubNameInput.value || "").trim();
+        storage.save();
+        UIUtils.showSuccessMessage("Vereinsname gespeichert");
+      };
+
+      clubNameInput.addEventListener("change", saveClubName);
     }
   }
 
