@@ -237,10 +237,14 @@ class PDFExporter {
     // Team info section
     const teamLeader = team.teamLeader || {};
     let teamInfoHtml = `
-        <div class="team-info">
-            <div class="team-info-header">Mannschaftsführer: ${UIUtils.escapeHtml(teamLeader.name || "")}</div>
-            ${teamLeader.phone ? `<div class="team-info-phone">MF - Tel.: ${UIUtils.escapeHtml(teamLeader.phone)}</div>` : ""}
-        </div>
+        <table class="team-info-table">
+            <tr>
+                <td class="team-info-label">Mannschaftsführer:</td>
+                <td class="team-info-name">${UIUtils.escapeHtml(teamLeader.name || "")}</td>
+                <td class="team-info-phone-label">MF - Tel.:</td>
+                <td class="team-info-phone">${UIUtils.escapeHtml(teamLeader.phone || "")}</td>
+            </tr>
+        </table>
     `;
 
     let tableHtml;
@@ -555,9 +559,11 @@ class PDFExporter {
         .team-section { margin-bottom: 20px; page-break-inside: avoid; }
         .team-title { font-size: 12px; font-weight: bold; color: #333; margin-bottom: 4px; display: flex; align-items: baseline; gap: 6px; }
         .team-count { font-size: 10px; font-weight: normal; color: #666; }
-        .team-info { font-size: 9px; margin-bottom: 8px; padding: 4px; background-color: #f5f5f5; border-left: 2px solid #333; }
-        .team-info-header { font-weight: bold; margin-bottom: 2px; }
-        .team-info-phone { margin-top: 1px; }
+        .team-info-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 9px; background-color: #f5f5f5; border-left: 2px solid #333; }
+        .team-info-label { font-weight: bold; padding: 3px 4px; width: 15%; }
+        .team-info-name { padding: 3px 4px; width: 35%; }
+        .team-info-phone-label { font-weight: bold; padding: 3px 4px; width: 15%; }
+        .team-info-phone { padding: 3px 4px; width: 35%; }
         
         /* TABLE STYLES */
         .results-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; page-break-inside: avoid; font-size: 10px; }
