@@ -558,7 +558,7 @@ class PDFExporter {
         .team-section { margin-bottom: 20px; page-break-inside: avoid; }
         .team-title { font-size: 12px; font-weight: bold; color: #333; margin-bottom: 4px; display: flex; align-items: baseline; gap: 6px; }
         .team-count { font-size: 10px; font-weight: normal; color: #666; }
-        .team-info { font-size: 10px; margin-bottom: 8px; padding: 4px; background-color: #f5f5f5; border-left: 2px solid #333; }
+        .team-info { font-size: 9px; margin-bottom: 8px; padding: 4px; background-color: #f5f5f5; border-left: 2px solid #333; }
         .team-leader { font-weight: bold; }
         
         /* TABLE STYLES */
