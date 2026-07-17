@@ -238,9 +238,8 @@ class PDFExporter {
     const teamLeader = team.teamLeader || {};
     let teamInfoHtml = `
         <div class="team-info">
-            <div style="margin-bottom: 2px;"><strong>Standmannschaft:</strong></div>
-            <div style="margin-bottom: 1px;">${UIUtils.escapeHtml(teamLeader.name || "")}</div>
-            <div>${teamLeader.phone ? `MF - Tel.: ${UIUtils.escapeHtml(teamLeader.phone)}` : ""}</div>
+            <div class="team-info-header">Mannschaftsführer: ${UIUtils.escapeHtml(teamLeader.name || "")}</div>
+            ${teamLeader.phone ? `<div class="team-info-phone">MF - Tel.: ${UIUtils.escapeHtml(teamLeader.phone)}</div>` : ""}
         </div>
     `;
 
@@ -445,8 +444,7 @@ class PDFExporter {
     // Team total row
     rows += `
         <tr class="total-row">
-            <td colspan="2" class="total-label">Mannschaft Gesamt:</td>
-            <td colspan="2"></td>
+            <td colspan="4" class="total-label">Mannschaft Gesamt:</td>
             <td class="total-value">${teamTotal}</td>
         </tr>
     `;
@@ -500,8 +498,7 @@ class PDFExporter {
     // Team total row
     rows += `
         <tr class="total-row">
-            <td colspan="2" class="total-label">Mannschaft Gesamt:</td>
-            <td colspan="5"></td>
+            <td colspan="7" class="total-label">Mannschaft Gesamt:</td>
             <td class="total-value">${teamTotal}</td>
         </tr>
     `;
@@ -559,7 +556,8 @@ class PDFExporter {
         .team-title { font-size: 12px; font-weight: bold; color: #333; margin-bottom: 4px; display: flex; align-items: baseline; gap: 6px; }
         .team-count { font-size: 10px; font-weight: normal; color: #666; }
         .team-info { font-size: 9px; margin-bottom: 8px; padding: 4px; background-color: #f5f5f5; border-left: 2px solid #333; }
-        .team-leader { font-weight: bold; }
+        .team-info-header { font-weight: bold; margin-bottom: 2px; }
+        .team-info-phone { margin-top: 1px; }
         
         /* TABLE STYLES */
         .results-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; page-break-inside: avoid; font-size: 10px; }
