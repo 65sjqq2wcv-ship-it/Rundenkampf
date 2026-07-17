@@ -238,11 +238,9 @@ class PDFExporter {
     const teamLeader = team.teamLeader || {};
     let teamInfoHtml = `
         <div class="team-info">
-            <strong>Standmannschaft:</strong>
-            <br/>
-            <span class="team-leader">${UIUtils.escapeHtml(teamLeader.name || "")}</span>
-            <br/>
-            ${teamLeader.phone ? `<span>MF - Tel.: ${UIUtils.escapeHtml(teamLeader.phone)}</span>` : ""}
+            <div style="margin-bottom: 2px;"><strong>Standmannschaft:</strong></div>
+            <div style="margin-bottom: 1px;">${UIUtils.escapeHtml(teamLeader.name || "")}</div>
+            <div>${teamLeader.phone ? `MF - Tel.: ${UIUtils.escapeHtml(teamLeader.phone)}` : ""}</div>
         </div>
     `;
 
