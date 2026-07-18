@@ -106,14 +106,9 @@ class PDFExporter {
         <html lang="de">
         <head>
             <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Rundenkampfbericht</title>
             <style>
                 ${cssStyles}
-                /* Mobile PDF Rendering Fixes */
-                * { box-sizing: border-box; }
-                body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                table { border-collapse: collapse; width: 100%; }
             </style>
         </head>
         <body>
@@ -242,14 +237,14 @@ class PDFExporter {
     // Team info section
     const teamLeader = team.teamLeader || {};
     let teamInfoHtml = `
-        <table class="team-info-table">
-            <tr>
-                <td class="team-info-label">Mannschaftsführer:</td>
-                <td class="team-info-name">${UIUtils.escapeHtml(teamLeader.name || "")}</td>
-                <td class="team-info-phone-label">MF - Tel.:</td>
-                <td class="team-info-phone">${UIUtils.escapeHtml(teamLeader.phone || "")}</td>
-            </tr>
-        </table>
+        <div class="team-info">
+            <table class="team-leader-table">
+                <tr>
+                    <td class="label">Mannschaftsführer:</td>
+                    <td class="value">${UIUtils.escapeHtml(teamLeader.name || "")}${teamLeader.phone ? ` (Telefon: ${UIUtils.escapeHtml(teamLeader.phone)})` : ""}</td>
+                </tr>
+            </table>
+        </div>
     `;
 
     let tableHtml;
@@ -566,17 +561,14 @@ class PDFExporter {
         .team-section { margin-bottom: 20px; page-break-inside: avoid; }
         .team-title { font-size: 12px; font-weight: bold; color: #333; margin-bottom: 4px; display: flex; align-items: baseline; gap: 6px; }
         .team-count { font-size: 10px; font-weight: normal; color: #666; }
-        .team-info-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 9px; background-color: #f5f5f5; border-left: 2px solid #333; }
-        .team-info-label { font-weight: bold; padding: 2px 3px; width: 15%; }
-        .team-info-name { padding: 2px 3px; width: 35%; }
-        .team-info-phone-label { font-weight: bold; padding: 2px 3px; width: 15%; }
-        .team-info-phone { padding: 2px 3px; width: 35%; }
+        .team-info { font-size: 10px; margin-bottom: 8px; padding: 4px; background-color: #f5f5f5; border-left: 2px solid #333; }
+        .team-leader { font-weight: bold; }
         
         /* TABLE STYLES */
         .results-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; page-break-inside: avoid; font-size: 10px; }
-        .results-table th, .results-table td { padding: 2px 2px; border: 1px solid #999; text-align: center; }
+        .results-table th, .results-table td { padding: 4px 3px; border: 1px solid #999; text-align: center; }
         .results-table th { background-color: #d3d3d3; font-weight: bold; }
-        .name-header, .name-cell { text-align: left; width: 45%; font-size: 8px; }
+        .name-header, .name-cell { text-align: left; width: 45%; }
         .scheiben-header, .scheiben-cell { width: 6%; }
         .score-header, .score-cell { width: 12%; }
         .series-header, .series-cell { width: 10%; }
@@ -585,7 +577,7 @@ class PDFExporter {
         .table-row { background-color: white; }
         .table-row.zebra { background-color: #f9f9f9; }
         .table-row.worst-shooter { background-color: #ffcccc; }
-        .total-row { background-color: #d3d3d3; font-weight: bold; font-size: 8px; }
+        .total-row { background-color: #d3d3d3; font-weight: bold; }
         .total-label { text-align: left; font-weight: bold; }
         .total-value { text-align: center; font-weight: bold; }
         
@@ -762,25 +754,22 @@ class PDFExporter {
 
   getPDFOptions() {
     return {
-      margin: [10, 10, 15, 10], // top, right, bottom, left (mm) - reduziert
+      margin: [15, 15, 20, 15], // top, right, bottom, left (mm)
       filename: `Rundenkampfbericht_${new Date()
         .toLocaleDateString("de-DE")
         .replace(/\./g, "_")}.pdf`,
       image: {
         type: "jpeg",
-        quality: 0.95,
+        quality: 1.0,
       },
       html2canvas: {
-        scale: 1.3,  // Reduziert von 2.5 - bessere Mobile-Kompatibilität
-        dpi: 150,    // Reduziert von 300 - evtl. mobile Rendering-Fehler
+        scale: 2.5,
+        dpi: 300,
         useCORS: true,
         letterRendering: true,
         allowTaint: false,
         backgroundColor: "#ffffff",
         removeContainer: true,
-        logging: false,
-        windowHeight: 1400,  // Konsistente Höhe für mobiles Rendering
-        windowWidth: 800,    // Mobile-freundliche Breite
         onclone: function (document) {
           // Cleanup any potential styling issues
           const elements = document.querySelectorAll("*");
@@ -791,20 +780,13 @@ class PDFExporter {
               el.style.transform = "none";
             }
           });
-          
-          // Force consistent rendering für Tabellen
-          const tables = document.querySelectorAll('table');
-          tables.forEach((table) => {
-            table.style.borderCollapse = 'collapse';
-            table.style.width = '100%';
-          });
         },
       },
       jsPDF: {
         unit: "mm",
         format: "a4",
         orientation: "portrait",
-        compress: true,  // Geändert zu true für kleinere Dateigröße
+        compress: false,
       },
     };
   }
