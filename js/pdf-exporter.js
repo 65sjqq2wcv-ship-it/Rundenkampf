@@ -337,7 +337,7 @@ class PDFExporter {
     });
 
     return `
-        <table class="results-table">
+        <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
                     <th class="scheiben-header">Scheiben-Nr.</th>
@@ -398,7 +398,7 @@ class PDFExporter {
     });
 
     return `
-        <table class="results-table">
+        <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
                     <th class="scheiben-header">Scheiben-Nr.</th>
@@ -455,7 +455,7 @@ class PDFExporter {
     `;
 
     return `
-        <table class="results-table">
+        <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
                     <th class="scheiben-header">Scheiben-Nr.</th>
@@ -510,7 +510,7 @@ class PDFExporter {
     `;
 
     return `
-        <table class="results-table">
+        <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
                     <th class="scheiben-header">Scheiben-Nr.</th>
