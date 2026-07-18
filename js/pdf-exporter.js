@@ -106,9 +106,14 @@ class PDFExporter {
         <html lang="de">
         <head>
             <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Rundenkampfbericht</title>
             <style>
                 ${cssStyles}
+                /* Mobile PDF Rendering Fixes */
+                * { box-sizing: border-box; }
+                body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                table { border-collapse: collapse; width: 100%; }
             </style>
         </head>
         <body>
@@ -448,7 +453,8 @@ class PDFExporter {
     // Team total row
     rows += `
         <tr class="total-row">
-            <td colspan="4" class="total-label">Mannschaft Gesamt:</td>
+            <td colspan="2" class="total-label">Mannschaft Gesamt:</td>
+            <td colspan="2"></td>
             <td class="total-value">${teamTotal}</td>
         </tr>
     `;
@@ -502,7 +508,8 @@ class PDFExporter {
     // Team total row
     rows += `
         <tr class="total-row">
-            <td colspan="7" class="total-label">Mannschaft Gesamt:</td>
+            <td colspan="2" class="total-label">Mannschaft Gesamt:</td>
+            <td colspan="5"></td>
             <td class="total-value">${teamTotal}</td>
         </tr>
     `;
@@ -755,22 +762,25 @@ class PDFExporter {
 
   getPDFOptions() {
     return {
-      margin: [15, 15, 20, 15], // top, right, bottom, left (mm)
+      margin: [10, 10, 15, 10], // top, right, bottom, left (mm) - reduziert
       filename: `Rundenkampfbericht_${new Date()
         .toLocaleDateString("de-DE")
         .replace(/\./g, "_")}.pdf`,
       image: {
         type: "jpeg",
-        quality: 1.0,
+        quality: 0.95,
       },
       html2canvas: {
-        scale: 2.5,
-        dpi: 300,
+        scale: 1.3,  // Reduziert von 2.5 - bessere Mobile-Kompatibilität
+        dpi: 150,    // Reduziert von 300 - evtl. mobile Rendering-Fehler
         useCORS: true,
         letterRendering: true,
         allowTaint: false,
         backgroundColor: "#ffffff",
         removeContainer: true,
+        logging: false,
+        windowHeight: 1400,  // Konsistente Höhe für mobiles Rendering
+        windowWidth: 800,    // Mobile-freundliche Breite
         onclone: function (document) {
           // Cleanup any potential styling issues
           const elements = document.querySelectorAll("*");
@@ -781,13 +791,20 @@ class PDFExporter {
               el.style.transform = "none";
             }
           });
+          
+          // Force consistent rendering für Tabellen
+          const tables = document.querySelectorAll('table');
+          tables.forEach((table) => {
+            table.style.borderCollapse = 'collapse';
+            table.style.width = '100%';
+          });
         },
       },
       jsPDF: {
         unit: "mm",
         format: "a4",
         orientation: "portrait",
-        compress: false,
+        compress: true,  // Geändert zu true für kleinere Dateigröße
       },
     };
   }

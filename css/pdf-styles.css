@@ -12,15 +12,15 @@
 body {
   font-family: Arial, sans-serif;
   font-size: 10px;
-  line-height: 1.2;
+  line-height: 1;
   color: #333;
   background: white;
 }
 
 .pdf-container {
   max-width: 100%;
-  margin: 0 auto;
-  padding: 12px;
+  margin: 0;
+  padding: 8px;
 }
 
 /* =================================================================
@@ -28,16 +28,16 @@ body {
    ================================================================= */
 
 .pdf-header {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   border-bottom: 2px solid #333;
-  padding-bottom: 10px;
+  padding-bottom: 6px;
 }
 
 .header-content {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
 .logo-container {
@@ -92,13 +92,13 @@ body {
 .info-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 6px;
-  font-size: 9px;
+  margin-top: 3px;
+  font-size: 8px;
   table-layout: fixed;
 }
 
 .info-table td {
-  padding: 2px 2px;
+  padding: 1px 1px;
   border: 1px solid #999;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -124,22 +124,22 @@ body {
    ================================================================= */
 
 .pdf-main {
-  margin-bottom: 25px;
+  margin-bottom: 15px;
 }
 
 .team-section {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   page-break-inside: avoid;
 }
 
 .team-title {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: bold;
   color: #333;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 4px;
 }
 
 .team-count {
@@ -151,35 +151,32 @@ body {
 .team-info-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 6px;
-  font-size: 9px;
+  margin-bottom: 4px;
+  font-size: 8px;
   background-color: #f5f5f5;
   border-left: 2px solid #333;
 }
 
 .team-info-label {
   font-weight: bold;
-  padding: 2px 3px;
+  padding: 1px 2px;
   width: 15%;
 }
 
 .team-info-name {
-  padding: 2px 3px;
+  padding: 1px 2px;
   width: 35%;
 }
 
 .team-info-phone-label {
   font-weight: bold;
-  padding: 2px 3px;
+  padding: 1px 2px;
   width: 15%;
 }
 
 .team-info-phone {
-  padding: 2px 3px;
+  padding: 1px 2px;
   width: 35%;
-}
-  display: block;
-  margin-bottom: 1px;
   word-wrap: break-word;
 }
 
@@ -190,14 +187,14 @@ body {
 .results-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   page-break-inside: avoid;
-  font-size: 9px;
+  font-size: 8px;
 }
 
 .results-table th,
 .results-table td {
-  padding: 2px 2px;
+  padding: 1px 1px;
   border: 1px solid #999;
   text-align: center;
 }
@@ -252,7 +249,7 @@ body {
 .total-row {
   background-color: #d3d3d3;
   font-weight: bold;
-  font-size: 8px;
+  font-size: 7px;
 }
 
 .total-label {
@@ -270,12 +267,12 @@ body {
    ================================================================= */
 
 .pdf-footer {
-  margin-top: 20px;
+  margin-top: 12px;
   page-break-inside: avoid;
 }
 
 .signature-section {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .signature-table {
@@ -286,26 +283,26 @@ body {
 .signature-cell {
   width: 33%;
   text-align: center;
-  padding: 8px 3px;
+  padding: 4px 2px;
 }
 
 .signature-label {
-  font-size: 8px;
+  font-size: 7px;
   font-weight: normal;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .signature-line {
   border-bottom: 1px solid #333;
-  height: 15px;
+  height: 10px;
 }
 
 .footer-note {
-  font-size: 8px;
-  line-height: 1.2;
+  font-size: 7px;
+  line-height: 1;
   color: #666;
   text-align: justify;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .footer-note p {
