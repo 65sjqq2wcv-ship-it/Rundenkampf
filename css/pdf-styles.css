@@ -12,7 +12,7 @@
 body {
   font-family: Arial, sans-serif;
   font-size: 10px;
-  line-height: 1.2;
+  line-height: 1.5;
   color: #333;
   background: white;
 }
@@ -20,7 +20,7 @@ body {
 .pdf-container {
   max-width: 100%;
   margin: 0 auto;
-  padding: 12px;
+  padding: 15px;
 }
 
 /* =================================================================
@@ -28,9 +28,9 @@ body {
    ================================================================= */
 
 .pdf-header {
-  margin-bottom: 15px;
+  margin-bottom: 19px;
   border-bottom: 2px solid #333;
-  padding-bottom: 10px;
+  padding-bottom: 13px;
 }
 
 .header-content {
@@ -92,7 +92,7 @@ body {
 .info-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 9px;
 }
 
@@ -120,11 +120,11 @@ body {
    ================================================================= */
 
 .pdf-main {
-  margin-bottom: 25px;
+  margin-bottom: 31px;
 }
 
 .team-section {
-  margin-bottom: 15px;
+  margin-bottom: 19px;
   page-break-inside: avoid;
 }
 
@@ -132,10 +132,10 @@ body {
   font-size: 11px;
   font-weight: bold;
   color: #333;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 8px;
 }
 
 .team-count {
@@ -146,9 +146,9 @@ body {
 
 .team-info {
   font-size: 9px;
-  line-height: 1.2;
-  margin-bottom: 6px;
-  padding: 3px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  padding: 4px;
   background-color: #f5f5f5;
   border-left: 2px solid #333;
 }
@@ -166,7 +166,7 @@ body {
 }
 
 .team-leader-table td {
-  padding: 1px 2px;
+  padding: 2px 3px;
   vertical-align: top;
 }
 
@@ -187,14 +187,14 @@ body {
 .results-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 12px;
+  margin-bottom: 15px;
   page-break-inside: avoid;
   font-size: 9px;
 }
 
 .results-table th,
 .results-table td {
-  padding: 3px 2px;
+  padding: 4px 3px;
   border: 1px solid #999;
   text-align: center;
 }
