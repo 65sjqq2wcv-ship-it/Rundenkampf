@@ -97,13 +97,20 @@ body {
 .info-table {
   width: 100%;
   border-collapse: collapse;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
   margin-top: 8px;
   font-size: 9px;
 }
 
 .info-table td {
   padding: 2px 3px;
-  border: 1px solid #999;
+  border-right: 1px solid #999;
+  border-bottom: 1px solid #999;
+}
+
+.info-table td:empty {
+  background-color: white;
 }
 
 .info-label {
@@ -173,6 +180,7 @@ body {
 .team-leader-table td {
   padding: 2px 3px;
   vertical-align: top;
+  text-align: left;
 }
 
 .team-leader-table .label {
@@ -182,7 +190,8 @@ body {
 }
 
 .team-leader-table .value {
-  width: 55%;
+  text-align: left !important;
+  padding: 2px 0 !important;
 }
 
 /* =================================================================
@@ -192,6 +201,8 @@ body {
 .results-table {
   width: 100%;
   border-collapse: collapse;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
   margin-bottom: 15px;
   page-break-inside: avoid;
   font-size: 9px;
@@ -200,7 +211,8 @@ body {
 .results-table th,
 .results-table td {
   padding: 5px 4px;
-  border: 1px solid #999;
+  border-right: 1px solid #999;
+  border-bottom: 1px solid #999;
   text-align: center;
   line-height: 1.3;
   font-kerning: auto;

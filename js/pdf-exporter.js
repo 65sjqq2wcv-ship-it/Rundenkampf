@@ -153,8 +153,7 @@ class PDFExporter {
                     <td class="info-value">${UIUtils.escapeHtml(eventDirector.name || "")}</td>
                 </tr>
                 <tr>
-                    <td class="info-label"></td>
-                    <td class="info-value"></td>
+                    <td colspan="2"></td>
                     <td class="info-label">Tel:</td>
                     <td class="info-value">${UIUtils.escapeHtml(eventDirector.phone || "")}</td>
                 </tr>
@@ -240,8 +239,7 @@ class PDFExporter {
         <div class="team-info">
             <table class="team-leader-table">
                 <tr>
-                    <td class="label">Mannschaftsführer:</td>
-                    <td class="value">${UIUtils.escapeHtml(teamLeader.name || "")}${teamLeader.phone ? ` (Telefon: ${UIUtils.escapeHtml(teamLeader.phone)})` : ""}</td>
+                    <td><b>Mannschaftsführer: </b>${UIUtils.escapeHtml(teamLeader.name || "")}${teamLeader.phone ? ` (Telefon: ${UIUtils.escapeHtml(teamLeader.phone)})` : ""}</td>
                 </tr>
             </table>
         </div>
@@ -551,8 +549,9 @@ class PDFExporter {
         .main-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 8px; }
         
         /* INFO TABLE */
-        .info-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 10px; }
-        .info-table td { padding: 3px 4px; border: 1px solid #999; }
+        .info-table { width: 100%; border-collapse: collapse; border-left: 1px solid #999; border-top: 1px solid #999; margin-top: 8px; font-size: 10px; }
+        .info-table td { padding: 3px 4px; border-right: 1px solid #999; border-bottom: 1px solid #999; }
+        .info-table td:empty { background-color: white; }
         .info-label { font-weight: bold; width: 25%; text-align: left; background-color: #e0e0e0; }
         .info-value { text-align: left; width: 25%; }
         
@@ -563,10 +562,14 @@ class PDFExporter {
         .team-count { font-size: 10px; font-weight: normal; color: #666; }
         .team-info { font-size: 10px; margin-bottom: 8px; padding: 4px; background-color: #f5f5f5; border-left: 2px solid #333; }
         .team-leader { font-weight: bold; }
+        .team-leader-table { width: 100%; border-collapse: collapse; font-size: 9px; }
+        .team-leader-table td { padding: 2px 3px; vertical-align: top; text-align: left; }
+        .team-leader-table .label { font-weight: bold; width: 45%; padding-right: 4px; }
+        .team-leader-table .value { text-align: left !important; padding: 2px 0 !important; }
         
         /* TABLE STYLES */
-        .results-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; page-break-inside: avoid; font-size: 10px; }
-        .results-table th, .results-table td { padding: 4px 3px; border: 1px solid #999; text-align: center; }
+        .results-table { width: 100%; border-collapse: collapse; border-left: 1px solid #999; border-top: 1px solid #999; margin-bottom: 15px; page-break-inside: avoid; font-size: 10px; }
+        .results-table th, .results-table td { padding: 5px 4px; border-right: 1px solid #999; border-bottom: 1px solid #999; text-align: center; }
         .results-table th { background-color: #d3d3d3; font-weight: bold; }
         .name-header, .name-cell { text-align: left; width: 45%; }
         .scheiben-header, .scheiben-cell { width: 6%; }
