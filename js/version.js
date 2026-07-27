@@ -1,2 +1,2 @@
 // version.js
-const APP_VERSION = "1.123";
+const APP_VERSION = "1.124";

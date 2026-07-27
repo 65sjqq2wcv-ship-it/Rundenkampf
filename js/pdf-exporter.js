@@ -239,7 +239,7 @@ class PDFExporter {
         <div class="team-info">
             <table class="team-leader-table">
                 <tr>
-                    <td style="font-family: Arial, sans-serif; font-size: 10px;"><b>Mannschaftsführer: </b>${UIUtils.escapeHtml(teamLeader.name || "")}${teamLeader.phone ? ` (Telefon: ${UIUtils.escapeHtml(teamLeader.phone)})` : ""}</td>
+                    <td style="font-family: Arial, sans-serif; font-size: 9px;"><b>Mannschaftsführer: </b>${UIUtils.escapeHtml(teamLeader.name || "")}${teamLeader.phone ? ` (Telefon: ${UIUtils.escapeHtml(teamLeader.phone)})` : ""}</td>
                 </tr>
             </table>
         </div>
@@ -562,7 +562,7 @@ class PDFExporter {
         .team-count { font-size: 10px; font-weight: normal; color: #666; }
         .team-info { font-size: 10px; margin-bottom: 8px; padding: 4px; background-color: #f5f5f5; border-left: 2px solid #333; }
         .team-leader { font-weight: bold; }
-        .team-leader-table { width: 100%; border-collapse: collapse; font-size: 9px; }
+        .team-leader-table { width: 100%; border-collapse: collapse; font-size: 10px; }
         .team-leader-table td { padding: 2px 3px; vertical-align: top; text-align: left; }
         .team-leader-table .label { font-weight: bold; width: 45%; padding-right: 4px; }
         .team-leader-table .value { text-align: left !important; padding: 2px 0 !important; }
