@@ -239,7 +239,7 @@ class PDFExporter {
         <div class="team-info">
             <table class="team-leader-table">
                 <tr>
-                    <td><b>Mannschaftsführer: </b>${UIUtils.escapeHtml(teamLeader.name || "")}${teamLeader.phone ? ` (Telefon: ${UIUtils.escapeHtml(teamLeader.phone)})` : ""}</td>
+                    <td style="font-family: Arial, sans-serif; font-size: 10px;"><b>Mannschaftsführer: </b>${UIUtils.escapeHtml(teamLeader.name || "")}${teamLeader.phone ? ` (Telefon: ${UIUtils.escapeHtml(teamLeader.phone)})` : ""}</td>
                 </tr>
             </table>
         </div>
