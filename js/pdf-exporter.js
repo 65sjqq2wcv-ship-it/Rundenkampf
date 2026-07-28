@@ -399,14 +399,14 @@ class PDFExporter {
         <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
-                    <th class="scheiben-header" style="width:15%;">Scheiben-Nr.</th>
+                    <th class="scheiben-header">Scheiben-Nr.</th>
                     <th class="name-header">Name Vorname (Blockschrift)</th>
                     <th class="series-header">Serie 1</th>
                     <th class="series-header">Serie 2</th>
                     <th class="series-header">Serie 3</th>
                     <th class="series-header">Serie 4</th>
                     <th class="series-header">Serie 5</th>
-                    <th class="total-header">gesamt</th>
+                    <th class="total-header">Gesamt</th>
                 </tr>
             </thead>
             <tbody>
@@ -446,7 +446,8 @@ class PDFExporter {
     // Team total row
     rows += `
         <tr class="total-row">
-            <td colspan="4" class="total-label" style="text-align: right;">Mannschaft Gesamt:</td>
+            <td colspan="2" class="total-label"></td>
+            <td colspan="2" class="total-label">Mannschaft Gesamt:</td>
             <td class="total-value">${teamTotal}</td>
         </tr>
     `;
@@ -455,11 +456,11 @@ class PDFExporter {
         <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
-                    <th class="scheiben-header" style="width:15%;">Scheiben-Nr.</th>
+                    <th class="scheiben-header">Scheiben-Nr.</th>
                     <th class="name-header">Name Vorname (Blockschrift)</th>
                     <th class="score-header">Präz.</th>
                     <th class="score-header">Duell</th>
-                    <th class="total-header">gesamt</th>
+                    <th class="total-header">Gesamt</th>
                 </tr>
             </thead>
             <tbody>
@@ -500,8 +501,8 @@ class PDFExporter {
     // Team total row
     rows += `
         <tr class="total-row">
-            <td colspan="2" class="total-label">Mannschaft Gesamt:</td>
-            <td colspan="5"></td>
+            <td colspan="2" class="total-label"></td>
+            <td colspan="5">Mannschaft Gesamt:</td>
             <td class="total-value">${teamTotal}</td>
         </tr>
     `;
@@ -510,14 +511,14 @@ class PDFExporter {
         <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
-                    <th class="scheiben-header" style="width:15%;">Scheiben-Nr.</th>
+                    <th class="scheiben-header">Scheiben-Nr.</th>
                     <th class="name-header">Name Vorname (Blockschrift)</th>
-                    <th class="series-header">Serie 1</th>
-                    <th class="series-header">Serie 2</th>
-                    <th class="series-header">Serie 3</th>
-                    <th class="series-header">Serie 4</th>
-                    <th class="series-header">Serie 5</th>
-                    <th class="total-header">gesamt</th>
+                    <th class="series-header">S1</th>
+                    <th class="series-header">S2</th>
+                    <th class="series-header">S3</th>
+                    <th class="series-header">S4</th>
+                    <th class="series-header">S5</th>
+                    <th class="total-header">Gesamt</th>
                 </tr>
             </thead>
             <tbody>
