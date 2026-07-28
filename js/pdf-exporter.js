@@ -147,18 +147,16 @@ class PDFExporter {
             
             <table class="info-table">
                 <tr>
-                    <td class="info-label">Disziplin:</td>
-                    <td class="info-value">${UIUtils.escapeHtml(storage.selectedDiscipline || "Nicht gewählt")}</td>
+                    <td rowspan="3" class="info-label">Disziplin:</td>
+                    <td rowspan="3" class="info-value" style="text-align: center;">${UIUtils.escapeHtml(storage.selectedDiscipline || "Nicht gewählt")}</td>
                     <td class="info-label">Rundenkampfleiter:</td>
                     <td class="info-value">${UIUtils.escapeHtml(eventDirector.name || "")}</td>
                 </tr>
                 <tr>
-                    <td colspan="2"></td>
                     <td class="info-label">Tel:</td>
                     <td class="info-value">${UIUtils.escapeHtml(eventDirector.phone || "")}</td>
                 </tr>
                 <tr>
-                    <td colspan="2"></td>
                     <td class="info-label">E-mail:</td>
                     <td class="info-value">${UIUtils.escapeHtml(eventDirector.email || "")}</td>
                 </tr>
@@ -340,7 +338,7 @@ class PDFExporter {
         <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
-                    <th class="scheiben-header">Scheiben-Nr.</th>
+                    <th class="scheiben-header" style="width:15%;">Scheiben-Nr.</th>
                     <th class="name-header">Name Vorname (Blockschrift)</th>
                     <th class="score-header">Präz.</th>
                     <th class="score-header">Duell</th>
@@ -401,7 +399,7 @@ class PDFExporter {
         <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
-                    <th class="scheiben-header">Scheiben-Nr.</th>
+                    <th class="scheiben-header" style="width:15%;">Scheiben-Nr.</th>
                     <th class="name-header">Name Vorname (Blockschrift)</th>
                     <th class="series-header">Serie 1</th>
                     <th class="series-header">Serie 2</th>
@@ -412,7 +410,7 @@ class PDFExporter {
                 </tr>
             </thead>
             <tbody>
-                ${rows}
+                ${rows} 
             </tbody>
         </table>
     `;
@@ -448,8 +446,7 @@ class PDFExporter {
     // Team total row
     rows += `
         <tr class="total-row">
-            <td colspan="2" class="total-label">Mannschaft Gesamt:</td>
-            <td colspan="2"></td>
+            <td colspan="4" class="total-label" style="text-align: right;">Mannschaft Gesamt:</td>
             <td class="total-value">${teamTotal}</td>
         </tr>
     `;
@@ -458,7 +455,7 @@ class PDFExporter {
         <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
-                    <th class="scheiben-header">Scheiben-Nr.</th>
+                    <th class="scheiben-header" style="width:15%;">Scheiben-Nr.</th>
                     <th class="name-header">Name Vorname (Blockschrift)</th>
                     <th class="score-header">Präz.</th>
                     <th class="score-header">Duell</th>
@@ -513,7 +510,7 @@ class PDFExporter {
         <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
-                    <th class="scheiben-header">Scheiben-Nr.</th>
+                    <th class="scheiben-header" style="width:15%;">Scheiben-Nr.</th>
                     <th class="name-header">Name Vorname (Blockschrift)</th>
                     <th class="series-header">Serie 1</th>
                     <th class="series-header">Serie 2</th>
