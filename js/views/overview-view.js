@@ -154,6 +154,7 @@ class OverviewView {
   createInfoCard() {
     const card = document.createElement("div");
     card.className = "card";
+    card.style.cssText = "background: #f0fff0; border: 1px solid #c1e9c1;";
     let venueText = "";
     if (storage.selectedVenue) {
       venueText = `<p style="color: #666; margin-top: 8px;">Wettkampfort: ${UIUtils.escapeHtml(storage.selectedVenue)}</p>`;
@@ -161,7 +162,7 @@ class OverviewView {
     card.innerHTML = `
 			<div style="text-align: center;">
 				<h3>${storage.selectedDiscipline}</h3>
-				<p style="color: #666; margin-top: 8px;">${storage.selectedCompetitionType}</p>
+				<!-- <p style="color: #666; margin-top: 8px;">Modus: ${storage.selectedCompetitionType}</p> -->
 				${venueText}
 			</div>
 		`;

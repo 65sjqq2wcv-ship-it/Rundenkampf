@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rundenkampfbericht - Benutzerhandbuch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+        
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #007AFF;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            color: #007AFF;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            color: #666;
+        }
+        
+        .version {
+            text-align: center;
+            color: #999;
+            margin-bottom: 40px;
+            font-size: 0.9em;
+        }
+        
+        h2 {
+            color: #007AFF;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007AFF;
+            page-break-after: avoid;
+        }
+        
+        h3 {
+            color: #0056a3;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            page-break-after: avoid;
+        }
+        
+        p {
+            margin-bottom: 10px;
+            text-align: justify;
+        }
+        
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .feature {
+            background: #f0f8ff;
+            border-left: 4px solid #007AFF;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .tip {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        table th {
+            background: #007AFF;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        
+        table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .keyboard {
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: monospace;
+            display: inline-block;
+        }
+        
+        .button-label {
+            background: #007AFF;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            display: inline-block;
+            margin: 0 2px;
+        }
+        
+        .page-break {
+            page-break-after: always;
+            margin: 40px 0;
+        }
+        
+        .toc {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+        }
+        
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+        
+        .toc li {
+            margin-bottom: 5px;
+        }
+        
+        .toc a {
+            color: #007AFF;
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #999;
+            font-size: 0.9em;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Rundenkampfbericht</h1>
+            <p>Benutzerhandbuch - Digitale Verwaltung von Schießsport-Rundenkämpfen</p>
+        </div>
+        
+        <div class="version">
+            <p>Version 1.32 | Aktualisiert: Oktober 2026</p>
+        </div>
+        
+        <div class="toc">
+            <h3>📖 Inhaltsverzeichnis</h3>
+            <ul>
+                <li><a href="#ueberblick">1. Überblick</a></li>
+                <li><a href="#installation">2. Installation & Erste Schritte</a></li>
+                <li><a href="#oberflaeche">3. Benutzeroberfläche</a></li>
+                <li><a href="#teams">4. Mannschaften & Schützen</a></li>
+                <li><a href="#erfassung">5. Ergebnisse erfassen</a></li>
+                <li><a href="#uebersicht">6. Übersicht & Reports</a></li>
+                <li><a href="#einstellungen">7. Einstellungen</a></li>
+                <li><a href="#faq">8. FAQ & Tipps</a></li>
+            </ul>
+        </div>
+        
+        <div class="page-break"></div>
+        
+        <!-- 1. ÜBERBLICK -->
+        <h2 id="ueberblick">1. Überblick</h2>
+        
+        <p>
+            <strong>Rundenkampfbericht</strong> ist eine Progressive Web App zur digitalen Verwaltung und Auswertung von 
+            Schießsport-Rundenkämpfen. Die Anwendung ermöglicht die einfache Erfassung von Schussergebnissen, die 
+            automatische Berechnung von Mannschaftsergebnissen und den Export von Berichten.
+        </p>
+        
+        <div class="feature">
+            <strong>✨ Hauptmerkmale:</strong>
+            <ul>
+                <li>✅ Zwei verschiedene Wettkampfmodi (Präzision/Duell oder Annex Scheibe)</li>
+                <li>✅ Unterstützung für Mannschaften und Einzelschützen</li>
+                <li>✅ Automatische Wertungsberechnung (beste 3 von 4 Schützen)</li>
+                <li>✅ Scheibendokumentation mit Kamera</li>
+                <li>✅ PDF-Export für Berichte</li>
+                <li>✅ Offline-Funktionalität (PWA)</li>
+                <li>✅ Vollständige Datensicherung lokal im Browser</li>
+            </ul>
+        </div>
+        
+        <h3>Wettkampfmodi</h3>
+        
+        <h4>🎯 Präzision/Duell</h4>
+        <p>Dieser Modus ist für klassische Schießwettkämpfe mit zwei Phasen:</p>
+        <ul>
+            <li><strong>Präzision:</strong> 20 Schuss, Wertung 0-10 Ringe</li>
+            <li><strong>Duell:</strong> 20 Schuss, Wertung 0-10 Ringe</li>
+            <li><strong>Gesamtergebnis:</strong> Summe beider Phasen (max. 400 Punkte)</li>
+        </ul>
+        
+        <h4>🎪 Annex Scheibe</h4>
+        <p>Dieser Modus ermöglicht die Erfassung von mehreren Serien:</p>
+        <ul>
+            <li><strong>Serien:</strong> 5 Serien à 8 Schuss</li>
+            <li><strong>Wertung pro Schuss:</strong> 0-3 Punkte</li>
+            <li><strong>Gesamtergebnis:</strong> Summe aller 40 Schüsse (max. 120 Punkte)</li>
+        </ul>
+        
+        <!-- 2. INSTALLATION -->
+        <div class="page-break"></div>
+        <h2 id="installation">2. Installation & Erste Schritte</h2>
+        
+        <h3>PWA Installation (empfohlen)</h3>
+        <p>Die Anwendung kann wie eine native App auf dem Gerät installiert werden:</p>
+        
+        <ol>
+            <li><strong>Website öffnen:</strong> Rundenkampfbericht im Browser laden</li>
+            <li><strong>Installieren:</strong> 
+                <ul>
+                    <li><strong>iOS:</strong> Teilen-Button → "Zum Home-Bildschirm"</li>
+                    <li><strong>Android:</strong> Menü → "Zur Startseite hinzufügen"</li>
+                    <li><strong>Desktop:</strong> Adressleisten-Button oder Menü → "Installieren"</li>
+                </ul>
+            </li>
+            <li><strong>Offline-Nutzung:</strong> Die App funktioniert auch ohne Internetverbindung</li>
+        </ol>
+        
+        <h3>Browser-Anforderungen</h3>
+        <table>
+            <tr>
+                <th>Anforderung</th>
+                <th>Details</th>
+            </tr>
+            <tr>
+                <td>Browser</td>
+                <td>Chrome, Firefox, Safari, Edge (neueste Versionen)</td>
+            </tr>
+            <tr>
+                <td>Speicher</td>
+                <td>~50 MB LocalStorage verfügbar</td>
+            </tr>
+            <tr>
+                <td>Verbindung</td>
+                <td>Beim ersten Start notwendig, dann offline möglich</td>
+            </tr>
+            <tr>
+                <td>Kamera (optional)</td>
+                <td>Für Scheibendokumentation (HTTPS oder localhost erforderlich)</td>
+            </tr>
+        </table>
+        
+        <div class="warning">
+            <strong>⚠️ Wichtig:</strong> Alle Daten werden ausschließlich lokal im Browser gespeichert. 
+            Bei Löschen von Browser-Daten gehen alle Einträge verloren! Nutzen Sie regelmäßig die 
+            Sicherungsfunktion in den Einstellungen.
+        </div>
+        
+        <!-- 3. BENUTZEROBERFLÄCHE -->
+        <div class="page-break"></div>
+        <h2 id="oberflaeche">3. Benutzeroberfläche</h2>
+        
+        <h3>Navigationsleiste</h3>
+        <p>Oben auf jedem Bildschirm befindet sich eine Navigationsleiste mit folgenden Optionen:</p>
+        
+        <table>
+            <tr>
+                <th>Symbol</th>
+                <th>Funktion</th>
+                <th>Beschreibung</th>
+            </tr>
+            <tr>
+                <td>📊</td>
+                <td>Übersicht</td>
+                <td>Zeigt alle Mannschaften und aktuelle Ergebnisse</td>
+            </tr>
+            <tr>
+                <td>✏️</td>
+                <td>Erfassen</td>
+                <td>Erfassung neuer Schussergebnisse</td>
+            </tr>
+            <tr>
+                <td>👥</td>
+                <td>Teams</td>
+                <td>Verwaltung von Mannschaften und Schützen</td>
+            </tr>
+            <tr>
+                <td>⚙️</td>
+                <td>Einstellungen</td>
+                <td>Konfiguration der Anwendung</td>
+            </tr>
+        </table>
+        
+        <h3>Filterfunktion</h3>
+        <p>In der Übersicht können Sie mit dem Filtere-Button <span class="button-label">🔍</span> 
+        die angezeigten Mannschaften eingrenzen. Dies ist besonders bei vielen Teams hilfreich.</p>
+        
+        <!-- 4. TEAMS & SCHÜTZEN -->
+        <div class="page-break"></div>
+        <h2 id="teams">4. Mannschaften & Schützen verwalten</h2>
+        
+        <h3>Neue Mannschaft hinzufügen</h3>
+        <ol>
+            <li>Navigieren Sie zur <strong>Teams</strong>-Seite</li>
+            <li>Klicken Sie auf <span class="button-label">➕ Team hinzufügen</span></li>
+            <li>Füllen Sie folgende Felder aus:
+                <ul>
+                    <li><strong>Mannschaftsname:</strong> z.B. "Schützenverein ABC"</li>
+                    <li><strong>Mannschaftsführer Name, E-Mail, Telefon</strong></li>
+                </ul>
+            </li>
+            <li>Der Mannschaftsführer wird automatisch als erster Schütze hinzugefügt</li>
+            <li>Sie können weitere Schützen mit <span class="button-label">Schütze hinzufügen (n/4)</span> ergänzen</li>
+            <li>Speichern Sie die Mannschaft mit <span class="button-label">Speichern</span></li>
+        </ol>
+        
+        <div class="tip">
+            <strong>💡 Tipp:</strong> Eine Mannschaft kann zwischen 1-4 Schützen haben. 
+            Bei der Wertung werden die besten 3 Ergebnisse verwendet (wenn 4 Schützen vorhanden sind).
+        </div>
+        
+        <h3>Einzelschützen hinzufügen</h3>
+        <p>Einzelschützen sind Sportler, die nicht in einer Mannschaft starten:</p>
+        <ol>
+            <li>Klicken Sie auf <span class="button-label">👤 Einzelschütze hinzufügen</span></li>
+            <li>Geben Sie den Namen des Schützen ein</li>
+            <li>Speichern Sie den Eintrag</li>
+        </ol>
+        
+        <h3>CSV-Import</h3>
+        <p>Sie können Mannschaften und Schützen per CSV-Datei importieren. Das Format muss sein:</p>
+        <p style="font-family: monospace; background: #f0f0f0; padding: 10px; border-radius: 4px;">
+            Name; Verein; Einzelschütze<br>
+            Max Mustermann; Schützenverein ABC; nein<br>
+            Erika Musterfrau; ; ja
+        </p>
+        
+        <ul>
+            <li><strong>Name:</strong> Name des Schützen</li>
+            <li><strong>Verein:</strong> Name der Mannschaft (leer = Einzelschütze)</li>
+            <li><strong>Einzelschütze:</strong> "ja" oder "nein"</li>
+        </ul>
+        
+        <!-- 5. ERGEBNISSE ERFASSEN -->
+        <div class="page-break"></div>
+        <h2 id="erfassung">5. Ergebnisse erfassen</h2>
+        
+        <h3>Schussergebnisse eingeben</h3>
+        <ol>
+            <li>Navigieren Sie zur <strong>Erfassen</strong>-Seite</li>
+            <li>Wählen Sie die <strong>Mannschaft</strong> aus</li>
+            <li>Wählen Sie den <strong>Schützen</strong> aus</li>
+            <li>Im Modus "Präzision/Duell":
+                <ul>
+                    <li>Wählen Sie die <strong>Phase</strong> (Präzision oder Duell)</li>
+                    <li>Wählen Sie die <strong>Schussnummer</strong> (1-20)</li>
+                    <li>Geben Sie die Ringzahl ein (0-10)</li>
+                </ul>
+            </li>
+            <li>Im Modus "Annex Scheibe":
+                <ul>
+                    <li>Wählen Sie die <strong>Serie</strong> (1-5)</li>
+                    <li>Wählen Sie die <strong>Schussnummer</strong> (1-8)</li>
+                    <li>Geben Sie die Punktzahl ein (0-3)</li>
+                </ul>
+            </li>
+            <li>Das Ergebnis wird automatisch gespeichert</li>
+        </ol>
+        
+        <h3>Scheibendokumentation</h3>
+        <p>Sie können Schießscheiben fotografieren und automatisch mit Informationen beschriften:</p>
+        
+        <ol>
+            <li>Klicken Sie auf <span class="button-label">📷 Kamera</span> im Erfassungsbereich</li>
+            <li>Fotografieren Sie die Schießscheibe</li>
+            <li>Das Foto wird automatisch mit folgendem Info-Overlay versehen:
+                <ul>
+                    <li>Mannschaftsname</li>
+                    <li>Schützenname</li>
+                    <li>Datum und Uhrzeit</li>
+                </ul>
+            </li>
+            <li>Das Bild wird automatisch heruntergeladen</li>
+        </ol>
+        
+        <div class="warning">
+            <strong>⚠️ Wichtig:</strong> Die Kamera funktioniert nur über HTTPS oder localhost. 
+            Kamerazugriff erfordert Browser-Berechtigung.
+        </div>
+        
+        <h3>Daten korrigieren</h3>
+        <p>Um bereits eingegebene Ergebnisse zu korrigieren:</p>
+        <ol>
+            <li>Wählen Sie erneut denselben Schützen und Schuss</li>
+            <li>Geben Sie den neuen Wert ein (überschreibt den alten)</li>
+        </ol>
+        
+        <!-- 6. ÜBERSICHT & REPORTS -->
+        <div class="page-break"></div>
+        <h2 id="uebersicht">6. Übersicht & PDF-Reports</h2>
+        
+        <h3>Übersichtsseite</h3>
+        <p>Die Übersicht zeigt:</p>
+        <ul>
+            <li>✅ Aktuelle Disziplin und Wettkampfmodus</li>
+            <li>✅ Aktueller Wettkampfort (aus den Einstellungen)</li>
+            <li>✅ Alle Mannschaften mit detaillierten Schützen-Ergebnissen</li>
+            <li>✅ Einzelschützen-Ergebnisse</li>
+            <li>✅ Begegnungen zwischen Mannschaften</li>
+            <li>✅ Kontaktdaten des Rundenkampfleiters und Mannschaftsführer</li>
+        </ul>
+        
+        <h3>PDF-Export</h3>
+        <p>Sie können die gesamte Übersicht als PDF-Datei exportieren:</p>
+        <ol>
+            <li>Gehen Sie zur <strong>Übersicht</strong>-Seite</li>
+            <li>Klicken Sie auf <span class="button-label">📄 PDF</span></li>
+            <li>Die PDF wird automatisch erzeugt und heruntergeladen</li>
+            <li>Der PDF enthält alle Ergebnisse in druckoptimierter Form</li>
+        </ol>
+        
+        <div class="feature">
+            <strong>📋 Inhalte des PDF-Reports:</strong>
+            <ul>
+                <li>Wettkampfinformationen</li>
+                <li>Vollständige Ergebnistabellen aller Mannschaften</li>
+                <li>Einzelschützen-Ergebnisse</li>
+                <li>Mannschaftsbewertungen</li>
+                <li>Kontaktdaten</li>
+            </ul>
+        </div>
+        
+        <!-- 7. EINSTELLUNGEN -->
+        <div class="page-break"></div>
+        <h2 id="einstellungen">7. Einstellungen</h2>
+        
+        <h3>Wettkampfkonfiguration</h3>
+        <p>In den Einstellungen können Sie folgende Parameter anpassen:</p>
+        
+        <h4>Wettbewerbsmodus</h4>
+        <ul>
+            <li>Wählen Sie zwischen "Präzision/Duell" oder "Annex Scheibe"</li>
+            <li>Diese Einstellung gilt für alle erfassten Daten</li>
+        </ul>
+        
+        <h4>Aktuelle Disziplin</h4>
+        <ul>
+            <li>Wählen Sie die Waffenart (z.B. "Pistole 10m", "Gewehr 50m")</li>
+            <li>Erstellen Sie neue Disziplinen nach Bedarf</li>
+        </ul>
+        
+        <h4>Aktueller Wettkampfort</h4>
+        <ul>
+            <li>Geben Sie den Ort des Wettkampfs ein</li>
+            <li>Dieser wird in der Übersicht angezeigt und in Reports enthalten</li>
+        </ul>
+        
+        <h3>Vereinseinstellungen</h3>
+        
+        <h4>Vereinsname</h4>
+        <p>Geben Sie den Namen Ihres Schützenvereins ein (wird für interne Verwaltung genutzt)</p>
+        
+        <h4>Vereinslogo</h4>
+        <p>Sie können ein Logo-Bild hochladen (JPG, PNG, GIF, max. 5 MB). Dieses wird ggf. in Reports angezeigt.</p>
+        
+        <h4>Rundenkampfleiter</h4>
+        <p>Erfassen Sie die Kontaktdaten des Wettkampfleiters:</p>
+        <ul>
+            <li>Name</li>
+            <li>E-Mail</li>
+            <li>Telefon</li>
+        </ul>
+        
+        <div class="tip">
+            <strong>💡 Tipp:</strong> Diese Daten werden in der Übersicht und in PDF-Reports angezeigt.
+        </div>
+        
+        <h3>Foto-Overlay Einstellungen</h3>
+        <p>Für die Scheibendokumentation können Sie anpassen:</p>
+        <ul>
+            <li><strong>Overlay-Größe:</strong> Vergrößert/verkleinert die Informationen auf dem Foto</li>
+            <li><strong>Transparenz:</strong> Einstellen wie durchsichtig das Overlay sein soll</li>
+        </ul>
+        
+        <h3>Label-Einstellungen</h3>
+        <p>Für den Etikettendruck können Sie folgende Parameter konfigurieren:</p>
+        <ul>
+            <li>Etikett-Abmessungen (Breite, Höhe in mm)</li>
+            <li>Seitenränder</li>
+            <li>Anzahl der Spalten und Zeilen</li>
+            <li>Abstand zwischen Etiketten</li>
+            <li>Anzahl der Kopien</li>
+        </ul>
+        
+        <h3>Sicherung & Wiederherstellung</h3>
+        <p>Wichtig: Erstellen Sie regelmäßig Sicherungen!</p>
+        
+        <h4>Backup erstellen</h4>
+        <ol>
+            <li>Klicken Sie auf <span class="button-label">💾 Backup erstellen</span></li>
+            <li>Eine JSON-Datei mit allen Daten wird heruntergeladen</li>
+            <li>Speichern Sie die Datei sicher</li>
+        </ol>
+        
+        <h4>Backup wiederherstellen</h4>
+        <ol>
+            <li>Klicken Sie auf <span class="button-label">📥 Wiederherstellen</span></li>
+            <li>Wählen Sie eine zuvor erstellte Backup-Datei</li>
+            <li>Alle Daten werden wiederhergestellt</li>
+        </ol>
+        
+        <div class="warning">
+            <strong>⚠️ Achtung:</strong> Die Wiederherstellung überschreibt alle aktuellen Daten! 
+            Erstellen Sie vor dem Import ein aktuelles Backup.
+        </div>
+        
+        <!-- 8. FAQ & TIPPS -->
+        <div class="page-break"></div>
+        <h2 id="faq">8. FAQ & Tipps</h2>
+        
+        <h3>Häufig gestellte Fragen</h3>
+        
+        <h4>❓ Meine Daten sind weg - wie stelle ich sie wieder her?</h4>
+        <p><strong>Antwort:</strong> Falls Sie ein Backup erstellt haben, können Sie dieses in den Einstellungen 
+        unter "Sicherung & Wiederherstellung" wiederherstellen. Ansonsten sind die Daten leider verloren, 
+        da alles lokal im Browser gespeichert wird.</p>
+        
+        <h4>❓ Kann ich die App auf mehreren Geräten nutzen?</h4>
+        <p><strong>Antwort:</strong> Ja! Erstellen Sie auf Gerät A ein Backup und importieren Sie es auf Gerät B. 
+        So haben Sie auf beiden Geräten dieselben Daten.</p>
+        
+        <h4>❓ Wie funktioniert die Offline-Nutzung?</h4>
+        <p><strong>Antwort:</strong> Nach der ersten vollständigen Nutzung werden alle wichtigen Daten im Browser 
+        gespeichert. Sie können die App dann ohne Internetverbindung verwenden. Die Synchronisierung findet statt, 
+        wenn Sie die App wieder online öffnen.</p>
+        
+        <h4>❓ Warum zeigt die Übersicht unterschiedliche Mannschaften als die Erfassungsseite?</h4>
+        <p><strong>Antwort:</strong> Das bedeutet, dass Sie den Filter aktiviert haben. Klicken Sie auf das 
+        Filtere-Symbol <span class="keyboard">🔍</span> um alle Mannschaften anzuzeigen.</p>
+        
+        <h4>❓ Wie ändere ich den Wettkampfmodus, wenn ich bereits Ergebnisse erfasst habe?</h4>
+        <p><strong>Antwort:</strong> Gehen Sie zu Einstellungen und ändern Sie den Modus. 
+        <strong>Warnung:</strong> Dies kann zu Dateninkonsistenzen führen. Erstellen Sie vorher ein Backup!</p>
+        
+        <h4>❓ Kann ich Schützen aus der Mannschaft löschen?</h4>
+        <p><strong>Antwort:</strong> Ja, in der Bearbeitung der Mannschaft können Sie einzelne Schützen mit dem 
+        "Löschen"-Button entfernen. Die bereits erfassten Ergebnisse bleiben erhalten.</p>
+        
+        <h3>Praktische Tipps</h3>
+        
+        <div class="tip">
+            <strong>💡 Tipp 1: Datenbestand sichern</strong><br>
+            Erstellen Sie täglich ein Backup! Gehen Sie zu Einstellungen → Sicherung & Wiederherstellung → 
+            Backup erstellen.
+        </div>
+        
+        <div class="tip">
+            <strong>💡 Tipp 2: Filter nutzen</strong><br>
+            Bei vielen Teams nutzen Sie den Filter in der Übersicht, um schnell die relevanten Teams zu finden.
+        </div>
+        
+        <div class="tip">
+            <strong>💡 Tipp 3: Schnelle Erfassung</strong><br>
+            Speichern Sie lange Listen von Wettkampfergebnissen, indem Sie bei gleicher Person von Schuss zu 
+            Schuss wechseln - die Auswahl bleibt erhalten.
+        </div>
+        
+        <div class="tip">
+            <strong>💡 Tipp 4: PDF-Reports drucken</strong><br>
+            Nutzen Sie den PDF-Export für offizielle Auswertungsberichte. Diese können dann ausgedruckt oder 
+            elektronisch weitergeleitet werden.
+        </div>
+        
+        <div class="tip">
+            <strong>💡 Tipp 5: Kamera kalibrieren</strong><br>
+            Testen Sie die Scheibendokumentation mit verschiedenen Overlay-Größen und Transparenz-Einstellungen, 
+            um die optimale Lesbarkeit zu erreichen.
+        </div>
+        
+        <div class="tip">
+            <strong>💡 Tipp 6: Etikett-Vorschau</strong><br>
+            Drucken Sie zunächst ein Test-Etikett auf normalem Papier, bevor Sie auf die Etiketten-Blanko-Bögen drucken.
+        </div>
+        
+        <h3>Troubleshooting</h3>
+        
+        <h4>🔧 Problem: Kamera funktioniert nicht</h4>
+        <p><strong>Lösung:</strong></p>
+        <ul>
+            <li>Überprüfen Sie, ob HTTPS aktiviert ist (außer localhost)</li>
+            <li>Erlauben Sie der App Kamerazugriff in den Browser-Einstellungen</li>
+            <li>Versuchen Sie es in einem anderen Browser</li>
+        </ul>
+        
+        <h4>🔧 Problem: App lädt sehr langsam</h4>
+        <p><strong>Lösung:</strong></p>
+        <ul>
+            <li>Löschen Sie den Browser-Cache</li>
+            <li>Deinstallieren Sie die PWA und installieren Sie neu</li>
+            <li>Überprüfen Sie Ihre Internetverbindung</li>
+        </ul>
+        
+        <h4>🔧 Problem: Speichern funktioniert nicht</h4>
+        <p><strong>Lösung:</strong></p>
+        <ul>
+            <li>Überprüfen Sie, ob LocalStorage aktiviert ist</li>
+            <li>Leeren Sie den Browser-Cache und Cookies</li>
+            <li>Nutzen Sie einen anderen Browser</li>
+            <li>Überprüfen Sie verfügbaren Festplattenspeicher</li>
+        </ul>
+        
+        <!-- FOOTER -->
+        <div class="page-break"></div>
+        <footer>
+            <p><strong>Rundenkampfbericht v1.32</strong></p>
+            <p>Progressive Web App für digitale Schießsport-Verwaltung</p>
+            <p>Alle Daten werden lokal im Browser gespeichert und nicht übertragen.</p>
+            <p>© 2024-2026 | Made with ❤️ for shooters</p>
+        </footer>
+    </div>
+</body>
+</html>
