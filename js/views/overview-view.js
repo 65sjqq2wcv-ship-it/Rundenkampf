@@ -17,12 +17,6 @@ class OverviewView {
         container.appendChild(infoCard);
       }
 
-      // Event Director info card
-      const eventDirectorCard = this.createEventDirectorCard();
-      if (eventDirectorCard) {
-        container.appendChild(eventDirectorCard);
-      }
-
       // Teams overview
       const filteredTeams = storage.getFilteredTeams();
 
@@ -42,16 +36,22 @@ class OverviewView {
         container.appendChild(soloCard);
       }
 
-      // Add team leaders and encounters cards - unabhängig vom Filter, von ALLEN Teams
+      // Add encounters and event director cards - unabhängig vom Filter, von ALLEN Teams
       if (storage.teams.length > 0) {
-        const leadersCard = this.createAllTeamLeadersCard(storage.teams);
-        if (leadersCard) {
-          container.appendChild(leadersCard);
-        }
-
         const encountersCard = this.createAllEncountersCard(storage.teams);
         if (encountersCard) {
           container.appendChild(encountersCard);
+        }
+
+        // Event Director info card - nach den Ergebnissen
+        const eventDirectorCard = this.createEventDirectorCard();
+        if (eventDirectorCard) {
+          container.appendChild(eventDirectorCard);
+        }
+
+        const leadersCard = this.createAllTeamLeadersCard(storage.teams);
+        if (leadersCard) {
+          container.appendChild(leadersCard);
         }
       }
 
@@ -154,10 +154,15 @@ class OverviewView {
   createInfoCard() {
     const card = document.createElement("div");
     card.className = "card";
+    let venueText = "";
+    if (storage.selectedVenue) {
+      venueText = `<p style="color: #666; margin-top: 8px;">Wettkampfort: ${UIUtils.escapeHtml(storage.selectedVenue)}</p>`;
+    }
     card.innerHTML = `
 			<div style="text-align: center;">
 				<h3>${storage.selectedDiscipline}</h3>
-				<p style="color: #666; margin-top: 8px;">Modus: ${storage.selectedCompetitionType}</p>
+				<p style="color: #666; margin-top: 8px;">${storage.selectedCompetitionType}</p>
+				${venueText}
 			</div>
 		`;
     return card;
