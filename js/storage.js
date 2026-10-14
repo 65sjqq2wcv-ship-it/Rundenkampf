@@ -17,6 +17,8 @@ class Storage {
       overlayScale: 3.0, // Default-Wert
       overlayOpacity: 0.8, // NEU: Default-Transparenz
       clubName: "Sportschützenkreis Germersheim e.V.",
+      sortingOption: "nameAsc", // NEU: Sortierungsoption (nameAsc, nameDesc, scoreAsc, scoreDesc)
+      showSignatureText: true, // NEU: Unterschrift-Textblock anzeigen/verbergen (Default: true)
       eventDirector: {
         name: "",
         email: "",

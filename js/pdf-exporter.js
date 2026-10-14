@@ -191,6 +191,15 @@ class PDFExporter {
   }
 
   createFooter() {
+    const showSignatureText = storage.settings.showSignatureText !== false; // Default: true
+    
+    if (!showSignatureText) {
+      return `
+        <footer class="pdf-footer">
+        </footer>
+        `;
+    }
+    
     return `
         <footer class="pdf-footer">
             <div class="signature-section">
@@ -316,8 +325,21 @@ class PDFExporter {
           .reduce((sum, r) => sum + r.total(), 0);
         return [shooter, precision, duell, precision + duell];
       })
-      //.sort((a, b) => b[3] - a[3]); // Sortiert nach Gesamtpunkten
-      .sort((a, b) => a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" })); // Sortiert alphabetisch nach Namen
+      .sort((a, b) => {
+        const sortingOpt = storage.settings.sortingOption || "nameAsc";
+        switch (sortingOpt) {
+          case "nameAsc":
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+          case "nameDesc":
+            return b[0].name.localeCompare(a[0].name, "de", { sensitivity: "base" });
+          case "scoreAsc":
+            return a[3] - b[3];
+          case "scoreDesc":
+            return b[3] - a[3];
+          default:
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+        }
+      });
 
     shooterData.forEach((data, index) => {
       const [shooter, precision, duell, total] = data;
@@ -338,7 +360,7 @@ class PDFExporter {
         <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
-                    <th class="scheiben-header" style="min-width: 75px;">Scheiben-Nr.</th>
+                    <th class="scheiben-header" style="min-width: 75px;">Nummer</th>
                     <th class="name-header" style="max-width: 110px;">Name Vorname (Blockschrift)</th>
                     <th class="score-header">Präzision</th>
                     <th class="score-header">Duell</th>
@@ -372,8 +394,21 @@ class PDFExporter {
         }
         return [shooter, [0, 0, 0, 0, 0], 0];
       })
-      //.sort((a, b) => b[2] - a[2]); // Sortiert nach Gesamtpunkten
-      .sort((a, b) => a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" })); // Sortiert alphabetisch nach Namen
+      .sort((a, b) => {
+        const sortingOpt = storage.settings.sortingOption || "nameAsc";
+        switch (sortingOpt) {
+          case "nameAsc":
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+          case "nameDesc":
+            return b[0].name.localeCompare(a[0].name, "de", { sensitivity: "base" });
+          case "scoreAsc":
+            return a[2] - b[2];
+          case "scoreDesc":
+            return b[2] - a[2];
+          default:
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+        }
+      });
 
     shooterData.forEach((data, index) => {
       const [shooter, seriesSums, total] = data;
@@ -399,13 +434,13 @@ class PDFExporter {
         <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
-                    <th class="scheiben-header" style="min-width: 75px;">Scheiben-Nr.</th>
+                    <th class="scheiben-header" style="min-width: 75px;">Nummer</th>
                     <th class="name-header" style="max-width: 110px;">Name Vorname (Blockschrift)</th>
-                    <th class="series-header">Serie 1</th>
-                    <th class="series-header">Serie 2</th>
-                    <th class="series-header">Serie 3</th>
-                    <th class="series-header">Serie 4</th>
-                    <th class="series-header">Serie 5</th>
+                    <th class="series-header">S1</th>
+                    <th class="series-header">S2</th>
+                    <th class="series-header">S3</th>
+                    <th class="series-header">S4</th>
+                    <th class="series-header">S5</th>
                     <th class="total-header" style="min-width: 60px;">Gesamt</th>
                 </tr>
             </thead>
@@ -456,7 +491,7 @@ class PDFExporter {
         <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
-                    <th class="scheiben-header" style="min-width: 75px;">Scheiben-Nr.</th>
+                    <th class="scheiben-header" style="min-width: 75px;">Nummer</th>
                     <th class="name-header" style="max-width: 110px;">Name Vorname (Blockschrift)</th>
                     <th class="score-header">Präzision</th>
                     <th class="score-header">Duell</th>
@@ -511,13 +546,13 @@ class PDFExporter {
         <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
-                    <th class="scheiben-header" style="min-width: 75px;">Scheiben-Nr.</th>
+                    <th class="scheiben-header" style="min-width: 75px;">Nummer</th>
                     <th class="name-header" style="max-width: 110px;">Name Vorname (Blockschrift)</th>
-                    <th class="series-header">Serie 1</th>
-                    <th class="series-header">Serie 2</th>
-                    <th class="series-header">Serie 3</th>
-                    <th class="series-header">Serie 4</th>
-                    <th class="series-header">Serie 5</th>
+                    <th class="series-header">S1</th>
+                    <th class="series-header">S2</th>
+                    <th class="series-header">S3</th>
+                    <th class="series-header">S4</th>
+                    <th class="series-header">S5</th>
                     <th class="total-header" style="min-width: 60px;">Gesamt</th>
                 </tr>
             </thead>
@@ -634,10 +669,21 @@ class PDFExporter {
           .reduce((sum, r) => sum + r.total(), 0);
         return [shooter, precision, duell, precision + duell];
       })
-      // ALTE ZEILE:
-      //.sort((a, b) => b[3] - a[3]); // Sortiert nach Gesamtpunkten, höchste zuerst
-      // NEUE ZEILE:
-      .sort((a, b) => a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" })); // Sortiert alphabetisch nach Namen
+      .sort((a, b) => {
+        const sortingOpt = storage.settings.sortingOption || "nameAsc";
+        switch (sortingOpt) {
+          case "nameAsc":
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+          case "nameDesc":
+            return b[0].name.localeCompare(a[0].name, "de", { sensitivity: "base" });
+          case "scoreAsc":
+            return a[3] - b[3];
+          case "scoreDesc":
+            return b[3] - a[3];
+          default:
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+        }
+      });
   }
 
   prepareAnnexShooterData(team) {
@@ -657,10 +703,21 @@ class PDFExporter {
         }
         return [shooter, [0, 0, 0, 0, 0], 0];
       })
-      // ALTE ZEILE:
-      //.sort((a, b) => b[2] - a[2]); // Sortiert nach Gesamtpunkten, höchste zuerst
-      // NEUE ZEILE:
-      .sort((a, b) => a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" })); // Sortiert alphabetisch nach Namen
+      .sort((a, b) => {
+        const sortingOpt = storage.settings.sortingOption || "nameAsc";
+        switch (sortingOpt) {
+          case "nameAsc":
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+          case "nameDesc":
+            return b[0].name.localeCompare(a[0].name, "de", { sensitivity: "base" });
+          case "scoreAsc":
+            return a[2] - b[2];
+          case "scoreDesc":
+            return b[2] - a[2];
+          default:
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+        }
+      });
   }
 
   getWorstShooterId(team, competitionType) {

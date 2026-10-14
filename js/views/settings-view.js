@@ -44,6 +44,14 @@ class SettingsView {
       const eventDirectorSection = this.createEventDirectorSection();
       container.appendChild(eventDirectorSection);
 
+      // NEU: Sortierungs-Einstellungen Section
+      const sortingSection = this.createSortingSection();
+      container.appendChild(sortingSection);
+
+      // NEU: PDF-Report Einstellungen Section
+      const pdfSettingsSection = this.createPDFSettingsSection();
+      container.appendChild(pdfSettingsSection);
+
       // Backup/Restore Section
       const backupSection = this.createBackupRestoreSection();
       container.appendChild(backupSection);
@@ -70,6 +78,8 @@ class SettingsView {
         this.setupClubNameEventListener(); // NEU: Club-Name Event-Listener
         this.setupLabelSettingsEventListeners(); // NEU: Label-Settings Event-Listeners
         this.setupEventDirectorEventListeners(); // NEU: Event-Director Event-Listeners
+        this.setupSortingEventListener(); // NEU: Sortierungs Event-Listener
+        this.setupPDFSettingsEventListener(); // NEU: PDF-Settings Event-Listener
         this.updateCurrentDisciplineSelect();
         this.updateCurrentVenueSelect();
         this.updateDisciplinesList();
@@ -526,6 +536,60 @@ class SettingsView {
     return section;
   }
 
+  createSortingSection() {
+    const sortingOption = storage.settings.sortingOption || "nameAsc";
+    const section = document.createElement("div");
+    section.className = "card";
+
+    section.innerHTML = `
+      <h3>Sortierung</h3>
+      <div class="form-section">
+        <div class="form-row">
+          <select id="sortingOptionSelect" class="form-input">
+            <option value="nameAsc" ${sortingOption === "nameAsc" ? "selected" : ""}>
+              Name aufsteigend
+            </option>
+            <option value="nameDesc" ${sortingOption === "nameDesc" ? "selected" : ""}>
+              Name absteigend
+            </option>
+            <option value="scoreAsc" ${sortingOption === "scoreAsc" ? "selected" : ""}>
+              Ergebnis aufsteigend
+            </option>
+            <option value="scoreDesc" ${sortingOption === "scoreDesc" ? "selected" : ""}>
+              Ergebnis absteigend
+            </option>
+          </select>
+        </div>
+        <p style="margin: 8px 0 0 0; color: #666; font-size: 12px;">
+          Diese Sortierung wird auf Mannschaften und Einzelschützen in der Übersicht und im PDF-Export angewendet.
+        </p>
+      </div>
+    `;
+    return section;
+  }
+
+  createPDFSettingsSection() {
+    const showSignatureText = storage.settings.showSignatureText !== false; // Default: true
+    const section = document.createElement("div");
+    section.className = "card";
+
+    section.innerHTML = `
+      <h3>PDF-Report Einstellungen</h3>
+      <div class="form-section">
+        <div class="form-row" style="display: flex; align-items: center; gap: 12px;">
+          <input type="checkbox" id="showSignatureTextCheckbox" ${showSignatureText ? "checked" : ""} style="width: 18px; height: 18px; cursor: pointer;">
+          <label for="showSignatureTextCheckbox" style="cursor: pointer; margin: 0;">
+            Unterschrift-Bestätigung anzeigen
+          </label>
+        </div>
+        <p style="margin: 8px 0 0 0; color: #666; font-size: 12px;">
+          Textblock mit Unterschriften-Bestätigung im PDF-Report ein-/ausblenden.
+        </p>
+      </div>
+    `;
+    return section;
+  }
+
   createInfoSection() {
     const section = document.createElement("div");
     section.className = "card";
@@ -544,8 +608,11 @@ class SettingsView {
         <span style="color: #8e8e93;">© 2026</span>
       </div>
     </div>
-    <div style="margin-top: 16px;">
-      <button class="btn btn-danger" id="resetAppBtn" style="width: 100%;">
+    <div style="margin-top: 16px; display: flex; gap: 8px;">
+      <a href="BENUTZERHANDBUCH.html" target="_blank" class="btn btn-secondary" style="flex: 1; text-decoration: none; text-align: center; line-height: 40px; height: 40px;">
+      Benutzerhandbuch
+      </a>
+      <button class="btn btn-danger" id="resetAppBtn" style="flex: 1; height: 40px;">
         App zurücksetzen
       </button>
     </div>
@@ -1993,6 +2060,34 @@ class SettingsView {
       nameInput.addEventListener("change", saveEventDirector);
       emailInput.addEventListener("change", saveEventDirector);
       phoneInput.addEventListener("change", saveEventDirector);
+    }
+  }
+
+  setupSortingEventListener() {
+    const sortingSelect = document.getElementById("sortingOptionSelect");
+
+    if (sortingSelect) {
+      sortingSelect.addEventListener("change", (e) => {
+        storage.settings.sortingOption = e.target.value;
+        storage.save();
+        UIUtils.showSuccessMessage("Sortierung geändert");
+        // Aktuelle View aktualisieren, falls vorhanden
+        if (app && app.views && app.currentView === "overview") {
+          app.showView("overview");
+        }
+      });
+    }
+  }
+
+  setupPDFSettingsEventListener() {
+    const showSignatureTextCheckbox = document.getElementById("showSignatureTextCheckbox");
+
+    if (showSignatureTextCheckbox) {
+      showSignatureTextCheckbox.addEventListener("change", (e) => {
+        storage.settings.showSignatureText = e.target.checked;
+        storage.save();
+        UIUtils.showSuccessMessage("PDF-Einstellungen gespeichert");
+      });
     }
   }
 }

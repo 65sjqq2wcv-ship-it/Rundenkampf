@@ -457,10 +457,21 @@ class OverviewView {
           .reduce((sum, r) => sum + r.total(), 0);
         return [shooter, precision, duell, precision + duell];
       })
-      //.sort((a, b) => b[3] - a[3])
-      .sort((a, b) =>
-        a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" }),
-      )
+      .sort((a, b) => {
+        const sortingOpt = storage.settings.sortingOption || "nameAsc";
+        switch (sortingOpt) {
+          case "nameAsc":
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+          case "nameDesc":
+            return b[0].name.localeCompare(a[0].name, "de", { sensitivity: "base" });
+          case "scoreAsc":
+            return a[3] - b[3];
+          case "scoreDesc":
+            return b[3] - a[3];
+          default:
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+        }
+      })
       .forEach((data, index) => {
         const [shooter, precision, duell, total] = data;
 
@@ -550,10 +561,21 @@ class OverviewView {
         }
         return [shooter, [0, 0, 0, 0, 0], 0];
       })
-      //.sort((a, b) => b[2] - a[2])
-      .sort((a, b) =>
-        a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" }),
-      )
+      .sort((a, b) => {
+        const sortingOpt = storage.settings.sortingOption || "nameAsc";
+        switch (sortingOpt) {
+          case "nameAsc":
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+          case "nameDesc":
+            return b[0].name.localeCompare(a[0].name, "de", { sensitivity: "base" });
+          case "scoreAsc":
+            return a[2] - b[2];
+          case "scoreDesc":
+            return b[2] - a[2];
+          default:
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+        }
+      })
       .forEach((data, index) => {
         const [shooter, seriesSums, total] = data;
 
@@ -610,9 +632,21 @@ class OverviewView {
           .reduce((sum, r) => sum + r.total(), 0);
         return [shooter, precision, duell, precision + duell];
       })
-      .sort((a, b) =>
-        a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" }),
-      );
+      .sort((a, b) => {
+        const sortingOpt = storage.settings.sortingOption || "nameAsc";
+        switch (sortingOpt) {
+          case "nameAsc":
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+          case "nameDesc":
+            return b[0].name.localeCompare(a[0].name, "de", { sensitivity: "base" });
+          case "scoreAsc":
+            return a[3] - b[3];
+          case "scoreDesc":
+            return b[3] - a[3];
+          default:
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+        }
+      });
   }
 
   prepareShooterDataAnnex(team) {
@@ -632,9 +666,21 @@ class OverviewView {
         }
         return [shooter, [0, 0, 0, 0, 0], 0];
       })
-      .sort((a, b) =>
-        a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" }),
-      );
+      .sort((a, b) => {
+        const sortingOpt = storage.settings.sortingOption || "nameAsc";
+        switch (sortingOpt) {
+          case "nameAsc":
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+          case "nameDesc":
+            return b[0].name.localeCompare(a[0].name, "de", { sensitivity: "base" });
+          case "scoreAsc":
+            return a[2] - b[2];
+          case "scoreDesc":
+            return b[2] - a[2];
+          default:
+            return a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" });
+        }
+      });
   }
 
   getWorstShooterId(team) {

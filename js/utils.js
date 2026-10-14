@@ -538,3 +538,49 @@ if (typeof window !== "undefined" && window.location.hostname === "localhost") {
     console.log("Registry:", globalEventRegistry.handlers);
   };
 }
+
+// ===== SORTING UTILS =====
+
+class SortingUtils {
+  /**
+   * Sortiert Schützen-Daten nach der aktuellen Sortierungsoption
+   * 
+   * Für Präzision/Duell:
+   * data = [shooter, precision, duell, total]
+   * 
+   * Für Annex:
+   * data = [shooter, seriesSums, total]
+   * 
+   * @param {Array} data - Array von Schützen-Daten
+   * @param {string} sortingOption - Sortierungsoption (nameAsc, nameDesc, scoreAsc, scoreDesc)
+   * @param {boolean} isAnnex - True if Annex discipline, false if Standard
+   * @returns {Array} - Sortiertes Array
+   */
+  static sortShooterData(data, sortingOption, isAnnex = false) {
+    const sortingOpt = sortingOption || storage.settings.sortingOption || "nameAsc";
+    
+    // Bestimme den Index des Ergebnisses je nach Disziplin
+    const scoreIndex = isAnnex ? 2 : 3; // Bei Annex ist total an Index 2, bei Standard an Index 3
+    
+    switch (sortingOpt) {
+      case "nameAsc":
+        return data.sort((a, b) =>
+          a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" })
+        );
+      case "nameDesc":
+        return data.sort((a, b) =>
+          b[0].name.localeCompare(a[0].name, "de", { sensitivity: "base" })
+        );
+      case "scoreAsc":
+        return data.sort((a, b) => a[scoreIndex] - b[scoreIndex]);
+      case "scoreDesc":
+        return data.sort((a, b) => b[scoreIndex] - a[scoreIndex]);
+      default:
+        return data.sort((a, b) =>
+          a[0].name.localeCompare(b[0].name, "de", { sensitivity: "base" })
+        );
+    }
+  }
+}
+
+console.log("✅ SortingUtils class loaded");
