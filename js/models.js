@@ -64,9 +64,24 @@ function isElectronicDiscipline(discipline) {
   );
 }
 
-// Höchstwert einer Serie (10 Schuss): LG 10 x 10,9 = 109, LP 10 x 10 = 100
-function getElectronicMaxSeriesValue(discipline) {
-  return discipline === Discipline.LUFTPISTOLE ? 100 : 109;
+// Höchstwert einer Serie (10 Schuss): 10 x 10,9 = 109 (LG und LP gleich, da keine Disziplin-Auswahl mehr).
+function getElectronicMaxSeriesValue() {
+  return 109;
+}
+
+// Anzeige im deutschen Format: 90 bzw. 104,5
+function formatScore(value) {
+  if (value === null || value === undefined) return "–";
+  return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(".", ",");
+}
+
+// Eingabe prüfen: ganze Zahl (ohne Zehntelwertung) oder mit einer Nachkommastelle.
+// Akzeptiert Komma und Punkt. Gibt null zurück, wenn die Eingabe ungültig ist.
+function parseElectronicSeries(text, decimals = false) {
+  const normalized = String(text).trim().replace(",", ".");
+  const pattern = decimals ? /^\d+(\.\d)?$/ : /^\d+$/;
+  if (!pattern.test(normalized)) return null;
+  return Number(normalized);
 }
 
 // Utility Functions (unverändert)
@@ -208,9 +223,11 @@ class ResultEntry {
   }
 
   total() {
-    return this.shots
+    const sum = this.shots
       .filter((shot) => shot !== null)
       .reduce((sum, shot) => sum + shot, 0);
+    // Ganzzahlig bei Klassisch; bei Zehntelwertung auf eine Nachkommastelle runden
+    return Math.round(sum * 10) / 10;
   }
 
   static fromJSON(json) {

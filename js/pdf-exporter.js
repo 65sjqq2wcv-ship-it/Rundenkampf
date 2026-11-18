@@ -479,15 +479,14 @@ class PDFExporter {
             ? "table-row"
             : "table-row zebra";
       const seriesCells = row.series
-        .map((v) => `<td class="score-cell">${v === null || v === undefined ? "–" : v}</td>`)
+        .map((v) => `<td class="score-cell">${formatScore(v)}</td>`)
         .join("");
 
       body += `
           <tr class="${rowClass}">
-              <td class="scheiben-cell">${UIUtils.escapeHtml(row.discipline)}</td>
               <td class="name-cell">${UIUtils.escapeHtml(row.shooter.name)}</td>
               ${seriesCells}
-              <td class="total-cell">${row.total}</td>
+              <td class="total-cell">${formatScore(row.total)}</td>
           </tr>
       `;
     });
@@ -495,8 +494,8 @@ class PDFExporter {
     if (teamTotal !== undefined) {
       body += `
           <tr class="total-row">
-              <td colspan="6" class="total-label">Mannschaft Gesamt:</td>
-              <td class="total-value">${teamTotal}</td>
+              <td colspan="5" class="total-label">Mannschaft Gesamt:</td>
+              <td class="total-value">${formatScore(teamTotal)}</td>
           </tr>
       `;
     }
@@ -506,7 +505,6 @@ class PDFExporter {
         <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">
-                    <th class="scheiben-header">Disz.</th>
                     <th class="name-header">Name Vorname (Blockschrift)</th>
                     <th class="score-header">S1</th>
                     <th class="score-header">S2</th>

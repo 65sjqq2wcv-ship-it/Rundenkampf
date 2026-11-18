@@ -114,6 +114,16 @@ class SettingsView {
             </option>
           </select>
         </div>
+        <div class="form-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+          <div>
+            <div class="form-label">Zehntelwertung</div>
+            <div class="text-muted">Nur Modus Elektronisch (LG/LP): Kommazahlen und Serien über 100</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="electronicDecimalsSwitch" ${storage.settings.electronicDecimals ? "checked" : ""}>
+            <span class="switch-slider"></span>
+          </label>
+        </div>
       </div>
     `;
     return section;
@@ -641,6 +651,17 @@ class SettingsView {
         storage.selectedCompetitionType = e.target.value;
         storage.save();
         UIUtils.showSuccessMessage("Wettbewerbsmodus geändert");
+      });
+    }
+
+    const decimalsSwitch = document.getElementById("electronicDecimalsSwitch");
+    if (decimalsSwitch) {
+      decimalsSwitch.addEventListener("change", (e) => {
+        storage.settings.electronicDecimals = e.target.checked;
+        storage.save();
+        UIUtils.showSuccessMessage(
+          e.target.checked ? "Zehntelwertung aktiviert" : "Zehntelwertung deaktiviert"
+        );
       });
     }
 

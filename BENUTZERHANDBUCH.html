@@ -220,7 +220,7 @@
         </div>
         
         <div class="version">
-            <p>Version 1.35 | Aktualisiert: November 2026</p>
+            <p>Version 1.36 | Aktualisiert: November 2026</p>
         </div>
         
         <div class="toc">
@@ -284,7 +284,7 @@
         geschossen, hier werden nur die Serienergebnisse dokumentiert:</p>
         <ul>
             <li><strong>Serien:</strong> maximal 4 Serien, mindestens 3 Serien müssen erfasst werden</li>
-            <li><strong>Serienwert:</strong> ganze Zahl, LG bis 109, LP bis 100 Ringe</li>
+            <li><strong>Serienwert:</strong> ganze Zahl bis 109 Ringe (mit Zehntelwertung: Kommazahl mit einer Nachkommastelle)</li>
             <li><strong>Ergebnis:</strong> Summe der erfassten Serien (z.B. 90 + 90 + 90 + 90 = 360)</li>
             <li><strong>Mannschaftsergebnis:</strong> Summe der besten 3 Schützen</li>
             <li><strong>Schlechtester Schütze:</strong> Bei 4 Schützen wird der Schütze mit dem niedrigsten Ergebnis rot hinterlegt (Übersicht und PDF)</li>
@@ -478,8 +478,7 @@
         <h3>Elektronische Erfassung (LG/LP)</h3>
         <p>Im Wettbewerbsmodus <strong>"Elektronisch (LG/LP)"</strong> (siehe Einstellungen) gibt es kein Nummernpad:</p>
         <ol>
-            <li>Wählen Sie Mannschaft und Schützen (oder "Einzelschütze") aus</li>
-            <li>Wählen Sie die Disziplin <strong>LG</strong> oder <strong>LP</strong></li>
+            <li>Wählen Sie Mannschaft und Schützen (oder "Einzelschütze") aus. Eine Disziplin-Auswahl gibt es hier nicht</li>
             <li>Tragen Sie die Serienergebnisse in die Felder <strong>Serie 1</strong> bis <strong>Serie 4</strong> ein
                 (mindestens 3, lückenlos ab Serie 1)</li>
             <li>Drücken Sie auf <span class="button-label">Speichern</span>. Das Ergebnis (Summe der Serien) wird angezeigt</li>
@@ -532,8 +531,9 @@
         </ul>
         
         <h3>Anzeige im Modus "Elektronisch (LG/LP)"</h3>
-        <p>Übersicht und PDF zeigen je Mannschaft eine Tabelle mit Name, Disziplin (LG/LP), den Serien S1–S4,
-        dem Ergebnis je Schütze und der Zeile <strong>Mannschaft Gesamt</strong> (Summe der besten 3 Schützen).
+        <p>Übersicht und PDF zeigen je Mannschaft eine Tabelle mit Name, den Serien S1–S4, dem Ergebnis je Schütze
+        und der Zeile <strong>Mannschaft Gesamt</strong> (Summe der besten 3 Schützen). Bei vier Schützen wird der
+        schlechteste Schütze rot hinterlegt.
         Einzelschützen werden in einer eigenen Tabelle dargestellt.</p>
         
         <h3>PDF-Export</h3>
@@ -577,10 +577,20 @@
             <li>Im Modus "Elektronisch (LG/LP)" zeigen Übersicht und PDF je Mannschaft eine Tabelle mit Serien S1–S4, Ergebnis und Mannschaftsergebnis</li>
         </ul>
         
+        <h4>Zehntelwertung</h4>
+        <ul>
+            <li>Schalter für den Modus "Elektronisch (LG/LP)": Wenn er eingeschaltet ist, können Serien mit einer Nachkommastelle
+            (z.B. 104,5) und Werte bis 109 bei LG und LP erfasst werden</li>
+            <li>Ohne Schalter sind nur ganze Zahlen bis 109 möglich</li>
+            <li>Die Einstellung wird mit dem Backup gesichert</li>
+        </ul>
+        
         <h4>Aktuelle Disziplin</h4>
         <ul>
             <li>Wählen Sie die Waffenart (z.B. "Pistole 10m", "Gewehr 50m")</li>
             <li>Erstellen Sie neue Disziplinen nach Bedarf</li>
+            <li>Standard-Disziplinen sind bereits enthalten, u.a. "1.10 Luftgewehr", "1.11 Luftgewehr Auflage",
+            "1.20 Luftgewehr Dreistellung" und "2.10 Luftpistole". Bestehende Listen werden beim ersten Start mit dieser Version um diese Einträge ergänzt. Gelöschte Standard-Disziplinen kehren nicht zurück</li>
         </ul>
         
         <h4>Aktueller Wettkampfort</h4>
@@ -781,7 +791,7 @@
         <!-- FOOTER -->
         <div class="page-break"></div>
         <footer>
-            <p><strong>Rundenkampfbericht v1.35</strong></p>
+            <p><strong>Rundenkampfbericht v1.36</strong></p>
             <p>Progressive Web App für digitale Schießsport-Verwaltung</p>
             <p>Alle Daten werden lokal im Browser gespeichert und nicht übertragen.</p>
             <p>© 2024-2026 | Made with ❤️ for shooters</p>

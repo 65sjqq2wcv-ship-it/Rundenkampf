@@ -157,7 +157,23 @@ class Storage {
       "1.65 KK Unterhebel 25 m - Kreisliga",
       "1.66 GK Unterhebel 25m - Kreisliga",
       "KK SLG 25 m - Kreisliga",
+      "1.10 Luftgewehr",
+      "1.11 Luftgewehr Auflage",
+      "1.20 Luftgewehr Dreistellung",
+      "2.10 Luftpistole",
     ];
+  }
+
+  // Fehlende Standarddisziplinen ergänzen (für bereits gespeicherte Listen)
+  addMissingDefaultDisciplines() {
+    const missing = this.defaultDisciplines().filter(
+      (d) => !this.availableDisciplines.includes(d),
+    );
+    if (missing.length > 0) {
+      this.availableDisciplines.push(...missing);
+      this.save();
+    }
+    return missing.length;
   }
 
   // Initiale Demodaten
@@ -211,6 +227,13 @@ class Storage {
         this.selectedCompetitionType =
           data.selectedCompetitionType || CompetitionType.PRAEZISION_DUELL;
         this.settings = data.settings || {};
+
+        // Einmalig neue Standard-Disziplinen in bestehende Listen übernehmen
+        if (!this.settings.defaultDisciplinesMerged) {
+          this.addMissingDefaultDisciplines();
+          this.settings.defaultDisciplinesMerged = true;
+          this.save();
+        }
 
         this.availableWeapons = data.availableWeapons || this.defaultWeapons();
         this.selectedWeapon = data.selectedWeapon || null;

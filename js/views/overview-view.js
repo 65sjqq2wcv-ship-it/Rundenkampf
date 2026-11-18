@@ -218,7 +218,6 @@ class OverviewView {
     header.className = "electro-row electro-head";
     header.innerHTML = `
 			<div>Name</div>
-			<div>Disz.</div>
 			<div>S1</div>
 			<div>S2</div>
 			<div>S3</div>
@@ -237,13 +236,12 @@ class OverviewView {
         .filter(Boolean)
         .join(" ");
       const seriesCells = row.series
-        .map((v) => `<div>${v === null || v === undefined ? "–" : v}</div>`)
+        .map((v) => `<div>${formatScore(v)}</div>`)
         .join("");
       line.innerHTML = `
 				<div class="electro-name">${UIUtils.escapeHtml(row.shooter.name)}</div>
-				<div>${UIUtils.escapeHtml(row.discipline)}</div>
 				${seriesCells}
-				<div class="electro-total">${row.total}</div>
+				<div class="electro-total">${formatScore(row.total)}</div>
 			`;
       table.appendChild(line);
     });
@@ -253,7 +251,7 @@ class OverviewView {
       foot.className = "electro-row electro-foot";
       foot.innerHTML = `
 				<div class="electro-foot-label">Mannschaft Gesamt:</div>
-				<div class="electro-total">${options.total}</div>
+				<div class="electro-total">${formatScore(options.total)}</div>
 			`;
       table.appendChild(foot);
     }

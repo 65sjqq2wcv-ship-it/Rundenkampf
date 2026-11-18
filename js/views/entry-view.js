@@ -24,6 +24,10 @@ class EntryView {
   render() {
     const container = document.createElement("div");
 
+    // Modus muss vor dem Aufbau der Auswahl feststehen (Disziplin-Zeile)
+    this.electronicMode =
+      storage.selectedCompetitionType === CompetitionType.ELEKTRONISCH;
+
     try {
       this.setupNavButtons();
 
@@ -58,6 +62,8 @@ class EntryView {
     // Elektronische Erfassung (LG/LP) ergibt sich aus dem Wettbewerbsmodus
     this.electronicMode =
       storage.selectedCompetitionType === CompetitionType.ELEKTRONISCH;
+    // Elektronisch: keine Disziplin-Auswahl, Standard ist LG (wird je Schütze angepasst)
+    this.selectedDiscipline = this.electronicMode ? Discipline.LUFTGEWEHR : null;
     this.shots = new Array(40).fill(null);
     this.selectedWeapon = null;
 
@@ -109,6 +115,8 @@ class EntryView {
       "Disziplin",
       this.createDisciplineSelect(),
     );
+    // Elektronisch: keine Disziplin-Auswahl (nie gemischt in einer Mannschaft)
+    if (this.electronicMode) disciplineRow.style.display = "none";
 
     formContainer.appendChild(teamRow);
     formContainer.appendChild(shooterRow);
@@ -274,6 +282,7 @@ class EntryView {
       this.eventRegistry.register(shooterSelect, "change", (e) => {
         try {
           this.selectedShooterId = e.target.value || null;
+          this.resolveElectronicDiscipline();
           this.loadExistingResults(); // NEU: Lade existierende Ergebnisse
           this.updateShotsDisplay();
         } catch (error) {
@@ -791,7 +800,8 @@ class EntryView {
   // =================================================================
 
   createElectronicInputs(container) {
-    const maxValue = getElectronicMaxSeriesValue(this.selectedDiscipline);
+    const decimals = !!storage.settings.electronicDecimals;
+    const maxValue = getElectronicMaxSeriesValue();
 
     const grid = document.createElement("div");
     grid.className = "electro-inputs";
@@ -804,19 +814,17 @@ class EntryView {
       label.htmlFor = `electroSeries${i}`;
       label.textContent = `Serie ${i + 1}`;
 
+      // Text statt number: damit Komma (deutsch) und Punkt akzeptiert werden
       const input = document.createElement("input");
-      input.type = "number";
-      input.inputMode = "numeric";
+      input.type = "text";
+      input.inputMode = decimals ? "decimal" : "numeric";
       input.id = `electroSeries${i}`;
       input.className = "form-input electro-input";
-      input.min = "0";
-      input.max = String(maxValue);
-      input.step = "1";
       input.placeholder = "–";
       input.value =
         this.shots[i] === null || this.shots[i] === undefined
           ? ""
-          : String(this.shots[i]);
+          : formatScore(this.shots[i]);
       input.addEventListener("change", () =>
         this.setElectronicSeries(i, input.value, maxValue, input),
       );
@@ -828,26 +836,31 @@ class EntryView {
 
     const hint = document.createElement("div");
     hint.className = "text-muted electro-hint";
-    hint.textContent = `${ELECTRONIC_MIN_SERIES} bis ${ELECTRONIC_SERIES_COUNT} Serien, je max. ${maxValue} Ringe`;
+    const digits = decimals ? "mit Zehntel" : "ganze Zahlen";
+    hint.textContent = `${ELECTRONIC_MIN_SERIES} bis ${ELECTRONIC_SERIES_COUNT} Serien, je max. ${formatScore(maxValue)} Ringe (${digits})`;
 
     container.appendChild(grid);
     container.appendChild(hint);
   }
 
   setElectronicSeries(index, rawValue, maxValue, input) {
+    const decimals = !!storage.settings.electronicDecimals;
     const text = String(rawValue).trim();
     let value = null;
 
     if (text !== "") {
-      const num = Number(text);
-      if (!Number.isInteger(num) || num < 0 || num > maxValue) {
+      const parsed = parseElectronicSeries(text, decimals);
+      if (parsed === null || parsed > maxValue) {
         UIUtils.showError(
-          `Serienwert muss eine ganze Zahl zwischen 0 und ${maxValue} sein.`,
+          decimals
+            ? `Serienwert muss eine Zahl mit höchstens einer Nachkommastelle zwischen 0 und ${formatScore(maxValue)} sein.`
+            : `Serienwert muss eine ganze Zahl zwischen 0 und ${maxValue} sein.`,
         );
-        input.value = this.shots[index] === null ? "" : String(this.shots[index]);
+        input.value = formatScore(this.shots[index]);
+        if (input.value === "–") input.value = "";
         return;
       }
-      value = num;
+      value = parsed;
     }
 
     this.shots[index] = value;
@@ -868,16 +881,14 @@ class EntryView {
       const cells = series
         .map(
           (v, i) =>
-            `<div class="electro-summary-cell"><span class="text-muted">S${i + 1}</span><strong>${
-              v === null ? "–" : v
-            }</strong></div>`,
+            `<div class="electro-summary-cell"><span class="text-muted">S${i + 1}</span><strong>${formatScore(v)}</strong></div>`,
         )
         .join("");
       grid.innerHTML = `<div class="electro-summary">${cells}</div>`;
     }
 
     if (stats) {
-      stats.innerHTML = `<span>${entered.length} von ${ELECTRONIC_SERIES_COUNT} Serien</span><span><strong>Ergebnis: ${total}</strong></span>`;
+      stats.innerHTML = `<span>${entered.length} von ${ELECTRONIC_SERIES_COUNT} Serien</span><span><strong>Ergebnis: ${formatScore(Math.round(total * 10) / 10)}</strong></span>`;
     }
 
     if (summary) {
@@ -888,7 +899,7 @@ class EntryView {
   updateElectronicDisplay() {
     const title = document.getElementById("shotsTitle");
     if (title) {
-      title.textContent = `Elektronische Erfassung (${this.selectedDiscipline})`;
+      title.textContent = "Elektronische Erfassung";
     }
 
     this.updateElectronicSummary();
@@ -1219,6 +1230,20 @@ class EntryView {
   }
 
   // Zusätzlich: Bessere Initialisierung beim Laden von existierenden Ergebnissen
+  // Elektronisch: Disziplin (LG/LP) aus dem bestehenden Ergebnis des Schützen übernehmen
+  resolveElectronicDiscipline() {
+    if (!this.electronicMode) return;
+    const existing = this.selectedShooterId
+      ? storage.results.find(
+          (r) =>
+            r.shooterId === this.selectedShooterId &&
+            r.teamId === this.selectedTeamId &&
+            isElectronicDiscipline(r.discipline),
+        )
+      : null;
+    this.selectedDiscipline = existing ? existing.discipline : Discipline.LUFTGEWEHR;
+  }
+
   loadExistingResults() {
     if (!this.selectedShooterId || !this.selectedDiscipline) {
       this.shots = new Array(40).fill(null);
