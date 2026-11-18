@@ -81,10 +81,10 @@ class OverviewView {
         const infoCard = document.createElement("div");
         infoCard.className = "card";
         infoCard.style.cssText =
-          "background: #fff3cd; border: 1px solid #ffeaa7; text-align: center; margin-bottom: 30px;";
+          "background: color-mix(in srgb, var(--warning-color) 15%, var(--bg-card)); border: 1px solid var(--warning-color); text-align: center; margin-bottom: 30px;";
         infoCard.innerHTML = `
-        <h4 style="margin: 0 0 8px 0; color: #856404;">Noch keine Ergebnisse erfasst</h4>
-        <p style="margin: 0; color: #856404;">Die Teams sind angelegt, aber es wurden noch keine Schussergebnisse erfasst.</p>
+        <h4 style="margin: 0 0 8px 0; color: var(--warning-color);">Noch keine Ergebnisse erfasst</h4>
+        <p style="margin: 0; color: var(--warning-color);">Die Teams sind angelegt, aber es wurden noch keine Schussergebnisse erfasst.</p>
         <button class="btn btn-primary" style="width: 100%; height: 70px; margin-top: 20px;" onclick="app.showView('entry')" style="margin-top: 12px;">
           Jetzt Ergebnisse erfassen
         </button>
@@ -109,29 +109,21 @@ class OverviewView {
       if (navButtons) {
         navButtons.innerHTML = "";
 
-        // Filter Button
-        const filterBtn = document.createElement("button");
-        filterBtn.className = "nav-btn";
-        filterBtn.textContent = "🔍";
-        filterBtn.title = "Filter";
-        filterBtn.addEventListener("click", () => this.showFilterModal());
-        navButtons.appendChild(filterBtn);
+        // Einträge des Header-Menüs (Übersicht)
+        const items = [
+          { text: "🔍 Filter", action: () => this.showFilterModal() },
+          { text: "🏷️ Labels drucken", action: () => this.printLabels() },
+          { text: "📄 PDF Export", action: () => this.exportToPDF() },
+        ];
 
-        // NEU: Labels Button
-        const labelsBtn = document.createElement("button");
-        labelsBtn.className = "nav-btn";
-        labelsBtn.textContent = "🏷️";
-        labelsBtn.title = "Labels drucken";
-        labelsBtn.addEventListener("click", () => this.printLabels());
-        navButtons.appendChild(labelsBtn);
-
-        // PDF Export Button
-        const pdfBtn = document.createElement("button");
-        pdfBtn.className = "nav-btn";
-        pdfBtn.textContent = "📄";
-        pdfBtn.title = "PDF Export";
-        pdfBtn.addEventListener("click", () => this.exportToPDF());
-        navButtons.appendChild(pdfBtn);
+        items.forEach((item) => {
+          const btn = document.createElement("button");
+          btn.className = "nav-menu-item";
+          btn.type = "button";
+          btn.textContent = item.text;
+          btn.addEventListener("click", item.action);
+          navButtons.appendChild(btn);
+        });
       }
     }, 100);
   }
@@ -154,15 +146,15 @@ class OverviewView {
   createInfoCard() {
     const card = document.createElement("div");
     card.className = "card";
-    card.style.cssText = "background: #f0fff0; border: 1px solid #c1e9c1;";
+    card.style.cssText = "background: color-mix(in srgb, var(--color-success) 12%, var(--bg-card)); border: 1px solid var(--color-success);";
     let venueText = "";
     if (storage.selectedVenue) {
-      venueText = `<p style="color: #666; margin-top: 8px;">Wettkampfort: ${UIUtils.escapeHtml(storage.selectedVenue)}</p>`;
+      venueText = `<p style="color: var(--text-secondary); margin-top: 8px;">Wettkampfort: ${UIUtils.escapeHtml(storage.selectedVenue)}</p>`;
     }
     card.innerHTML = `
 			<div style="text-align: center;">
 				<h3>${storage.selectedDiscipline}</h3>
-				<!-- <p style="color: #666; margin-top: 8px;">Modus: ${storage.selectedCompetitionType}</p> -->
+				<!-- <p style="color: var(--text-secondary); margin-top: 8px;">Modus: ${storage.selectedCompetitionType}</p> -->
 				${venueText}
 			</div>
 		`;
@@ -172,11 +164,102 @@ class OverviewView {
   createTeamOverviewCard(team) {
     const competitionType = storage.selectedCompetitionType;
 
+    if (competitionType === CompetitionType.ELEKTRONISCH) {
+      return this.createTeamOverviewCardElectronic(team);
+    }
     if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
       return this.createTeamOverviewCardAnnex(team);
-    } else {
-      return this.createTeamOverviewCardStandard(team);
     }
+    return this.createTeamOverviewCardStandard(team);
+  }
+
+  // Modus Elektronisch (LG/LP): Serien je Schütze, Mannschaftssumme (bester 3er)
+  createTeamOverviewCardElectronic(team) {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const header = document.createElement("div");
+    header.style.cssText =
+      "display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;";
+    header.innerHTML = `
+			<h3 style="margin: 0; flex: 1; line-height: 1.3;">${UIUtils.escapeHtml(team.name)}</h3>
+			<span style="color: var(--text-secondary); font-size: 14px;">Schützen: ${team.shooters.length}</span>
+		`;
+    card.appendChild(header);
+
+    const rows = storage.getElectronicRows(team.shooters, team.id);
+    card.appendChild(
+      this.createElectronicBlock(rows, {
+        total: storage.calculateTeamTotal(team, CompetitionType.ELEKTRONISCH),
+        worstShooterId: storage.getElectronicWorstShooterId(team),
+      }),
+    );
+    return card;
+  }
+
+  // Tabelle für elektronisch erfasste Serien (LG/LP): S1-S4 und Ergebnis.
+  // options.total: optionale Zeile "Mannschaft Gesamt"
+  createElectronicBlock(rows, options = {}) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "electro-block";
+
+    if (!rows || rows.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "text-muted";
+      empty.textContent = "Noch keine elektronischen Ergebnisse erfasst.";
+      wrapper.appendChild(empty);
+      return wrapper;
+    }
+
+    const table = document.createElement("div");
+    table.className = "electro-table";
+
+    const header = document.createElement("div");
+    header.className = "electro-row electro-head";
+    header.innerHTML = `
+			<div>Name</div>
+			<div>Disz.</div>
+			<div>S1</div>
+			<div>S2</div>
+			<div>S3</div>
+			<div>S4</div>
+			<div class="electro-total">Erg.</div>
+		`;
+    table.appendChild(header);
+
+    rows.forEach((row, index) => {
+      const line = document.createElement("div");
+      const isWorst = row.shooter.id === options.worstShooterId;
+      line.className = [
+        "electro-row",
+        isWorst ? "electro-worst" : index % 2 === 1 ? "zebra" : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+      const seriesCells = row.series
+        .map((v) => `<div>${v === null || v === undefined ? "–" : v}</div>`)
+        .join("");
+      line.innerHTML = `
+				<div class="electro-name">${UIUtils.escapeHtml(row.shooter.name)}</div>
+				<div>${UIUtils.escapeHtml(row.discipline)}</div>
+				${seriesCells}
+				<div class="electro-total">${row.total}</div>
+			`;
+      table.appendChild(line);
+    });
+
+    if (options.total !== undefined) {
+      const foot = document.createElement("div");
+      foot.className = "electro-row electro-foot";
+      foot.innerHTML = `
+				<div class="electro-foot-label">Mannschaft Gesamt:</div>
+				<div class="electro-total">${options.total}</div>
+			`;
+      table.appendChild(foot);
+    }
+
+    wrapper.appendChild(table);
+    return wrapper;
   }
 
   createTeamOverviewCardStandard(team) {
@@ -196,7 +279,7 @@ class OverviewView {
 			<h3 style="margin: 0; flex: 1; line-height: 1.3;">${UIUtils.escapeHtml(
         team.name,
       )}</h3>
-			<span style="color: #666; font-size: 14px;">Schützen: ${
+			<span style="color: var(--text-secondary); font-size: 14px;">Schützen: ${
         team.shooters.length
       }</span>
 		`;
@@ -206,7 +289,7 @@ class OverviewView {
     if (team.shooters.length === 0) {
       const noShooters = document.createElement("div");
       noShooters.style.cssText =
-        "text-align: center; color: #666; padding: 20px;";
+        "text-align: center; color: var(--text-secondary); padding: 20px;";
       noShooters.textContent = "Keine Schützen in dieser Mannschaft";
       card.appendChild(noShooters);
       return card;
@@ -215,12 +298,12 @@ class OverviewView {
     // Table
     const table = document.createElement("div");
     table.style.cssText =
-      "border: 1px solid #f0f0f0; border-radius: 8px; overflow: hidden;";
+      "border: 1px solid var(--border-default); border-radius: 8px; overflow: hidden;";
 
     // Table header
     const tableHeader = document.createElement("div");
     tableHeader.style.cssText =
-      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 8px; font-weight: 600; font-size: 12px;";
+      "background: var(--bg-table-header); padding: 8px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 8px; font-weight: 600; font-size: 12px;";
     tableHeader.innerHTML = `
 			<div style="text-align: left;">Name</div>
 			<div style="text-align: right;">Präz.</div>
@@ -242,9 +325,9 @@ class OverviewView {
 				grid-template-columns: 1fr 50px 50px 50px; 
 				gap: 4px; 
 				font-size: 12px;
-				border-top: 1px solid #f0f0f0;
-				${index % 2 === 1 ? "background: #f8f9fa;" : ""}
-				${isWorst ? "color: #ff3b30; background-color: #ffebee;" : ""}
+				border-top: 1px solid var(--border-default);
+				${index % 2 === 1 ? "background: var(--bg-subtle);" : ""}
+				${isWorst ? "color: var(--color-danger); background-color: color-mix(in srgb, var(--color-danger) 15%, var(--bg-card));" : ""}
 			`;
       row.innerHTML = `
 				<div style="overflow: hidden; text-overflow: ellipsis; ${
@@ -262,7 +345,7 @@ class OverviewView {
     // Team total row
     const totalRow = document.createElement("div");
     totalRow.style.cssText =
-      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr 50px; gap: 4px; font-weight: 600; border-top: 1px solid #f0f0f0;";
+      "background: var(--bg-table-header); padding: 8px; display: grid; grid-template-columns: 1fr 50px; gap: 4px; font-weight: 600; border-top: 1px solid var(--border-default);";
     totalRow.innerHTML = `
 			<div style="text-align: left; font-weight: bold; font-size: 12px;">Mannschaft Gesamt: </div>
 			<div style="text-align: right; font-weight: bold; font-size: 12px;">${teamTotal}</div>
@@ -290,7 +373,7 @@ class OverviewView {
 			<h3 style="margin: 0; flex: 1; line-height: 1.3;">${UIUtils.escapeHtml(
         team.name,
       )}</h3>
-			<span style="color: #666; font-size: 14px;">Schützen: ${
+			<span style="color: var(--text-secondary); font-size: 14px;">Schützen: ${
         team.shooters.length
       }</span>
 		`;
@@ -300,7 +383,7 @@ class OverviewView {
     if (team.shooters.length === 0) {
       const noShooters = document.createElement("div");
       noShooters.style.cssText =
-        "text-align: center; color: #666; padding: 20px;";
+        "text-align: center; color: var(--text-secondary); padding: 20px;";
       noShooters.textContent = "Keine Schützen in dieser Mannschaft";
       card.appendChild(noShooters);
       return card;
@@ -309,7 +392,7 @@ class OverviewView {
     // Scrollable table container
     const tableContainer = document.createElement("div");
     tableContainer.style.cssText =
-      "overflow-x: auto; border: 1px solid #f0f0f0; border-radius: 8px;";
+      "overflow-x: auto; border: 1px solid var(--border-default); border-radius: 8px;";
 
     const table = document.createElement("div");
     table.style.cssText = "min-width: 330px;";
@@ -317,7 +400,7 @@ class OverviewView {
     // Table header - narrower columns for series, wider for Gesamt
     const tableHeader = document.createElement("div");
     tableHeader.style.cssText =
-      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 25px) 35px; gap: 4px; font-weight: 600; font-size: 12px;";
+      "background: var(--bg-table-header); padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 25px) 35px; gap: 4px; font-weight: 600; font-size: 12px;";
     tableHeader.innerHTML = `
 			<div>Name</div>
 			<div style="text-align: center;">S1</div>
@@ -342,9 +425,9 @@ class OverviewView {
 				grid-template-columns: 1fr repeat(5, 25px) 35px; 
 				gap: 4px; 
 				font-size: 12px;
-				border-top: 1px solid #f0f0f0;
-				${index % 2 === 1 ? "background: #f8f9fa;" : ""}
-				${isWorst ? "color: #ff3b30; background-color: #ffebee;" : ""}
+				border-top: 1px solid var(--border-default);
+				${index % 2 === 1 ? "background: var(--bg-subtle);" : ""}
+				${isWorst ? "color: var(--color-danger); background-color: color-mix(in srgb, var(--color-danger) 15%, var(--bg-card));" : ""}
 			`;
 
       let rowHTML = `<div style="overflow: hidden; text-overflow: ellipsis; ${
@@ -374,7 +457,7 @@ class OverviewView {
     // Team total row - spanning across name and series columns
     const totalRow = document.createElement("div");
     totalRow.style.cssText =
-      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr 50px; gap: 4px; font-weight: 600; border-top: 1px solid #f0f0f0;";
+      "background: var(--bg-table-header); padding: 8px; display: grid; grid-template-columns: 1fr 50px; gap: 4px; font-weight: 600; border-top: 1px solid var(--border-default);";
     totalRow.innerHTML = `
 			<div style="text-align: left; font-weight: bold; font-size: 12px;">Mannschaft Gesamt: </div>
 			<div style="text-align: right; font-weight: bold; font-size: 12px;">${teamTotal}</div>
@@ -391,11 +474,32 @@ class OverviewView {
   createSoloShootersCard() {
     const competitionType = storage.selectedCompetitionType;
 
+    if (competitionType === CompetitionType.ELEKTRONISCH) {
+      return this.createSoloShootersCardElectronic();
+    }
     if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
       return this.createSoloShootersCardAnnex();
-    } else {
-      return this.createSoloShootersCardStandard();
     }
+    return this.createSoloShootersCardStandard();
+  }
+
+  createSoloShootersCardElectronic() {
+    const shooters = storage.getFilteredStandaloneShooters();
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const header = document.createElement("div");
+    header.style.cssText =
+      "display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;";
+    header.innerHTML = `
+			<h3 style="margin: 0; flex: 1; line-height: 1.3;">Einzelschützen</h3>
+			<span style="color: var(--text-secondary); font-size: 14px;">Schützen: ${shooters.length}</span>
+		`;
+    card.appendChild(header);
+    card.appendChild(
+      this.createElectronicBlock(storage.getElectronicRows(shooters, null)),
+    );
+    return card;
   }
 
   createSoloShootersCardStandard() {
@@ -413,7 +517,7 @@ class OverviewView {
     if (filteredShooters.length === 0) {
       const noShooters = document.createElement("div");
       noShooters.style.cssText =
-        "text-align: center; color: #666; padding: 20px;";
+        "text-align: center; color: var(--text-secondary); padding: 20px;";
       noShooters.textContent = "Keine Einzelschützen sichtbar";
       card.appendChild(noShooters);
       return card;
@@ -422,12 +526,12 @@ class OverviewView {
     // Table
     const table = document.createElement("div");
     table.style.cssText =
-      "border: 1px solid #f0f0f0; border-radius: 8px; overflow: hidden;";
+      "border: 1px solid var(--border-default); border-radius: 8px; overflow: hidden;";
 
     // Table header
     const tableHeader = document.createElement("div");
     tableHeader.style.cssText =
-      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 8px; font-weight: 600; font-size: 12px;";
+      "background: var(--bg-table-header); padding: 8px; display: grid; grid-template-columns: 1fr 50px 50px 50px; gap: 8px; font-weight: 600; font-size: 12px;";
     tableHeader.innerHTML = `
 			<div style="text-align: left;">Name</div>
 			<div style="text-align: right;">Präz.</div>
@@ -482,8 +586,8 @@ class OverviewView {
 				grid-template-columns: 1fr 50px 50px 50px; 
 				gap: 4px; 
 				font-size: 12px;
-				border-top: 1px solid #f0f0f0;
-				${index % 2 === 1 ? "background: #f8f9fa;" : ""}
+				border-top: 1px solid var(--border-default);
+				${index % 2 === 1 ? "background: var(--bg-subtle);" : ""}
 			`;
         row.innerHTML = `
 				<div style="overflow: hidden; text-overflow: ellipsis;">${UIUtils.escapeHtml(
@@ -515,7 +619,7 @@ class OverviewView {
     if (filteredShooters.length === 0) {
       const noShooters = document.createElement("div");
       noShooters.style.cssText =
-        "text-align: center; color: #666; padding: 20px;";
+        "text-align: center; color: var(--text-secondary); padding: 20px;";
       noShooters.textContent = "Keine Einzelschützen sichtbar";
       card.appendChild(noShooters);
       return card;
@@ -524,7 +628,7 @@ class OverviewView {
     // Scrollable table container
     const tableContainer = document.createElement("div");
     tableContainer.style.cssText =
-      "overflow-x: auto; border: 1px solid #f0f0f0; border-radius: 8px;";
+      "overflow-x: auto; border: 1px solid var(--border-default); border-radius: 8px;";
 
     const table = document.createElement("div");
     table.style.cssText = "min-width: 330px;";
@@ -532,7 +636,7 @@ class OverviewView {
     // Table header
     const tableHeader = document.createElement("div");
     tableHeader.style.cssText =
-      "background: #e9ecef; padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 25px) 35px; gap: 4px; font-weight: 600; font-size: 12px;";
+      "background: var(--bg-table-header); padding: 8px; display: grid; grid-template-columns: 1fr repeat(5, 25px) 35px; gap: 4px; font-weight: 600; font-size: 12px;";
     tableHeader.innerHTML = `
 			<div>Name</div>
 			<div style="text-align: center;">S1</div>
@@ -586,8 +690,8 @@ class OverviewView {
 				grid-template-columns: 1fr repeat(5, 25px) 35px; 
 				gap: 4px; 
 				font-size: 12px;
-				border-top: 1px solid #f0f0f0;
-				${index % 2 === 1 ? "background: #f8f9fa;" : ""}
+				border-top: 1px solid var(--border-default);
+				${index % 2 === 1 ? "background: var(--bg-subtle);" : ""}
 			`;
 
         let rowHTML = `<div style="overflow: hidden; text-overflow: ellipsis;">${UIUtils.escapeHtml(
@@ -917,10 +1021,10 @@ class OverviewView {
 
     const card = document.createElement("div");
     card.className = "card";
-    card.style.cssText = "margin-bottom: 12px; padding: 12px; background: #f0f8ff; border: 1px solid #b3d9ff;";
+    card.style.cssText = "margin-bottom: 12px; padding: 12px; background: var(--bg-subtle); border: 1px solid var(--border-default);";
 
     const header = document.createElement("h4");
-    header.style.cssText = "margin: 0 0 8px 0; color: #333; font-size: 14px;";
+    header.style.cssText = "margin: 0 0 8px 0; color: var(--text-primary); font-size: 14px;";
     header.textContent = `Mannschaftsführer (${teamLeaders.length})`;
     card.appendChild(header);
 
@@ -930,7 +1034,7 @@ class OverviewView {
     teamLeaders.forEach((item, index) => {
       const { team, leader } = item;
       const container = document.createElement("div");
-      container.style.cssText = `padding: 6px 0; ${index < teamLeaders.length - 1 ? 'border-bottom: 1px solid #d9ecff; padding-bottom: 8px;' : ''}`;
+      container.style.cssText = `padding: 6px 0; ${index < teamLeaders.length - 1 ? 'border-bottom: 1px solid var(--border-default); padding-bottom: 8px;' : ''}`;
       
       // Name und Team
       const nameLine = document.createElement("div");
@@ -940,16 +1044,16 @@ class OverviewView {
       // eMail
       if (leader.email) {
         const emailLine = document.createElement("div");
-        emailLine.style.cssText = "color: #0066cc;";
-        emailLine.innerHTML = `<span style="color: #000;">eMail:</span> <a href="mailto:${UIUtils.escapeHtml(leader.email)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(leader.email)}</a>`;
+        emailLine.style.cssText = "color: var(--color-link);";
+        emailLine.innerHTML = `<span style="color: var(--text-primary);">eMail:</span> <a href="mailto:${UIUtils.escapeHtml(leader.email)}" style="color: var(--color-link); text-decoration: none;">${UIUtils.escapeHtml(leader.email)}</a>`;
         container.appendChild(emailLine);
       }
 
       // Telefon
       if (leader.phone) {
         const phoneLine = document.createElement("div");
-        phoneLine.style.cssText = "color: #0066cc;";
-        phoneLine.innerHTML = `<span style="color: #000;">Telefon:</span> <a href="tel:${UIUtils.escapeHtml(leader.phone)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(leader.phone)}</a>`;
+        phoneLine.style.cssText = "color: var(--color-link);";
+        phoneLine.innerHTML = `<span style="color: var(--text-primary);">Telefon:</span> <a href="tel:${UIUtils.escapeHtml(leader.phone)}" style="color: var(--color-link); text-decoration: none;">${UIUtils.escapeHtml(leader.phone)}</a>`;
         container.appendChild(phoneLine);
       }
       
@@ -986,10 +1090,10 @@ class OverviewView {
 
     const card = document.createElement("div");
     card.className = "card";
-    card.style.cssText = "margin-bottom: 12px; padding: 12px; background: #fff8f0; border: 1px solid #ffc9a3;";
+    card.style.cssText = "margin-bottom: 12px; padding: 12px; background: var(--bg-subtle); border: 1px solid var(--border-default);";
 
     const header = document.createElement("h4");
-    header.style.cssText = "margin: 0 0 8px 0; color: #333; font-size: 14px;";
+    header.style.cssText = "margin: 0 0 8px 0; color: var(--text-primary); font-size: 14px;";
     header.textContent = `Begegnungen (${totalEncounters})`;
     card.appendChild(header);
 
@@ -999,7 +1103,7 @@ class OverviewView {
     encountersList.forEach((item, index) => {
       const { team, encounter } = item;
       const row = document.createElement("div");
-      row.style.cssText = `padding: 4px 0; ${index < encountersList.length - 1 ? 'border-bottom: 1px solid #ffe0cc;' : ''}`;
+      row.style.cssText = `padding: 4px 0; ${index < encountersList.length - 1 ? 'border-bottom: 1px solid var(--border-default);' : ''}`;
       const dateShort = encounter.date.substring(0, 5) + "." + encounter.date.slice(-2); // DD.MM.YY
       row.innerHTML = `<strong>${UIUtils.escapeHtml(dateShort)}</strong> ${UIUtils.escapeHtml(team.name)} gegen ${UIUtils.escapeHtml(encounter.opponent)}`;
       list.appendChild(row);
@@ -1017,10 +1121,10 @@ class OverviewView {
 
     const card = document.createElement("div");
     card.className = "card";
-    card.style.cssText = "margin-bottom: 12px; padding: 12px; background: #fff0f5; border: 1px solid #ffb3d9;";
+    card.style.cssText = "margin-bottom: 12px; padding: 12px; background: var(--bg-subtle); border: 1px solid var(--border-default);";
 
     const header = document.createElement("h4");
-    header.style.cssText = "margin: 0 0 8px 0; color: #333; font-size: 14px;";
+    header.style.cssText = "margin: 0 0 8px 0; color: var(--text-primary); font-size: 14px;";
     header.textContent = "Rundenkampfleiter";
     card.appendChild(header);
 
@@ -1029,23 +1133,23 @@ class OverviewView {
 
     // Name
     const nameDiv = document.createElement("div");
-    nameDiv.style.cssText = "font-weight: 600; color: #333; margin-bottom: 6px;";
+    nameDiv.style.cssText = "font-weight: 600; color: var(--text-primary); margin-bottom: 6px;";
     nameDiv.textContent = UIUtils.escapeHtml(eventDirector.name);
     content.appendChild(nameDiv);
 
     // eMail
     if (eventDirector.email) {
       const emailDiv = document.createElement("div");
-      emailDiv.style.cssText = "color: #0066cc; margin-bottom: 4px;";
-      emailDiv.innerHTML = `<span style="color: #000;">eMail:</span> <a href="mailto:${UIUtils.escapeHtml(eventDirector.email)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(eventDirector.email)}</a>`;
+      emailDiv.style.cssText = "color: var(--color-link); margin-bottom: 4px;";
+      emailDiv.innerHTML = `<span style="color: var(--text-primary);">eMail:</span> <a href="mailto:${UIUtils.escapeHtml(eventDirector.email)}" style="color: var(--color-link); text-decoration: none;">${UIUtils.escapeHtml(eventDirector.email)}</a>`;
       content.appendChild(emailDiv);
     }
 
     // Telefon
     if (eventDirector.phone) {
       const phoneDiv = document.createElement("div");
-      phoneDiv.style.cssText = "color: #0066cc;";
-      phoneDiv.innerHTML = `<span style="color: #000;">Telefon:</span> <a href="tel:${UIUtils.escapeHtml(eventDirector.phone)}" style="color: #0066cc; text-decoration: none;">${UIUtils.escapeHtml(eventDirector.phone)}</a>`;
+      phoneDiv.style.cssText = "color: var(--color-link);";
+      phoneDiv.innerHTML = `<span style="color: var(--text-primary);">Telefon:</span> <a href="tel:${UIUtils.escapeHtml(eventDirector.phone)}" style="color: var(--color-link); text-decoration: none;">${UIUtils.escapeHtml(eventDirector.phone)}</a>`;
       content.appendChild(phoneDiv);
     }
 

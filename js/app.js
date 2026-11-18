@@ -18,6 +18,8 @@ class App {
       this.initializeViews();
 
       this.setupTabNavigation();
+      this.setupThemeToggle();
+      this.setupHeaderMenu();
       this.isInitialized = true;
       this.showView("overview");
 
@@ -90,6 +92,61 @@ class App {
         }
       });
     });
+  }
+
+  // Hell/Dunkel umschalten (Standard: dunkel), Auswahl wird gespeichert
+  // Header-Menü (☰): auf-/zuklappen, schließt bei Klick außerhalb, Eintrag oder Escape
+  setupHeaderMenu() {
+    const toggle = document.getElementById("menuToggleBtn");
+    const menu = document.getElementById("navMenu");
+    if (!toggle || !menu) return;
+
+    const setOpen = (open) => {
+      menu.classList.toggle("open", open);
+      toggle.setAttribute("aria-expanded", String(open));
+    };
+
+    toggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setOpen(!menu.classList.contains("open"));
+    });
+
+    // Klick auf einen Eintrag führt aus und schließt das Menü
+    menu.addEventListener("click", (e) => {
+      if (e.target.closest(".nav-menu-item")) setOpen(false);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!menu.contains(e.target)) setOpen(false);
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setOpen(false);
+    });
+  }
+
+  // Hell/Dunkel umschalten (Standard: dunkel), Auswahl wird gespeichert
+  setupThemeToggle() {
+    const btn = document.getElementById("themeToggleBtn");
+    if (!btn) return;
+
+    const isLight = () =>
+      document.documentElement.getAttribute("data-theme") === "light";
+
+    const updateButton = () => {
+      // Eintrag zeigt das Ziel-Design: im hellen Design ☀️ Dunkel, im dunklen 🌙 Hell
+      btn.textContent = isLight() ? "🌙 Dunkel" : "☀️ Hell";
+      btn.title = isLight() ? "Zu dunklem Design wechseln" : "Zu hellem Design wechseln";
+    };
+
+    btn.addEventListener("click", () => {
+      const next = isLight() ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("rundenkampf-theme", next);
+      updateButton();
+    });
+
+    updateButton();
   }
 
   showView(viewName) {
@@ -206,7 +263,7 @@ function initApp() {
         <div class="card" style="text-align: center; margin-top: 50px;">
           <h3 style="color: red;">Fehler beim Laden</h3>
           <p>${error.message}</p>
-          <p style="font-size: 14px; color: #666; margin-top: 16px;">
+          <p style="font-size: 14px; color: var(--text-secondary); margin-top: 16px;">
             Überprüfen Sie die Browser-Konsole für weitere Details.
           </p>
           <button class="btn btn-primary" onclick="location.reload()" style="margin-top: 16px;">

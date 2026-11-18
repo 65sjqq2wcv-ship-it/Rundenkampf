@@ -244,6 +244,11 @@ class TeamsView {
       ${!isNew ? `
         <div class="form-section">
           <div class="form-row">
+            <button class="btn btn-secondary" id="deleteTeamResultsBtn" style="width: 100%;">
+              Alle Ergebnisse dieser Mannschaft löschen
+            </button>
+          </div>
+          <div class="form-row">
             <button class="btn btn-danger" id="deleteTeamBtn" style="width: 100%;">
               Mannschaft löschen
             </button>
@@ -295,6 +300,32 @@ class TeamsView {
         });
       }
 
+      const deleteResultsBtn = document.getElementById("deleteTeamResultsBtn");
+      if (deleteResultsBtn && !isNew) {
+        deleteResultsBtn.addEventListener("click", () => {
+          const count = storage.results.filter((r) => r.teamId === team.id).length;
+          if (count === 0) {
+            UIUtils.showError(`Für "${team.name}" sind keine Ergebnisse vorhanden.`);
+            return;
+          }
+          if (
+            confirm(
+              `Alle ${count} Ergebnisse der Mannschaft "${team.name}" wirklich löschen?\n\nDie Mannschaft und ihre Schützen bleiben erhalten. Das kann nicht rückgängig gemacht werden.`
+            )
+          ) {
+            const deleted = storage.deleteResultsForTeam(team.id);
+            UIUtils.showSuccessMessage(`${deleted} Ergebnisse gelöscht`);
+
+            const modal = document.querySelector(".modal");
+            if (modal) {
+              modal.remove();
+            }
+
+            app.showView("teams");
+          }
+        });
+      }
+
       const deleteTeamBtn = document.getElementById("deleteTeamBtn");
       if (deleteTeamBtn && !isNew) {
         deleteTeamBtn.addEventListener("click", () => {
@@ -337,7 +368,7 @@ class TeamsView {
       input.type = "text";
       input.placeholder = "Schützenname";
       input.value = UIUtils.escapeHtml(shooter.name);
-      input.style.cssText = "flex: 1; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px;";
+      input.style.cssText = "flex: 1; padding: 8px; border: 1px solid var(--border-input); border-radius: 8px;";
       
       // ✅ SICHERHEITSFIX: addEventListener statt onchange in innerHTML
       input.addEventListener("change", (e) => {
@@ -415,7 +446,7 @@ class TeamsView {
           dateInput.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
         }
       }
-      dateInput.style.cssText = "flex: 0.8; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px;";
+      dateInput.style.cssText = "flex: 0.8; padding: 8px; border: 1px solid var(--border-input); border-radius: 8px;";
 
       dateInput.addEventListener("change", (e) => {
         // Konvertiere YYYY-MM-DD zurück zu DD.MM.YYYY
@@ -427,7 +458,7 @@ class TeamsView {
 
       // Dropdown für Gegner-Teams
       const opponentSelect = document.createElement("select");
-      opponentSelect.style.cssText = "flex: 1; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px;";
+      opponentSelect.style.cssText = "flex: 1; padding: 8px; border: 1px solid var(--border-input); border-radius: 8px;";
 
       // Leere Option
       const emptyOption = document.createElement("option");

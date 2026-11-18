@@ -255,7 +255,13 @@ class PDFExporter {
     `;
 
     let tableHtml;
-    if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
+    if (competitionType === CompetitionType.ELEKTRONISCH) {
+      tableHtml = this.createElectronicTable(
+        storage.getElectronicRows(team.shooters, team.id),
+        teamTotal,
+        storage.getElectronicWorstShooterId(team)
+      );
+    } else if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
       tableHtml = this.createAnnexTable(shooterData, worstShooterId, teamTotal);
     } else {
       tableHtml = this.createStandardTable(
@@ -291,7 +297,11 @@ class PDFExporter {
             </h2>
         `;
 
-    if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
+    if (competitionType === CompetitionType.ELEKTRONISCH) {
+      content += this.createElectronicTable(
+        storage.getElectronicRows(filteredStandaloneShooters, null)
+      );
+    } else if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
       content += this.createSoloShootersAnnexTable(filteredStandaloneShooters);
     } else {
       content += this.createSoloShootersStandardTable(filteredStandaloneShooters);
@@ -454,6 +464,63 @@ class PDFExporter {
   // =================================================================
   // TABELLEN-ERSTELLUNG (bleibt größtenteils unverändert)
   // =================================================================
+
+  // Elektronisch erfasste Serien (LG/LP): S1-S4 und Ergebnis, leer wenn keine vorhanden
+  // teamTotal (optional): zusätzliche Zeile "Mannschaft Gesamt"
+  createElectronicTable(rows, teamTotal, worstShooterId = null) {
+    if (!rows || rows.length === 0) return "";
+
+    let body = "";
+    rows.forEach((row, index) => {
+      const rowClass =
+        row.shooter.id === worstShooterId
+          ? "table-row worst-shooter"
+          : index % 2 === 0
+            ? "table-row"
+            : "table-row zebra";
+      const seriesCells = row.series
+        .map((v) => `<td class="score-cell">${v === null || v === undefined ? "–" : v}</td>`)
+        .join("");
+
+      body += `
+          <tr class="${rowClass}">
+              <td class="scheiben-cell">${UIUtils.escapeHtml(row.discipline)}</td>
+              <td class="name-cell">${UIUtils.escapeHtml(row.shooter.name)}</td>
+              ${seriesCells}
+              <td class="total-cell">${row.total}</td>
+          </tr>
+      `;
+    });
+
+    if (teamTotal !== undefined) {
+      body += `
+          <tr class="total-row">
+              <td colspan="6" class="total-label">Mannschaft Gesamt:</td>
+              <td class="total-value">${teamTotal}</td>
+          </tr>
+      `;
+    }
+
+    return `
+        <p style="margin: 12px 0 4px; font-weight: bold;">Elektronisch (LG/LP)</p>
+        <table class="results-table" cellspacing="0">
+            <thead>
+                <tr class="header-row">
+                    <th class="scheiben-header">Disz.</th>
+                    <th class="name-header">Name Vorname (Blockschrift)</th>
+                    <th class="score-header">S1</th>
+                    <th class="score-header">S2</th>
+                    <th class="score-header">S3</th>
+                    <th class="score-header">S4</th>
+                    <th class="total-header">Ergebnis</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${body}
+            </tbody>
+        </table>
+    `;
+  }
 
   createStandardTable(shooterData, worstShooterId, teamTotal) {
     let rows = "";

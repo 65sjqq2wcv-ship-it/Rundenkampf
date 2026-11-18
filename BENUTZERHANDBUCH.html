@@ -220,7 +220,7 @@
         </div>
         
         <div class="version">
-            <p>Version 1.33 | Aktualisiert: Oktober 2026</p>
+            <p>Version 1.38 | Aktualisiert: November 2026</p>
         </div>
         
         <div class="toc">
@@ -251,7 +251,7 @@
         <div class="feature">
             <strong>✨ Hauptmerkmale:</strong>
             <ul>
-                <li>✅ Zwei verschiedene Wettkampfmodi (Präzision/Duell oder Annex Scheibe)</li>
+                <li>✅ Drei Wettkampfmodi (Präzision/Duell, Annex Scheibe oder Elektronisch LG/LP)</li>
                 <li>✅ Unterstützung für Mannschaften und Einzelschützen</li>
                 <li>✅ Automatische Wertungsberechnung (beste 3 von 4 Schützen)</li>
                 <li>✅ Scheibendokumentation mit Kamera</li>
@@ -277,6 +277,17 @@
             <li><strong>Serien:</strong> 5 Serien à 8 Schuss</li>
             <li><strong>Wertung pro Schuss:</strong> 0-3 Punkte</li>
             <li><strong>Gesamtergebnis:</strong> Summe aller 40 Schüsse (max. 120 Punkte)</li>
+        </ul>
+        
+        <h4>⚡ Elektronisch (LG/LP)</h4>
+        <p>Dieser Modus ist für Luftgewehr (LG) und Luftpistole (LP) gedacht. Die Serien werden elektronisch
+        geschossen, hier werden nur die Serienergebnisse dokumentiert:</p>
+        <ul>
+            <li><strong>Serien:</strong> maximal 4 Serien, mindestens 3 Serien müssen erfasst werden</li>
+            <li><strong>Serienwert:</strong> ganze Zahl, LG bis 109, LP bis 100 Ringe</li>
+            <li><strong>Ergebnis:</strong> Summe der erfassten Serien (z.B. 90 + 90 + 90 + 90 = 360)</li>
+            <li><strong>Mannschaftsergebnis:</strong> Summe der besten 3 Schützen</li>
+            <li><strong>Schlechtester Schütze:</strong> Bei 4 Schützen wird der Schütze mit dem niedrigsten Ergebnis rot hinterlegt (Übersicht und PDF)</li>
         </ul>
         
         <!-- 2. INSTALLATION -->
@@ -333,7 +344,8 @@
         <h2 id="oberflaeche">3. Benutzeroberfläche</h2>
         
         <h3>Navigationsleiste</h3>
-        <p>Oben auf jedem Bildschirm befindet sich eine Navigationsleiste mit folgenden Optionen:</p>
+        <p>Oben auf jedem Bildschirm befindet sich die Kopfzeile mit dem Titel und dem Menü-Button <span class="button-label">☰</span>.
+        Ein Klick öffnet das Menü. Es enthält folgende Einträge:</p>
         
         <table>
             <tr>
@@ -363,8 +375,23 @@
             </tr>
         </table>
         
+        <p>Das Menü schließt sich nach einem Klick auf einen Eintrag, bei einem Klick außerhalb oder mit der Taste Esc.</p>
+        
+        <h4>Aktionen der Übersicht</h4>
+        <p>Diese Einträge erscheinen im Menü nur auf der Übersichtsseite (unterhalb der Tabs):</p>
+        <ul>
+            <li><strong>🔍 Filter:</strong> Mannschaften und Einzelschützen eingrenzen</li>
+            <li><strong>🏷️ Labels drucken:</strong> Etiketten drucken</li>
+            <li><strong>📄 PDF Export:</strong> Bericht als PDF erstellen</li>
+        </ul>
+        
+        <h4>Design (Hell/Dunkel)</h4>
+        <p>Das Design wird über den Menüeintrag <span class="button-label">☀️ Hell</span> bzw.
+        <span class="button-label">🌙 Dunkel</span> umgeschaltet. Standard ist das dunkle Design. Die Auswahl wird
+        auf diesem Gerät gespeichert und nicht mit dem Backup gesichert.</p>
+        
         <h3>Filterfunktion</h3>
-        <p>In der Übersicht können Sie mit dem Filtere-Button <span class="button-label">🔍</span> 
+        <p>In der Übersicht können Sie im Menü ☰ über <span class="button-label">🔍 Filter</span>
         die angezeigten Mannschaften eingrenzen. Dies ist besonders bei vielen Teams hilfreich.</p>
         
         <!-- 4. TEAMS & SCHÜTZEN -->
@@ -398,6 +425,15 @@
             <li>Geben Sie den Namen des Schützen ein</li>
             <li>Speichern Sie den Eintrag</li>
         </ol>
+        
+        <h3>Alle Ergebnisse einer Mannschaft löschen</h3>
+        <ol>
+            <li>Öffnen Sie die <strong>Teams</strong>-Seite und wählen Sie die Mannschaft zum Bearbeiten aus</li>
+            <li>Klicken Sie auf <span class="button-label">Alle Ergebnisse dieser Mannschaft löschen</span></li>
+            <li>Bestätigen Sie die Abfrage. Die Anzahl der Ergebnisse wird dort angezeigt</li>
+        </ol>
+        <p>Es werden nur die Ergebnisse dieser Mannschaft gelöscht. Die Mannschaft, ihre Schützen sowie
+        Ergebnisse anderer Mannschaften und Einzelschützen bleiben erhalten. Das Löschen kann nicht rückgängig gemacht werden.</p>
         
         <h3>CSV-Import</h3>
         <p>Sie können Mannschaften und Schützen per CSV-Datei importieren. Das Format muss sein:</p>
@@ -438,6 +474,19 @@
             </li>
             <li>Das Ergebnis wird automatisch gespeichert</li>
         </ol>
+        
+        <h3>Elektronische Erfassung (LG/LP)</h3>
+        <p>Im Wettbewerbsmodus <strong>"Elektronisch (LG/LP)"</strong> (siehe Einstellungen) gibt es kein Nummernpad:</p>
+        <ol>
+            <li>Wählen Sie Mannschaft und Schützen (oder "Einzelschütze") aus</li>
+            <li>Wählen Sie die Disziplin <strong>LG</strong> oder <strong>LP</strong></li>
+            <li>Tragen Sie die Serienergebnisse in die Felder <strong>Serie 1</strong> bis <strong>Serie 4</strong> ein
+                (mindestens 3, lückenlos ab Serie 1)</li>
+            <li>Drücken Sie auf <span class="button-label">Speichern</span>. Das Ergebnis (Summe der Serien) wird angezeigt</li>
+        </ol>
+        <div class="tip">
+            <strong>💡 Hinweis:</strong> Die Scheibendokumentation ist für die elektronische Erfassung nicht vorgesehen.
+        </div>
         
         <h3>Scheibendokumentation</h3>
         <p>Sie können Schießscheiben fotografieren und automatisch mit Informationen beschriften:</p>
@@ -482,6 +531,11 @@
             <li>✅ Kontaktdaten des Rundenkampfleiters und Mannschaftsführer</li>
         </ul>
         
+        <h3>Anzeige im Modus "Elektronisch (LG/LP)"</h3>
+        <p>Übersicht und PDF zeigen je Mannschaft eine Tabelle mit Name, Disziplin (LG/LP), den Serien S1–S4,
+        dem Ergebnis je Schütze und der Zeile <strong>Mannschaft Gesamt</strong> (Summe der besten 3 Schützen).
+        Einzelschützen werden in einer eigenen Tabelle dargestellt.</p>
+        
         <h3>PDF-Export</h3>
         <p>Sie können die gesamte Übersicht als PDF-Datei exportieren:</p>
         <ol>
@@ -518,8 +572,9 @@
         
         <h4>Wettbewerbsmodus</h4>
         <ul>
-            <li>Wählen Sie zwischen "Präzision/Duell" oder "Annex Scheibe"</li>
-            <li>Diese Einstellung gilt für alle erfassten Daten</li>
+            <li>Wählen Sie zwischen "Präzision/Duell", "Annex Scheibe" oder "Elektronisch (LG/LP)"</li>
+            <li>Diese Einstellung bestimmt, welche Disziplinen in der Erfassung angeboten werden und wie Übersicht und PDF aufgebaut sind</li>
+            <li>Im Modus "Elektronisch (LG/LP)" zeigen Übersicht und PDF je Mannschaft eine Tabelle mit Serien S1–S4, Ergebnis und Mannschaftsergebnis</li>
         </ul>
         
         <h4>Aktuelle Disziplin</h4>
@@ -637,7 +692,7 @@
         
         <h4>❓ Warum zeigt die Übersicht unterschiedliche Mannschaften als die Erfassungsseite?</h4>
         <p><strong>Antwort:</strong> Das bedeutet, dass Sie den Filter aktiviert haben. Klicken Sie auf das 
-        Filtere-Symbol <span class="keyboard">🔍</span> um alle Mannschaften anzuzeigen.</p>
+        Menü-Eintrag <span class="keyboard">🔍 Filter</span> (Menü ☰) um alle Mannschaften anzuzeigen.</p>
         
         <h4>❓ Wie ändere ich den Wettkampfmodus, wenn ich bereits Ergebnisse erfasst habe?</h4>
         <p><strong>Antwort:</strong> Gehen Sie zu Einstellungen und ändern Sie den Modus. 
@@ -726,7 +781,7 @@
         <!-- FOOTER -->
         <div class="page-break"></div>
         <footer>
-            <p><strong>Rundenkampfbericht v1.33</strong></p>
+            <p><strong>Rundenkampfbericht v1.38</strong></p>
             <p>Progressive Web App für digitale Schießsport-Verwaltung</p>
             <p>Alle Daten werden lokal im Browser gespeichert und nicht übertragen.</p>
             <p>© 2024-2026 | Made with ❤️ for shooters</p>

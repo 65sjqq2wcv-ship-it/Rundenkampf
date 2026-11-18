@@ -14,6 +14,7 @@ class EntryView {
     this.cameraStream = null;
     this.isCapturing = false;
     this.selectedWeapon = null;
+    this.electronicMode = false; // wird aus dem Wettbewerbsmodus abgeleitet
   }
 
   // =================================================================
@@ -54,6 +55,9 @@ class EntryView {
     this.selectedTeamId = null;
     this.selectedShooterId = null;
     this.selectedDiscipline = null;
+    // Elektronische Erfassung (LG/LP) ergibt sich aus dem Wettbewerbsmodus
+    this.electronicMode =
+      storage.selectedCompetitionType === CompetitionType.ELEKTRONISCH;
     this.shots = new Array(40).fill(null);
     this.selectedWeapon = null;
 
@@ -237,7 +241,6 @@ class EntryView {
     const disciplineSelect = document.getElementById("disciplineSelect");
 
     const weaponSelect = document.getElementById("weaponSelect");
-
     // Waffen-Handler nur wenn Element existiert
     if (weaponSelect) {
       this.eventRegistry.register(weaponSelect, "change", (e) => {
@@ -466,12 +469,17 @@ class EntryView {
     defaultOption.textContent = "— Bitte wählen —";
     select.appendChild(defaultOption);
 
-    // Standard-Disziplinen
-    const disciplines = [
-      { value: Discipline.PRAEZISION, text: "Präzision" },
-      { value: Discipline.DUELL, text: "Duell" },
-      { value: Discipline.ANNEX_SCHEIBE, text: "Annex" },
-    ];
+    // Disziplinen: Standard oder elektronisch (LG/LP), je nach Wettbewerbsmodus
+    const disciplines = this.electronicMode
+      ? [
+          { value: Discipline.LUFTGEWEHR, text: "LG (Luftgewehr)" },
+          { value: Discipline.LUFTPISTOLE, text: "LP (Luftpistole)" },
+        ]
+      : [
+          { value: Discipline.PRAEZISION, text: "Präzision" },
+          { value: Discipline.DUELL, text: "Duell" },
+          { value: Discipline.ANNEX_SCHEIBE, text: "Annex" },
+        ];
 
     disciplines.forEach((discipline) => {
       const option = document.createElement("option");
@@ -510,7 +518,7 @@ class EntryView {
     const statsContainer = document.createElement("div");
     statsContainer.id = "shotsStats";
     statsContainer.style.cssText =
-      "display: flex; justify-content: space-between; margin-top: 12px; font-size: 14px; color: #666;";
+      "display: flex; justify-content: space-between; margin-top: 12px; font-size: 14px; color: var(--text-secondary);";
     card.appendChild(statsContainer);
 
     // Series Summary Container
@@ -757,9 +765,15 @@ class EntryView {
     if (!this.selectedDiscipline) {
       const placeholder = document.createElement("div");
       placeholder.style.cssText =
-        "text-align: center; color: #666; padding: 20px;";
+        "text-align: center; color: var(--text-secondary); padding: 20px;";
       placeholder.textContent = "Wählen Sie eine Disziplin aus";
       keypadContainer.appendChild(placeholder);
+      return;
+    }
+
+    // Elektronisch (LG/LP): 4 Serienfelder statt Nummernpad
+    if (isElectronicDiscipline(this.selectedDiscipline)) {
+      this.createElectronicInputs(keypadContainer);
       return;
     }
 
@@ -770,6 +784,115 @@ class EntryView {
     } else {
       this.createStandardKeypad(keypadContainer);
     }
+  }
+
+  // =================================================================
+  // ELEKTRONISCHE ERFASSUNG (LG/LP) - nur Serienergebnisse
+  // =================================================================
+
+  createElectronicInputs(container) {
+    const maxValue = getElectronicMaxSeriesValue(this.selectedDiscipline);
+
+    const grid = document.createElement("div");
+    grid.className = "electro-inputs";
+
+    for (let i = 0; i < ELECTRONIC_SERIES_COUNT; i++) {
+      const cell = document.createElement("div");
+      cell.className = "electro-input-cell";
+
+      const label = document.createElement("label");
+      label.htmlFor = `electroSeries${i}`;
+      label.textContent = `Serie ${i + 1}`;
+
+      const input = document.createElement("input");
+      input.type = "number";
+      input.inputMode = "numeric";
+      input.id = `electroSeries${i}`;
+      input.className = "form-input electro-input";
+      input.min = "0";
+      input.max = String(maxValue);
+      input.step = "1";
+      input.placeholder = "–";
+      input.value =
+        this.shots[i] === null || this.shots[i] === undefined
+          ? ""
+          : String(this.shots[i]);
+      input.addEventListener("change", () =>
+        this.setElectronicSeries(i, input.value, maxValue, input),
+      );
+
+      cell.appendChild(label);
+      cell.appendChild(input);
+      grid.appendChild(cell);
+    }
+
+    const hint = document.createElement("div");
+    hint.className = "text-muted electro-hint";
+    hint.textContent = `${ELECTRONIC_MIN_SERIES} bis ${ELECTRONIC_SERIES_COUNT} Serien, je max. ${maxValue} Ringe`;
+
+    container.appendChild(grid);
+    container.appendChild(hint);
+  }
+
+  setElectronicSeries(index, rawValue, maxValue, input) {
+    const text = String(rawValue).trim();
+    let value = null;
+
+    if (text !== "") {
+      const num = Number(text);
+      if (!Number.isInteger(num) || num < 0 || num > maxValue) {
+        UIUtils.showError(
+          `Serienwert muss eine ganze Zahl zwischen 0 und ${maxValue} sein.`,
+        );
+        input.value = this.shots[index] === null ? "" : String(this.shots[index]);
+        return;
+      }
+      value = num;
+    }
+
+    this.shots[index] = value;
+    this.updateElectronicSummary();
+  }
+
+  // Zeigt die erfassten Serien und das Ergebnis (Summe) im Schuss-Bereich
+  updateElectronicSummary() {
+    const grid = document.getElementById("shotsGrid");
+    const stats = document.getElementById("shotsStats");
+    const summary = document.getElementById("seriesSummary");
+
+    const series = this.shots.slice(0, ELECTRONIC_SERIES_COUNT);
+    const entered = series.filter((v) => v !== null);
+    const total = entered.reduce((sum, v) => sum + v, 0);
+
+    if (grid) {
+      const cells = series
+        .map(
+          (v, i) =>
+            `<div class="electro-summary-cell"><span class="text-muted">S${i + 1}</span><strong>${
+              v === null ? "–" : v
+            }</strong></div>`,
+        )
+        .join("");
+      grid.innerHTML = `<div class="electro-summary">${cells}</div>`;
+    }
+
+    if (stats) {
+      stats.innerHTML = `<span>${entered.length} von ${ELECTRONIC_SERIES_COUNT} Serien</span><span><strong>Ergebnis: ${total}</strong></span>`;
+    }
+
+    if (summary) {
+      summary.innerHTML = "";
+    }
+  }
+
+  updateElectronicDisplay() {
+    const title = document.getElementById("shotsTitle");
+    if (title) {
+      title.textContent = `Elektronische Erfassung (${this.selectedDiscipline})`;
+    }
+
+    this.updateElectronicSummary();
+    this.updateKeypad();
   }
 
   createStandardKeypad(container) {
@@ -925,10 +1048,10 @@ class EntryView {
 
     // Entferne vorherige Hervorhebungen
     const previousHighlights = document.querySelectorAll(
-      '[style*="border: 2px solid #007bff"]',
+      '[style*="border: 2px solid var(--color-link)"]',
     );
     previousHighlights.forEach((el) => {
-      el.style.border = "1px solid #d1d1d6";
+      el.style.border = "1px solid var(--border-input)";
       el.style.backgroundColor = "";
       el.style.transform = "";
     });
@@ -1000,8 +1123,8 @@ class EntryView {
           const targetCell = cells[targetCellIndex];
 
           // Hervorhebung anwenden
-          targetCell.style.border = "2px solid #007bff";
-          targetCell.style.backgroundColor = "#e7f3ff";
+          targetCell.style.border = "2px solid var(--color-link)";
+          targetCell.style.backgroundColor = "var(--bg-subtle)";
           targetCell.style.transform = "scale(1.1)";
           targetCell.style.transition = "all 0.3s ease";
 
@@ -1014,7 +1137,7 @@ class EntryView {
 
           // Entferne Hervorhebung nach 3 Sekunden
           setTimeout(() => {
-            targetCell.style.border = "1px solid #d1d1d6";
+            targetCell.style.border = "1px solid var(--border-input)";
             targetCell.style.backgroundColor = "";
             targetCell.style.transform = "";
           }, 3000);
@@ -1242,12 +1365,12 @@ class EntryView {
           const cells = rows[series].children;
           // +1 weil das erste Element das Serie-Label ist
           if (cells[shotInSeries + 1]) {
-            cells[shotInSeries + 1].style.border = "2px solid #007bff";
-            cells[shotInSeries + 1].style.backgroundColor = "#e7f3ff";
+            cells[shotInSeries + 1].style.border = "2px solid var(--color-link)";
+            cells[shotInSeries + 1].style.backgroundColor = "var(--bg-subtle)";
 
             // Entferne Hervorhebung nach 3 Sekunden
             setTimeout(() => {
-              cells[shotInSeries + 1].style.border = "1px solid #d1d1d6";
+              cells[shotInSeries + 1].style.border = "1px solid var(--border-input)";
               cells[shotInSeries + 1].style.backgroundColor = "";
             }, 3000);
           }
@@ -1271,7 +1394,7 @@ class EntryView {
       const grid = document.getElementById("shotsGrid");
       if (grid) {
         grid.innerHTML =
-          '<div style="text-align: center; color: #666; padding: 20px;">Bitte wählen Sie eine Disziplin aus.</div>';
+          '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">Bitte wählen Sie eine Disziplin aus.</div>';
       }
 
       const stats = document.getElementById("shotsStats");
@@ -1285,6 +1408,12 @@ class EntryView {
       }
 
       this.updateKeypad();
+      return;
+    }
+
+    // Elektronisch (LG/LP): nur Serienergebnisse anzeigen
+    if (isElectronicDiscipline(this.selectedDiscipline)) {
+      this.updateElectronicDisplay();
       return;
     }
 
@@ -1316,7 +1445,7 @@ class EntryView {
       const subtitle = document.createElement("div");
       subtitle.textContent = `${shooterText}`;
       subtitle.style.cssText =
-        "font-size: 14px; font-weight: normal; color: #666; margin-top: 4px;";
+        "font-size: 14px; font-weight: normal; color: var(--text-secondary); margin-top: 4px;";
       title.appendChild(subtitle);
     }
 
@@ -1349,7 +1478,7 @@ class EntryView {
       const cell = document.createElement("div");
       cell.style.cssText = `
         aspect-ratio: 1;
-        border: 1px solid #d1d1d6;
+        border: 1px solid var(--border-input);
         border-radius: 8px;
         display: flex;
         align-items: center;
@@ -1376,7 +1505,7 @@ class EntryView {
     header.className = "annex-header";
     header.setAttribute("data-row-type", "header"); // Debug-Attribut
     header.style.cssText =
-      "display: grid; grid-template-columns: 40px repeat(8, 30px); gap: 4px; margin-bottom: 8px; font-size: 12px; color: #666;";
+      "display: grid; grid-template-columns: 40px repeat(8, 30px); gap: 4px; margin-bottom: 8px; font-size: 12px; color: var(--text-secondary);";
 
     // Series/Round header
     const seriesHeader = document.createElement("div");
@@ -1410,7 +1539,7 @@ class EntryView {
       seriesLabel.textContent = `S${series + 1}`;
       seriesLabel.className = "series-label";
       seriesLabel.style.cssText =
-        "display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 11px; color: #666;";
+        "display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 11px; color: var(--text-secondary);";
       row.appendChild(seriesLabel);
 
       // Shot cells
@@ -1423,7 +1552,7 @@ class EntryView {
         cell.setAttribute("data-index", shotIndex.toString()); // Eindeutiger Index!
         cell.style.cssText = `
         aspect-ratio: 1;
-        border: 1px solid #d1d1d6;
+        border: 1px solid var(--border-input);
         border-radius: 4px;
         display: flex;
         align-items: center;
@@ -1470,7 +1599,7 @@ class EntryView {
     stats.innerHTML = "";
 
     // Ändere das Layout zu vertikal für mehrere Zeilen
-    stats.style.cssText = "margin-top: 12px; font-size: 14px; color: #666;";
+    stats.style.cssText = "margin-top: 12px; font-size: 14px; color: var(--text-secondary);";
 
     // Erste Zeile: Schüsse und Ringe (horizontal)
     const firstLineDiv = document.createElement("div");
@@ -1491,7 +1620,7 @@ class EntryView {
     if (competitionType !== CompetitionType.ANNEX_SCHEIBE) {
       const distributionDiv = document.createElement("div");
       distributionDiv.style.cssText =
-        "font-size: 12px; color: #666; text-align: center; background: #f8f9fa; border-radius: 8px; padding: 12px; margin-top: 12px; margin-bottom: 0px";
+        "font-size: 12px; color: var(--text-secondary); text-align: center; background: var(--bg-subtle); border-radius: 8px; padding: 12px; margin-top: 12px; margin-bottom: 0px";
 
       if (filledShots.length > 0) {
         const shotDistribution = this.calculateShotDistribution(filledShots);
@@ -1536,7 +1665,7 @@ class EntryView {
 
     const summaryCard = document.createElement("div");
     summaryCard.style.cssText =
-      "background: #f8f9fa; border-radius: 8px; padding: 12px;";
+      "background: var(--bg-subtle); border-radius: 8px; padding: 12px;";
 
     /*const summaryTitle = document.createElement("div");
     summaryTitle.style.cssText =
@@ -1553,7 +1682,7 @@ class EntryView {
       seriesDiv.style.cssText = "text-align: center;";
 
       const seriesLabel = document.createElement("div");
-      seriesLabel.style.cssText = "font-size: 12px; color: #666;";
+      seriesLabel.style.cssText = "font-size: 12px; color: var(--text-secondary);";
       seriesLabel.textContent = `S${i + 1}`;
 
       const seriesValue = document.createElement("div");
@@ -1625,11 +1754,34 @@ class EntryView {
         return;
       }*/
 
+      const electronic = isElectronicDiscipline(this.selectedDiscipline);
+      let shotsToSave = [...this.shots];
+
+      if (electronic) {
+        // Serien müssen lückenlos ab Serie 1 erfasst sein, mindestens 3 davon
+        const series = this.shots.slice(0, ELECTRONIC_SERIES_COUNT);
+        const enteredCount = series.filter((v) => v !== null).length;
+        const firstGap = series.indexOf(null);
+        const contiguousCount = firstGap === -1 ? series.length : firstGap;
+
+        if (enteredCount < ELECTRONIC_MIN_SERIES || contiguousCount !== enteredCount) {
+          UIUtils.showError(
+            `Bitte ${ELECTRONIC_MIN_SERIES} bis ${ELECTRONIC_SERIES_COUNT} Serien lückenlos ab Serie 1 erfassen.`,
+          );
+          return;
+        }
+
+        // Nur die Serien speichern (keine Schussdaten)
+        shotsToSave = shotsToSave.map((v, i) =>
+          i < ELECTRONIC_SERIES_COUNT ? v : null,
+        );
+      }
+
       const entry = new ResultEntry(
         this.selectedTeamId,
         this.selectedShooterId,
         this.selectedDiscipline,
-        [...this.shots],
+        shotsToSave,
       );
 
       storage.saveResult(entry);
@@ -1638,7 +1790,7 @@ class EntryView {
       const total = entry.total();
 
       UIUtils.showSuccessMessage(
-        `Ergebnis gespeichert für ${shooterInfo}: ${total} Ringe`,
+        `Ergebnis gespeichert für ${shooterInfo}: ${total} ${electronic ? "Punkte" : "Ringe"}`,
       );
 
       console.log("Entry saved successfully:", entry);
@@ -1725,10 +1877,10 @@ class EntryView {
     // Info-Bereich (Text "Disziplin" durch "Scheibe" ersetzt)
     const infoDiv = document.createElement("div");
     infoDiv.style.cssText =
-      "margin-bottom: 16px; padding: 12px; background: #f8f9fa; border-radius: 8px;";
+      "margin-bottom: 16px; padding: 12px; background: var(--bg-subtle); border-radius: 8px;";
     infoDiv.innerHTML = `
     <div style="font-weight: 600; margin-bottom: 4px;">${shooterInfo.name}</div>
-    <div style="font-size: 14px; color: #666;">
+    <div style="font-size: 14px; color: var(--text-secondary);">
       Disziplin: ${shooterInfo.currentDiscipline}<br>
       Scheibe: ${shooterInfo.discipline}<br>
       Datum: ${shooterInfo.date}
@@ -2518,7 +2670,7 @@ class EntryView {
     errorContent.innerHTML = `
     <div style="text-align: center; padding: 20px;">
       <div style="font-size: 48px; margin-bottom: 16px;">📷❌</div>
-      <h3 style="color: #ff3b30; margin-bottom: 16px;">${userMessage}</h3>
+      <h3 style="color: var(--color-danger); margin-bottom: 16px;">${userMessage}</h3>
       
       ${suggestions.length > 0
         ? `
@@ -2532,7 +2684,7 @@ class EntryView {
         : ""
       }
       
-      <div style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 12px; color: #666;">
+      <div style="margin-top: 20px; padding: 12px; background: var(--bg-subtle); border-radius: 8px; font-size: 12px; color: var(--text-secondary);">
         <strong>Technische Details:</strong><br>
         ${originalError.name || "Unknown"}: ${originalError.message}
       </div>
@@ -2605,10 +2757,10 @@ class EntryView {
     // Info-Bereich (gleich wie bei Kamera)
     const infoDiv = document.createElement("div");
     infoDiv.style.cssText =
-      "margin-bottom: 16px; padding: 12px; background: #f8f9fa; border-radius: 8px;";
+      "margin-bottom: 16px; padding: 12px; background: var(--bg-subtle); border-radius: 8px;";
     infoDiv.innerHTML = `
     <div style="font-weight: 600; margin-bottom: 4px;">${shooterInfo.name}</div>
-    <div style="font-size: 14px; color: #666;">
+    <div style="font-size: 14px; color: var(--text-secondary);">
       Disziplin: ${shooterInfo.currentDiscipline}<br>
       Scheibe: ${shooterInfo.discipline}<br>
       Datum: <span id="selectedDate">${shooterInfo.date}</span>
@@ -2628,7 +2780,7 @@ class EntryView {
     dateInput.type = "date";
     dateInput.id = "overlayDate";
     dateInput.style.cssText =
-      "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;";
+      "width: 100%; padding: 8px; border: 1px solid var(--border-input); border-radius: 4px;";
 
     // Aktuelles Datum als Standard
     const today = new Date();
@@ -2715,7 +2867,7 @@ class EntryView {
 
     const img = document.createElement("img");
     img.style.cssText =
-      "max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid #ddd;";
+      "max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--border-input);";
 
     const reader = new FileReader();
     reader.onload = (e) => {

@@ -267,7 +267,7 @@ class UIUtils {
 			top: 80px;
 			left: 50%;
 			transform: translateX(-50%);
-			background-color: #ff3b30;
+			background-color: var(--color-danger);
 			color: white;
 			padding: 12px 20px;
 			border-radius: 8px;
@@ -370,7 +370,7 @@ class ModalComponent {
     const modal = document.createElement("div");
     modal.className = "modal";
     modal.style.cssText = `
-			background: white;
+			background: var(--bg-card);
 			border-radius: 12px;
 			max-width: 90%;
 			max-height: 90%;
@@ -399,7 +399,7 @@ class ModalComponent {
     const header = document.createElement("div");
     header.style.cssText = `
 			padding: 16px 20px;
-			border-bottom: 1px solid #f0f0f0;
+			border-bottom: 1px solid var(--border-default);
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
@@ -416,7 +416,7 @@ class ModalComponent {
 			border: none;
 			font-size: 24px;
 			cursor: pointer;
-			color: #666;
+			color: var(--text-secondary);
 			padding: 0;
 			width: 32px;
 			height: 32px;
@@ -453,7 +453,7 @@ class ModalComponent {
     const footer = document.createElement("div");
     footer.style.cssText = `
 			padding: 16px 20px;
-			border-top: 1px solid #f0f0f0;
+			border-top: 1px solid var(--border-default);
 			display: flex;
 			gap: 12px;
 			justify-content: flex-end;

@@ -43,12 +43,31 @@ const Discipline = {
   PRAEZISION: "Präzision",
   DUELL: "Duell",
   ANNEX_SCHEIBE: "Annex",
+  LUFTGEWEHR: "LG", // Elektronisch erfasst, nur Serienergebnisse
+  LUFTPISTOLE: "LP", // Elektronisch erfasst, nur Serienergebnisse
 };
 
 const CompetitionType = {
   PRAEZISION_DUELL: "Präzision/Duell",
   ANNEX_SCHEIBE: "Annex",
+  ELEKTRONISCH: "Elektronisch (LG/LP)",
 };
+
+// Elektronische Erfassung (LG/LP): max. 4 Serien, mindestens 3 müssen erfasst sein
+const ELECTRONIC_SERIES_COUNT = 4;
+const ELECTRONIC_MIN_SERIES = 3;
+
+function isElectronicDiscipline(discipline) {
+  return (
+    discipline === Discipline.LUFTGEWEHR ||
+    discipline === Discipline.LUFTPISTOLE
+  );
+}
+
+// Höchstwert einer Serie (10 Schuss): LG 10 x 10,9 = 109, LP 10 x 10 = 100
+function getElectronicMaxSeriesValue(discipline) {
+  return discipline === Discipline.LUFTPISTOLE ? 100 : 109;
+}
 
 // Utility Functions (unverändert)
 function getCompetitionType(discipline) {
@@ -58,6 +77,9 @@ function getCompetitionType(discipline) {
       return CompetitionType.PRAEZISION_DUELL;
     case Discipline.ANNEX_SCHEIBE:
       return CompetitionType.ANNEX_SCHEIBE;
+    case Discipline.LUFTGEWEHR:
+    case Discipline.LUFTPISTOLE:
+      return CompetitionType.ELEKTRONISCH;
     default:
       return CompetitionType.PRAEZISION_DUELL;
   }
@@ -209,6 +231,11 @@ class ResultEntry {
       discipline: this.discipline,
       shots: this.shots,
     };
+  }
+
+  // Elektronisch (LG/LP): die 4 Serienergebnisse liegen in shots[0..3]
+  electronicSeries() {
+    return this.shots.slice(0, ELECTRONIC_SERIES_COUNT);
   }
 
   // seriesSums Methode (unverändert)

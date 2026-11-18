@@ -563,6 +563,40 @@ class Storage {
     }
   }
 
+  // Schlechtester Schütze im Modus Elektronisch (nur bei 4 Schützen, wie bei Präzision/Duell)
+  getElectronicWorstShooterId(team) {
+    if (!team || team.shooters.length < 4) return null;
+
+    const totals = team.shooters.map((shooter) => ({
+      id: shooter.id,
+      total: this.results
+        .filter(
+          (r) =>
+            r.teamId === team.id &&
+            r.shooterId === shooter.id &&
+            isElectronicDiscipline(r.discipline),
+        )
+        .reduce((sum, r) => sum + r.total(), 0),
+    }));
+
+    return totals.reduce((worst, t) => (t.total < worst.total ? t : worst)).id;
+  }
+
+  // Alle Ergebnisse einer Mannschaft löschen (Einzelschützen bleiben unberührt)
+  deleteResultsForTeam(teamId) {
+    if (!teamId) return 0;
+
+    const oldLength = this.results.length;
+    this.results = this.results.filter((r) => r.teamId !== teamId);
+
+    const deletedCount = oldLength - this.results.length;
+    if (deletedCount > 0) {
+      this.save();
+      console.log(`Deleted ${deletedCount} results for team:`, teamId);
+    }
+    return deletedCount;
+  }
+
   // Disziplinen-Management
   addDiscipline(name) {
     const trimmed = name.trim();
@@ -679,6 +713,24 @@ class Storage {
   calculateTeamTotal(team, competitionType) {
     if (!team || team.shooters.length === 0) return 0;
 
+    if (competitionType === CompetitionType.ELEKTRONISCH) {
+      // Elektronisch: bester 3er-Wert aus den Serienergebnissen (LG/LP)
+      const shooterTotals = team.shooters.map((shooter) =>
+        this.results
+          .filter(
+            (r) =>
+              r.teamId === team.id &&
+              r.shooterId === shooter.id &&
+              isElectronicDiscipline(r.discipline),
+          )
+          .reduce((sum, r) => sum + r.total(), 0),
+      );
+      return shooterTotals
+        .sort((a, b) => b - a)
+        .slice(0, 3)
+        .reduce((sum, total) => sum + total, 0);
+    }
+
     if (competitionType === CompetitionType.ANNEX_SCHEIBE) {
       const shooterTotals = team.shooters.map((shooter) => {
         const result = this.results.find(
@@ -696,6 +748,45 @@ class Storage {
     } else {
       // Bei Standard: Bester 3er-Schnitt aus Präzision + Duell
       return this.calculateBestThreeSum(team);
+    }
+  }
+
+  // Elektronische Ergebnisse (LG/LP) für eine Mannschaft (teamId) oder Einzelschützen (teamId = null)
+  // Liefert eine Zeile pro Ergebnis: { shooter, discipline, series[4], total }
+  getElectronicRows(shooters, teamId) {
+    const rows = [];
+
+    shooters.forEach((shooter) => {
+      this.results
+        .filter(
+          (r) =>
+            r.teamId === teamId &&
+            r.shooterId === shooter.id &&
+            isElectronicDiscipline(r.discipline),
+        )
+        .sort((a, b) => a.discipline.localeCompare(b.discipline, "de"))
+        .forEach((r) =>
+          rows.push({
+            shooter,
+            discipline: r.discipline,
+            series: r.electronicSeries(),
+            total: r.total(),
+          }),
+        );
+    });
+
+    const sortingOpt = this.settings.sortingOption || "nameAsc";
+    const byName = (a, b) =>
+      a.shooter.name.localeCompare(b.shooter.name, "de", { sensitivity: "base" });
+    switch (sortingOpt) {
+      case "nameDesc":
+        return rows.sort((a, b) => byName(b, a));
+      case "scoreAsc":
+        return rows.sort((a, b) => a.total - b.total);
+      case "scoreDesc":
+        return rows.sort((a, b) => b.total - a.total);
+      default:
+        return rows.sort(byName);
     }
   }
 

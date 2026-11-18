@@ -20,60 +20,63 @@ html, body {
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #f8fafb;
-  color: #1a202c;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
 }
 
+a { color: var(--color-link); }
+
 /* =================================================================
-   2. CSS VARIABLEN - PROFESSIONELLES FARBSCHEMA
+   2. CSS VARIABLEN - FARBEN
+   Farb-Tokens (Light/Dark) stehen in theme.css (siehe STYLEGUIDE.md).
+   Hier nur Aliase auf diese Tokens – keine festen Farbwerte.
    ================================================================= */
 
 :root {
   /* === PRIMÄRFARBEN === */
-  --primary-color: #2d3748;           /* Dunkelgrau-Blau - professionell */
-  --primary-hover: #1a202c;           /* Noch dunkler für Hover */
-  --primary-light: #4a5568;           /* Hellere Version */
-  
+  --primary-color: var(--text-primary);           /* Überschriften */
+  --primary-hover: var(--text-primary);
+  --primary-light: var(--text-secondary);
+
   /* === AKZENTFARBEN === */
-  --accent-color: #3182ce;            /* Professionelles Blau für wichtige Actions */
-  --accent-hover: #2c5282;            /* Dunkleres Blau für Hover */
-  --accent-light: #90cdf4;            /* Helles Blau für Highlights */
-  
+  --accent-color: var(--color-brand-primary);     /* Aktiver Tab, primäre Buttons */
+  --accent-hover: var(--color-brand-primary-hover);
+  --accent-light: var(--color-link);
+
   /* === HINTERGRUNDFARBEN === */
-  --background-primary: #f8fafb;      /* Sehr helles Grau - Haupthintergrund */
-  --background-white: #ffffff;        /* Reines Weiß für Karten */
-  --background-elevated: #f7fafc;     /* Leicht erhöhte Bereiche */
-  --secondary-bg: #edf2f7;            /* Sekundärer Hintergrund */
-  --secondary-hover: #e2e8f0;         /* Hover-Zustand */
-  
-  /* === TEXTFARBEN === */
-  --text-primary: #1a202c;            /* Primärer Text - sehr dunkel */
-  --text-secondary: #4a5568;          /* Sekundärer Text */
-  --text-muted: #718096;              /* Gedämpfter Text */
-  --text-light: #a0aec0;              /* Heller Text für Platzhalter */
-  
+  --background-primary: var(--bg-page);           /* Haupthintergrund */
+  --background-white: var(--bg-card);             /* Karten */
+  --background-elevated: var(--bg-subtle);        /* Erhöhte Bereiche */
+  --secondary-bg: var(--bg-table-header);
+  --secondary-hover: var(--bg-table-header-hover);
+
+  /* === TEXTFARBEN (--text-primary / --text-secondary kommen aus theme.css) === */
+  --text-muted: var(--text-secondary);
+  --text-light: var(--text-secondary);
+
   /* === STATUSFARBEN === */
-  --success-color: #38a169;           /* Grün für Erfolg */
-  --success-light: #68d391;           /* Helleres Grün */
-  --success-bg: #f0fff4;              /* Grüner Hintergrund */
-  
-  --danger-color: #e53e3e;            /* Rot für Gefahren/Löschen */
-  --danger-hover: #c53030;            /* Dunkleres Rot für Hover */
-  --danger-light: #fc8181;            /* Helleres Rot */
-  --danger-bg: #fed7d7;               /* Roter Hintergrund */
-  
-  --warning-color: #d69e2e;           /* Orange/Gelb für Warnungen */
-  --warning-light: #f6e05e;           /* Helles Gelb */
-  --warning-bg: #fffaf0;              /* Gelber Hintergrund */
-  
-  --info-color: #3182ce;              /* Blau für Informationen */
-  --info-light: #63b3ed;              /* Helles Info-Blau */
-  --info-bg: #ebf8ff;                 /* Blauer Hintergrund */
-  
+  --success-color: var(--color-success);
+  --success-light: var(--color-success);
+  --success-bg: var(--bg-subtle);
+
+  --danger-color: var(--color-danger);
+  --danger-hover: var(--color-danger);
+  --danger-light: var(--color-danger);
+  --danger-bg: var(--bg-subtle);
+
+  /* Warnfarbe: im STYLEGUIDE nicht definiert, daher fester Wert */
+  --warning-color: #d69e2e;
+  --warning-light: #f6e05e;
+  --warning-bg: var(--bg-subtle);
+
+  --info-color: var(--color-info);
+  --info-light: var(--color-info);
+  --info-bg: var(--bg-subtle);
+
   /* === RAHMEN UND SCHATTEN === */
-  --border-color: #e2e8f0;            /* Hauptrahmenfarbe */
-  --border-light: #f7fafc;            /* Sehr helle Rahmen */
-  --border-dark: #cbd5e0;             /* Dunklere Rahmen */
+  --border-color: var(--border-default);
+  --border-light: var(--border-default);
+  --border-dark: var(--border-input);
   
   --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
   --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.07);
@@ -88,9 +91,7 @@ body {
   
   /* === LAYOUT === */
   --app-max-width: 480px;
-  --navbar-height: 60px;
-  --tab-bar-height: 70px;
-  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --navbar-height: 56px;
 }
 
 /* =================================================================
@@ -103,24 +104,15 @@ body {
   height: 100vh;
   max-width: var(--app-max-width);
   margin: 0 auto;
-  background-color: var(--background-white);
+  background-color: var(--text-on-dark);
   box-shadow: var(--shadow-heavy);
   overflow: hidden;
 }
 
-/* Navigation Bar - EINFARBIG für iOS Statusbar */
+/* Kopfzeile: Titel + Aktionen oben, Menü (Tabs) darunter */
 .navbar {
-  /* ALT: Gradient entfernen */
-  /* background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%); */
-  
-  /* NEU: Einfarbig */
-  background-color: var(--primary-color); /* #2d3748 */
-  
-  color: var(--background-white);
-  padding: 12px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background-color: var(--bg-header);
+  color: var(--text-on-dark);
   box-shadow: var(--shadow-medium);
   position: fixed;
   top: 0;
@@ -131,24 +123,43 @@ body {
   height: var(--navbar-height);
   z-index: 100;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
 }
+
+.navbar-top {
+  height: 56px;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-title-wrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.nav-logo { width: 30px; height: 30px; border-radius: 6px; flex-shrink: 0; object-fit: cover; }
 
 .nav-title {
   font-size: 20px;
   font-weight: 700;
-  color: var(--background-white);
-  /*text-shadow: 0 1px 2px rgba(0,0,0,0.2);*/
+  color: var(--text-on-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .nav-buttons {
   display: flex;
   gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .nav-btn {
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: var(--background-white);
+  color: var(--text-on-dark);
   padding: 8px 10px;
   border-radius: var(--border-radius-medium);
   cursor: pointer;
@@ -167,65 +178,55 @@ body {
 .main-content {
   flex: 1;
   margin-top: var(--navbar-height);
-  margin-bottom: var(--tab-bar-height);
+  margin-bottom: 0;
   padding: 16px;
   overflow-y: auto;
   overflow-x: hidden;
   background-color: var(--background-primary);
 }
 
-/* Tab Bar */
-.tab-bar {
-  background-color: var(--background-white);
-  border-top: 1px solid var(--border-color);
-  display: flex;
-  padding: 8px 0;
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: var(--app-max-width);
-  height: var(--tab-bar-height);
-  z-index: 99;
-  flex-shrink: 0;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-}
 
 .tab-item {
   flex: 1;
   background: none;
   border: none;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  padding: 8px 4px;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 2px;
   cursor: pointer;
-  color: var(--text-muted);
+  color: var(--text-on-dark);
+  opacity: 0.8;
   transition: all 0.2s ease;
   border-radius: var(--border-radius-medium);
-  margin: 0 2px;
+  min-width: 0;
 }
 
 .tab-item:hover {
-  background-color: var(--background-elevated);
-  color: var(--text-secondary);
+  background-color: var(--bg-button-hover);
+  opacity: 1;
 }
 
 .tab-item.active {
-  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
-  color: var(--background-white);
+  background: var(--color-brand-primary);
+  color: var(--text-on-dark);
+  opacity: 1;
   box-shadow: var(--shadow-light);
 }
 
 .tab-icon {
-  font-size: 20px;
-  margin-bottom: 4px;
+  font-size: 16px;
+  line-height: 1;
 }
 
 .tab-label {
   font-size: 11px;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* =================================================================
@@ -280,7 +281,7 @@ body {
 
 .btn-primary {
   background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
-  color: var(--background-white);
+  color: var(--text-on-dark);
   box-shadow: var(--shadow-light);
 }
 
@@ -303,7 +304,7 @@ body {
 
 .btn-danger {
   background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-hover) 100%);
-  color: var(--background-white);
+  color: var(--text-on-dark);
   box-shadow: var(--shadow-light);
 }
 
@@ -335,7 +336,7 @@ body {
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius-medium);
   font-size: 16px;
-  background: var(--background-white);
+  background: var(--bg-input);
   color: var(--text-primary);
   transition: all 0.2s ease;
 }
@@ -344,7 +345,7 @@ body {
 .form-input:focus {
   outline: none;
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand-primary) 15%, transparent);
 }
 
 .form-section {
@@ -473,7 +474,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   background: linear-gradient(135deg, var(--success-color) 0%, var(--success-light) 100%);
-  color: var(--background-white);
+  color: var(--text-on-dark);
   padding: 12px 20px;
   border-radius: var(--border-radius-medium);
   font-size: 14px;
@@ -491,7 +492,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-light) 100%);
-  color: var(--background-white);
+  color: var(--text-on-dark);
   padding: 12px 20px;
   border-radius: var(--border-radius-medium);
   font-size: 14px;
@@ -545,7 +546,7 @@ body {
 
 .remove-shooter-btn {
   background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-hover) 100%);
-  color: var(--background-white);
+  color: var(--text-on-dark);
   border: none;
   border-radius: var(--border-radius-small);
   padding: 6px 12px;
@@ -603,18 +604,6 @@ body {
   /* Keine zusätzlichen Änderungen nötig */
 }
 
-/* Safe Area für iPhones mit Home Indicator */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .tab-bar {
-    padding-bottom: var(--safe-area-bottom);
-    height: calc(var(--tab-bar-height) + var(--safe-area-bottom));
-  }
-
-  .main-content {
-    margin-bottom: calc(var(--tab-bar-height) + var(--safe-area-bottom));
-  }
-}
-
 /* =================================================================
    12. UTILITY KLASSEN
    ================================================================= */
@@ -655,7 +644,7 @@ body {
   aspect-ratio: 1;
   height: 50px;
   background: linear-gradient(135deg, var(--success-color) 0%, var(--success-light) 100%);
-  color: var(--background-white);
+  color: var(--text-on-dark);
   border: none;
   border-radius: var(--border-radius-medium);
   font-size: 20px;
@@ -677,7 +666,7 @@ body {
   aspect-ratio: 1;
   height: 50px;
   background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-light) 100%);
-  color: var(--background-white);
+  color: var(--text-on-dark);
   border: none;
   border-radius: var(--border-radius-medium);
   font-size: 20px;
@@ -700,6 +689,125 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
+
+/* =================================================================
+   ELEKTRONISCH ERFASST (LG/LP) - Schalter, Serienfelder, Ergebnisse
+   ================================================================= */
+
+/* Serienfelder (Erfassen) */
+.electro-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.electro-input-cell label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.electro-hint { font-size: 12px; margin-top: 8px; }
+
+/* Serien-Übersicht (Erfassen, Schuss-Bereich) */
+.electro-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.electro-summary-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-medium);
+  background: var(--bg-subtle);
+  font-size: 16px;
+}
+
+/* Elektronisch-Block (Übersicht) */
+.electro-block { margin-top: 16px; }
+.electro-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.electro-table { border: 1px solid var(--border-default); border-radius: 8px; overflow: hidden; }
+.electro-row {
+  display: grid;
+  grid-template-columns: 1fr 40px 36px 36px 36px 36px 46px;
+  gap: 4px;
+  padding: 8px;
+  font-size: 12px;
+  align-items: center;
+  border-top: 1px solid var(--border-default);
+}
+.electro-row:first-child { border-top: none; }
+.electro-row.zebra { background: var(--bg-subtle); }
+.electro-head { background: var(--bg-table-header); color: var(--text-table-header); font-weight: 600; }
+.electro-row > div { text-align: center; }
+.electro-row > div:first-child { text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.electro-total { text-align: right !important; font-weight: 600; }
+.electro-row.electro-worst { background: color-mix(in srgb, var(--color-danger) 15%, var(--bg-card)); color: var(--color-danger); }
+.electro-foot { grid-template-columns: 1fr auto; background: var(--bg-table-header); color: var(--text-table-header); font-weight: 600; }
+.electro-foot .electro-total { padding: 0 4px; }
+
+/* =================================================================
+   HEADER-MENÜ (☰) - aufklappbar
+   ================================================================= */
+.nav-menu-wrap { position: relative; margin-left: auto; flex-shrink: 0; }
+.menu-toggle { font-size: 18px; line-height: 1; padding: 8px 12px; }
+
+.nav-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  padding: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow-heavy);
+  z-index: 200;
+  flex-direction: column;
+  gap: 2px;
+}
+.nav-menu.open { display: flex; }
+
+.nav-menu-items { display: flex; flex-direction: column; gap: 2px; }
+
+.nav-menu-item {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  border-radius: var(--border-radius-medium);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.nav-menu-item:hover { background: var(--bg-subtle); }
+
+
+/* Tabs (Übersicht, Erfassen, Teams, Einstellungen) im Header-Menü */
+.nav-menu .tab-item {
+  flex: none;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  margin: 0;
+  color: var(--text-primary);
+  opacity: 1;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--border-radius-medium);
+}
+.nav-menu .tab-item:hover { background: var(--bg-subtle); }
+.nav-menu .tab-item.active {
+  background: var(--color-brand-primary);
+  color: var(--text-on-dark);
+  box-shadow: none;
+}
+.nav-menu .tab-icon { font-size: 16px; }
+.nav-menu .tab-label { font-size: 14px; font-weight: 500; }
+.nav-menu-sep { height: 1px; background: var(--border-default); margin: 4px 6px; }
 
 /* =================================================================
    ENDE DER STYLES

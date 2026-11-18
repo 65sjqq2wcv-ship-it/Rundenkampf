@@ -109,6 +109,9 @@ class SettingsView {
             <option value="${CompetitionType.ANNEX_SCHEIBE}" ${storage.selectedCompetitionType === CompetitionType.ANNEX_SCHEIBE ? "selected" : ""}>
               ${CompetitionType.ANNEX_SCHEIBE}
             </option>
+            <option value="${CompetitionType.ELEKTRONISCH}" ${storage.selectedCompetitionType === CompetitionType.ELEKTRONISCH ? "selected" : ""}>
+              ${CompetitionType.ELEKTRONISCH}
+            </option>
           </select>
         </div>
       </div>
@@ -163,7 +166,7 @@ class SettingsView {
           </label>
           <input type="range" id="overlayScaleSlider" min="0.5" max="5.0" step="0.1" value="${overlayScale}"
                  style="width: 100%; margin-bottom: 8px;">
-          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">
             <span>klein (0,5x)</span>
             <span>Standard (3x)</span>
             <span>groß (5x)</span>
@@ -176,7 +179,7 @@ class SettingsView {
           </label>
           <input type="range" id="overlayOpacitySlider" min="0.2" max="1.0" step="0.1" value="${overlayOpacity}"
                  style="width: 100%; margin-bottom: 8px;">
-          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary);">
             <span>sehr Durchsichtig (20%)</span>
             <span>Standard</span>
             <span>Undurchsichtig (100%)</span>
@@ -193,7 +196,7 @@ class SettingsView {
     section.innerHTML = `
       <h3>Vereinslogo</h3>
       <div id="logoPreview" style="text-align: center; margin-bottom: 16px;"></div>
-      <p style="text-align: center; margin-bottom: 16px; color: #666;">Laden Sie ein Vereinslogo hoch</p>
+      <p style="text-align: center; margin-bottom: 16px; color: var(--text-secondary);">Laden Sie ein Vereinslogo hoch</p>
       
       <div class="form-section">
         <div class="form-row">
@@ -209,9 +212,9 @@ class SettingsView {
         </div>
       </div>
       
-      <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-top: 16px;">
+      <div style="background: var(--bg-subtle); border-radius: 8px; padding: 12px; margin-top: 16px;">
         <h4 style="margin: 0 0 8px 0; font-size: 14px;">📋 Anforderungen:</h4>
-        <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #666;">
+        <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: var(--text-secondary);">
           <li><strong>Größe:</strong> Mindestens 200×200px empfohlen</li>
           <li><strong>Format:</strong> JPG, PNG oder GIF</li>
           <li><strong>Dateigröße:</strong> Maximal 5MB</li>
@@ -242,7 +245,7 @@ class SettingsView {
             </label>
             <input type="number" id="labelWidthInput" min="30.0" max="100.0" step="0.1" 
                    value="${labelSettings.labelWidth}" 
-                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+                   style="width: 100%; padding: 8px; border: 1px solid var(--border-input); border-radius: 8px; font-size: 16px;">
           </div>
           <div style="flex: 1;">
             <label style="display: block; margin-bottom: 4px; font-weight: 500;">
@@ -250,7 +253,7 @@ class SettingsView {
             </label>
             <input type="number" id="labelHeightInput" min="15.0" max="60.0" step="0.1" 
                    value="${labelSettings.labelHeight}" 
-                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+                   style="width: 100%; padding: 8px; border: 1px solid var(--border-input); border-radius: 8px; font-size: 16px;">
           </div>
         </div>
       </div>
@@ -265,7 +268,7 @@ class SettingsView {
             </label>
             <input type="number" id="marginTopInput" min="0.0" max="30.0" step="0.1" 
                    value="${labelSettings.marginTop}" 
-                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+                   style="width: 100%; padding: 8px; border: 1px solid var(--border-input); border-radius: 8px; font-size: 16px;">
           </div>
           <div style="flex: 1;">
             <label style="display: block; margin-bottom: 4px; font-weight: 500;">
@@ -273,7 +276,7 @@ class SettingsView {
             </label>
             <input type="number" id="marginBottomInput" min="0.0" max="30.0" step="0.1" 
                    value="${labelSettings.marginBottom}" 
-                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+                   style="width: 100%; padding: 8px; border: 1px solid var(--border-input); border-radius: 8px; font-size: 16px;">
           </div>
         </div>
         
@@ -284,7 +287,7 @@ class SettingsView {
             </label>
             <input type="number" id="marginLeftInput" min="0.0" max="30.0" step="0.1" 
                    value="${labelSettings.marginLeft || 0}" 
-                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+                   style="width: 100%; padding: 8px; border: 1px solid var(--border-input); border-radius: 8px; font-size: 16px;">
           </div>
           <div style="flex: 1;">
             <label style="display: block; margin-bottom: 4px; font-weight: 500;">
@@ -292,7 +295,7 @@ class SettingsView {
             </label>
             <input type="number" id="marginRightInput" min="0.0" max="30.0" step="0.1" 
                    value="${labelSettings.marginRight || 0}" 
-                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+                   style="width: 100%; padding: 8px; border: 1px solid var(--border-input); border-radius: 8px; font-size: 16px;">
           </div>
         </div>
       </div>
@@ -307,7 +310,7 @@ class SettingsView {
             </label>
             <input type="number" id="columnsInput" min="1" max="4" step="1" 
                    value="${labelSettings.columns}" 
-                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+                   style="width: 100%; padding: 8px; border: 1px solid var(--border-input); border-radius: 8px; font-size: 16px;">
           </div>
           <div style="flex: 1;">
             <label style="display: block; margin-bottom: 4px; font-weight: 500;">
@@ -315,7 +318,7 @@ class SettingsView {
             </label>
             <input type="number" id="rowsInput" min="1" max="20" step="1" 
                    value="${labelSettings.rows}" 
-                   style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+                   style="width: 100%; padding: 8px; border: 1px solid var(--border-input); border-radius: 8px; font-size: 16px;">
           </div>
         </div>
 
@@ -325,7 +328,7 @@ class SettingsView {
           </label>
           <input type="number" id="labelSpacingInput" min="0.0" max="10.0" step="0.1" 
                  value="${labelSettings.labelSpacing || 0}" 
-                 style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+                 style="width: 100%; padding: 8px; border: 1px solid var(--border-input); border-radius: 8px; font-size: 16px;">
         </div>
       </div>
 
@@ -349,7 +352,7 @@ class SettingsView {
       </label>
       <input type="number" id="skipLabelsInput" min="0" max="50" step="1" 
              value="${labelSettings.skipLabels}" 
-             style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+             style="width: 100%; padding: 8px; border: 1px solid var(--border-input); border-radius: 8px; font-size: 16px;">
     </div>
     
     <div class="form-row">
@@ -358,7 +361,7 @@ class SettingsView {
           </label>
           <input type="number" id="copiesInput" min="1" max="5" step="1" 
              value="${labelSettings.copies}" 
-             style="width: 100%; padding: 8px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px;">
+             style="width: 100%; padding: 8px; border: 1px solid var(--border-input); border-radius: 8px; font-size: 16px;">
         </div>
      </div>
      
@@ -390,7 +393,7 @@ class SettingsView {
       </button>
     </div>
     
-    <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px; border-radius: 8px;">
+    <div style="background: var(--bg-subtle); border-left: 4px solid var(--color-info); padding: 12px; border-radius: 8px;">
       <div style="font-weight: 600; margin-bottom: 8px;">💡 Vollständiges Backup:</div>
       <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
         <li><strong>Backup:</strong> Sichert ALLE Daten (Teams, Ergebnisse, Einstellungen)</li>
@@ -427,7 +430,7 @@ class SettingsView {
     <div id="disciplinesList" style="margin-top: 12px;"></div>
     <div style="margin-top: 16px; display: flex; gap: 8px;">
       <input type="text" id="newDisciplineName" placeholder="Neue Disziplin" 
-             style="flex: 1; padding: 12px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px; height:40px;">
+             style="flex: 1; padding: 12px; border: 1px solid var(--border-input); border-radius: 8px; font-size: 16px; height:40px;">
       <button class="btn btn-secondary" id="addDisciplineBtn" 
               style="padding: 8px 12px; height: 40px;">Hinzufügen</button>
     </div>
@@ -454,7 +457,7 @@ class SettingsView {
     <div id="weaponsList" style="margin-top: 12px;"></div>
     <div style="margin-top: 16px; display: flex; gap: 8px;">
       <input type="text" id="newWeaponName" placeholder="Neue Waffe" 
-             style="flex: 1; padding: 12px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px; height:40px;">
+             style="flex: 1; padding: 12px; border: 1px solid var(--border-input); border-radius: 8px; font-size: 16px; height:40px;">
       <button class="btn btn-secondary" id="addWeaponBtn" 
               style="padding: 8px 12px; height: 40px;">Hinzufügen</button>
     </div>
@@ -481,7 +484,7 @@ class SettingsView {
     <div id="venuesList" style="margin-top: 12px;"></div>
     <div style="margin-top: 16px; display: flex; gap: 8px;">
       <input type="text" id="newVenueName" placeholder="Neuer Wettkampfort" 
-             style="flex: 1; padding: 12px; border: 1px solid #d1d1d6; border-radius: 8px; font-size: 16px; height:40px;">
+             style="flex: 1; padding: 12px; border: 1px solid var(--border-input); border-radius: 8px; font-size: 16px; height:40px;">
       <button class="btn btn-secondary" id="addVenueBtn" 
               style="padding: 8px 12px; height: 40px;">Hinzufügen</button>
     </div>
@@ -560,7 +563,7 @@ class SettingsView {
             </option>
           </select>
         </div>
-        <p style="margin: 8px 0 0 0; color: #666; font-size: 12px;">
+        <p style="margin: 8px 0 0 0; color: var(--text-secondary); font-size: 12px;">
           Diese Sortierung wird auf Mannschaften und Einzelschützen in der Übersicht und im PDF-Export angewendet.
         </p>
       </div>
@@ -582,7 +585,7 @@ class SettingsView {
             Unterschrift-Bestätigung anzeigen
           </label>
         </div>
-        <p style="margin: 8px 0 0 0; color: #666; font-size: 12px;">
+        <p style="margin: 8px 0 0 0; color: var(--text-secondary); font-size: 12px;">
           Textblock mit Unterschriften-Bestätigung im PDF-Report ein-/ausblenden.
         </p>
       </div>
@@ -599,13 +602,13 @@ class SettingsView {
     section.innerHTML = `
     <h3>App-Information</h3>
     <div style="margin-top: 12px;">
-      <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+      <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-default);">
         <span>App Version</span>
-        <span style="color: #8e8e93;">${APP_VERSION}</span>
+        <span style="color: var(--text-secondary);">${APP_VERSION}</span>
       </div>
       <div style="display: flex; justify-content: space-between; padding: 8px 0;">
         <span>Rundenkampfbericht</span>
-        <span style="color: #8e8e93;">© 2026</span>
+        <span style="color: var(--text-secondary);">© 2026</span>
       </div>
     </div>
     <div style="margin-top: 16px; display: flex; gap: 8px;">
@@ -726,13 +729,13 @@ class SettingsView {
           const value = parseFloat(e.target.value);
 
           // Entferne vorherige Fehler-Styles
-          input.style.borderColor = "#d1d1d6";
+          input.style.borderColor = "var(--border-input)";
           input.title = "";
 
           if (!isNaN(value)) {
             if (value < config.min || value > config.max) {
               // Zeige Fehler
-              input.style.borderColor = "#ff3b30";
+              input.style.borderColor = "var(--color-danger)";
               input.title = `Erlaubt: ${config.min} - ${config.max}`;
             }
           }
@@ -768,7 +771,7 @@ class SettingsView {
           e.target.value = formattedValue;
 
           // Entferne Fehler-Styles
-          e.target.style.borderColor = "#d1d1d6";
+          e.target.style.borderColor = "var(--border-input)";
           e.target.title = "";
         });
 
@@ -906,7 +909,7 @@ class SettingsView {
 
     if (storage.availableDisciplines.length === 0) {
       disciplinesList.innerHTML =
-        '<p style="color: #8e8e93; font-style: italic;">Keine Disziplinen vorhanden</p>';
+        '<p style="color: var(--text-secondary); font-style: italic;">Keine Disziplinen vorhanden</p>';
       return;
     }
 
@@ -918,7 +921,7 @@ class SettingsView {
       justify-content: space-between;
       align-items: center;
       padding: 8px 0;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid var(--border-default);
     `;
 
       // Name-Span
@@ -1040,7 +1043,7 @@ class SettingsView {
 
     if (storage.availableWeapons.length === 0) {
       weaponsList.innerHTML =
-        '<p style="color: #8e8e93; font-style: italic;">Keine Waffen vorhanden</p>';
+        '<p style="color: var(--text-secondary); font-style: italic;">Keine Waffen vorhanden</p>';
       return;
     }
 
@@ -1052,7 +1055,7 @@ class SettingsView {
       justify-content: space-between;
       align-items: center;
       padding: 8px 0;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid var(--border-default);
     `;
 
       // Name-Span
@@ -1239,7 +1242,7 @@ class SettingsView {
 
     if (storage.availableVenues.length === 0) {
       venuesList.innerHTML =
-        '<p style="color: #8e8e93; font-style: italic;">Keine Wettkampforte vorhanden</p>';
+        '<p style="color: var(--text-secondary); font-style: italic;">Keine Wettkampforte vorhanden</p>';
       return;
     }
 
@@ -1251,7 +1254,7 @@ class SettingsView {
       justify-content: space-between;
       align-items: center;
       padding: 8px 0;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid var(--border-default);
     `;
 
       // Name-Span
@@ -1295,12 +1298,12 @@ class SettingsView {
 
     if (logoData) {
       logoPreview.innerHTML = `
-        <img src="${logoData}" alt="Vereinslogo" style="max-width: 200px; max-height: 100px; border-radius: 8px; border: 1px solid #ddd;">
-        <p style="margin-top: 8px; font-size: 12px; color: #666;">Logo erfolgreich hochgeladen</p>
+        <img src="${logoData}" alt="Vereinslogo" style="max-width: 200px; max-height: 100px; border-radius: 8px; border: 1px solid var(--border-input);">
+        <p style="margin-top: 8px; font-size: 12px; color: var(--text-secondary);">Logo erfolgreich hochgeladen</p>
       `;
     } else {
       logoPreview.innerHTML = `
-        <div style="width: 200px; height: 100px; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto; color: #999;">
+        <div style="width: 200px; height: 100px; border: 2px dashed var(--border-input); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto; color: var(--text-secondary);">
           📷 Kein Logo
         </div>
       `;
@@ -1445,7 +1448,7 @@ class SettingsView {
     <div class="form-section">
       <div class="form-section-header">Wiederherstellen eines Backup</div>
       <div class="form-row">
-        <p style="margin-bottom: 12px; font-size: 14px; color: #666;">
+        <p style="margin-bottom: 12px; font-size: 14px; color: var(--text-secondary);">
           Wählen Sie eine zuvor exportierte Backup-Datei aus.
         </p>
         <input type="file" id="settingsFileInput" accept=".json" class="form-input" style="padding: 8px;">
@@ -1458,14 +1461,14 @@ class SettingsView {
           <input type="radio" name="importMode" value="replace" checked>
           <div>
             <strong>🔄 Vollständiger Restore</strong><br>
-            <small style="color: #666;">Alle aktuellen Daten werden überschrieben</small>
+            <small style="color: var(--text-secondary);">Alle aktuellen Daten werden überschrieben</small>
           </div>
         </label>
         <label style="display: flex; align-items: center; gap: 8px;">
           <input type="radio" name="importMode" value="merge">
           <div>
             <strong>🔀 Intelligenter Merge</strong><br>
-            <small style="color: #666;">Neue Daten hinzufügen, bestehende behalten</small>
+            <small style="color: var(--text-secondary);">Neue Daten hinzufügen, bestehende behalten</small>
           </div>
         </label>
       </div>
@@ -1473,7 +1476,7 @@ class SettingsView {
     
     <div class="form-section">
       <div class="form-section-header">Vorschau</div>
-      <div id="settingsPreview" style="max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; background: #f8f9fa; padding: 8px; border-radius: 4px;">
+      <div id="settingsPreview" style="max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; background: var(--bg-subtle); padding: 8px; border-radius: 4px;">
         Keine Datei ausgewählt
       </div>
     </div>
@@ -1481,7 +1484,7 @@ class SettingsView {
     <!-- NEU: Merge-Details -->
     <div class="form-section" id="mergeDetails" style="display: none;">
       <div class="form-section-header">🔀 Merge-Vorschau</div>
-      <div id="mergePreview" style="max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; background: #e8f5e8; padding: 8px; border-radius: 4px; border: 1px solid #4caf50;">
+      <div id="mergePreview" style="max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; background: var(--bg-subtle); padding: 8px; border-radius: 4px; border: 1px solid var(--color-success);">
         <!-- Wird dynamisch gefüllt -->
       </div>
     </div>

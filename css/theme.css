@@ -1,0 +1,104 @@
+/* ==========================================================================
+   theme.css – Farb-Tokens für Light/Dark gemäß STYLEGUIDE.md
+   Nur Farben (CSS-Variablen). Komponenten und Layout stehen in styles.css.
+   Standard ist Dark (:root). Light wird über [data-theme="light"] aktiviert.
+   ========================================================================== */
+
+/* ---------- Tokens: Dark (Standard) ---------------------------------------- */
+:root {
+    color-scheme: dark;
+
+    /* Brand (projektspezifisch anpassen) */
+    --color-brand-primary:       #ff3621;
+    --color-brand-primary-hover: #cc2b1a;
+
+    /* Status & Akzente */
+    --color-success:             #4caf50;
+    --color-danger:              #f44336;
+    --color-link:                #6ab0f5;
+    --color-info:                #a0b4ff;
+
+    /* Flächen */
+    --bg-page:                   #1a1a1a;
+    --bg-card:                   #242424;
+    --bg-subtle:                 #2a2a2a;
+    --bg-table-header:           #333333;
+    --bg-table-header-hover:     #4b4a4a;
+    --bg-input:                  #1a1a1a;
+    --bg-button:                 #2a2a2a;
+    --bg-button-hover:           #1e1e1e;
+    --bg-overlay:                rgba(0, 0, 0, 0.7);
+    --bg-header:                 #141414;
+
+    /* Text */
+    --text-primary:              #e0e0e0;
+    --text-secondary:            #a0a0a0;
+    --text-on-dark:              #ffffff;
+    --text-table-header:         #ffffff;
+    --text-button:               #ffffff;
+    --text-emphasis:             #ffffff;
+
+    /* Scrollbar */
+    --scrollbar-thumb:           #4a4a4a;
+    --scrollbar-track:           #1a1a1a;
+
+    /* Syntax-Highlighting (Code-/YAML-/JSON-Ausgabe) */
+    --color-code-key:            #0ea5e9;
+    --color-code-string:         #d4d4d4;
+    --color-code-number:         #b4cea8;
+    --color-code-boolean:        #569cd6;
+    --color-code-null:           #858585;
+
+    /* Rahmen */
+    --border-default:            #333333;
+    --border-input:              #333333;
+
+    /* Sonstiges */
+    --logo-opacity:              0.8;
+}
+
+/* ---------- Tokens: Light --------------------------------------------------- */
+[data-theme="light"] {
+    color-scheme: light;
+
+    --color-brand-primary:       #0b5ed7;
+    --color-brand-primary-hover: #0a4fb5;
+
+    --color-success:             #2e7d32;
+    --color-danger:              #d32f2f;
+    --color-link:                #0b5ed7;
+    --color-info:                #1565c0;
+
+    --bg-page:                   #f3f6fb;
+    --bg-card:                   #ffffff;
+    --bg-subtle:                 #f5f8fc;
+    --bg-table-header:           #e9f0f8;
+    --bg-table-header-hover:     #dce6f3;
+    --bg-input:                  #ffffff;
+    --bg-button:                 #ffffff;
+    --bg-button-hover:           #eef4fc;
+    --bg-overlay:                rgba(15, 35, 70, 0.4);
+    --bg-header:                 #13366b;
+
+    --text-primary:              #14213d;
+    --text-secondary:            #5f6f86;
+    --text-on-dark:              #ffffff;
+    --text-table-header:         #14213d;
+    --text-button:               #0b5ed7;
+    --text-emphasis:             #14213d;
+
+    /* Scrollbar */
+    --scrollbar-thumb:           #c5d0de;
+    --scrollbar-track:           #f3f6fb;
+
+    --color-code-key:            #0b5ed7;
+    --color-code-string:         #334155;
+    --color-code-number:         #7c3aed;
+    --color-code-boolean:        #0b5ed7;
+    --color-code-null:           #94a3b8;
+
+    --border-default:            #dbe3ee;
+    --border-input:              #c5d0de;
+
+    --logo-opacity:              1;
+}
