@@ -1,11 +1,11 @@
 /* ==========================================================================
    theme.css – Farb-Tokens für Light/Dark gemäß STYLEGUIDE.md
    Nur Farben (CSS-Variablen). Komponenten und Layout stehen in styles.css.
-   Standard ist Dark (:root). Light wird über [data-theme="light"] aktiviert.
+   Standard ist Light (:root). Dark wird über [data-theme="dark"] aktiviert.
    ========================================================================== */
 
-/* ---------- Tokens: Dark (Standard) ---------------------------------------- */
-:root {
+/* ---------- Tokens: Dark ---------------------------------------------------- */
+[data-theme="dark"] {
     color-scheme: dark;
 
     /* Brand (projektspezifisch anpassen) */
@@ -57,7 +57,8 @@
     --logo-opacity:              0.8;
 }
 
-/* ---------- Tokens: Light --------------------------------------------------- */
+/* ---------- Tokens: Light (Standard) ---------------------------------------- */
+:root,
 [data-theme="light"] {
     color-scheme: light;
 

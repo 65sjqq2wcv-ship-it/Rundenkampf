@@ -899,7 +899,7 @@ class EntryView {
   updateElectronicDisplay() {
     const title = document.getElementById("shotsTitle");
     if (title) {
-      title.textContent = "Elektronische Erfassung";
+      title.textContent = "Erfassung";
     }
 
     this.updateElectronicSummary();
@@ -2282,12 +2282,25 @@ class EntryView {
 
     // Angepasste Box-Größen - dynamisch basierend auf Inhalt
     const isAnnex = competitionType === CompetitionType.ANNEX_SCHEIBE;
+    const isElectronic = competitionType === CompetitionType.ELEKTRONISCH;
     const boxWidth = Math.min(width * 0.9, (isAnnex ? 420 : 370) * scale);
 
-    // NEU: Dynamische Box-Höhe basierend auf Waffen-Zeile
-    const baseHeight = isAnnex ? 270 : 270;
+    // Header-Zeilen (für alle Modi gleich)
+    const info = [
+      `Name: ${shooterInfo.name}`,
+      ...(hasWeapon ? [`Waffe: ${shooterInfo.weapon}`] : []),
+      `Disziplin: ${shooterInfo.currentDiscipline}`,
+      `Scheibe: ${shooterInfo.discipline}`,
+      `Datum: ${shooterInfo.date}`,
+    ];
+
+    // Box-Höhe: Elektronisch = Header + Serienblock (siehe drawElectronicSeries),
+    // sonst feste Höhe für die Schuss-Matrix (Präzision/Duell/Annex)
+    const ELECTRONIC_BLOCK_HEIGHT = 76; // Serienblock inkl. Abstand, in unskalierten Pixeln
     const weaponExtraHeight = hasWeapon ? 18 : 0; // Extra Höhe für Waffen-Zeile
-    const boxHeight = (baseHeight + weaponExtraHeight) * scale;
+    const boxHeight = isElectronic
+      ? (20 + info.length * 18 + 10 + ELECTRONIC_BLOCK_HEIGHT + 10) * scale
+      : (270 + weaponExtraHeight) * scale;
 
     const x = 20 * scale;
     const y = 20 * scale;
@@ -2307,15 +2320,7 @@ class EntryView {
       ctx.font = `bold ${14 * scale}px Arial`;
       ctx.textAlign = "left";
 
-      // Header-Informationen - NEU: Waffe nur wenn vorhanden
-      const info = [
-        `Name: ${shooterInfo.name}`,
-        ...(hasWeapon ? [`Waffe: ${shooterInfo.weapon}`] : []),
-        `Disziplin: ${shooterInfo.currentDiscipline}`,
-        `Scheibe: ${shooterInfo.discipline}`,
-        `Datum: ${shooterInfo.date}`,
-      ];
-
+      // Header-Informationen
       info.forEach((line, index) => {
         ctx.fillText(line, x + (10 * scale), y + (20 * scale) + index * (18 * scale));
       });
@@ -2323,7 +2328,16 @@ class EntryView {
       // Matrix-Position - NEU: Berücksichtigt die Anzahl der Info-Zeilen dynamisch
       const matrixStartY = y + (20 * scale) + (info.length * 18 * scale) + (10 * scale);
 
-      if (isAnnex) {
+      if (isElectronic) {
+        this.drawElectronicSeries(
+          ctx,
+          x + (10 * scale),
+          matrixStartY,
+          boxWidth - (20 * scale),
+          customShots,
+          scale
+        );
+      } else if (isAnnex) {
         this.drawAnnexMatrix(
           ctx,
           x + (10 * scale),
@@ -2345,6 +2359,53 @@ class EntryView {
     } catch (error) {
       console.error("Error adding overlay to canvas:", error);
     }
+  }
+
+  // Elektronisch (LG/LP): Serien S1–S4 nebeneinander, darunter Anzahl und Ergebnis.
+  // Belegt ca. 76 px (unskaliert) ab startY, passend zu ELECTRONIC_BLOCK_HEIGHT in addOverlayToCanvas.
+  drawElectronicSeries(ctx, startX, startY, maxWidth, customSeries = null, scale = 1) {
+    const series = (customSeries || this.shots).slice(0, ELECTRONIC_SERIES_COUNT);
+    const gap = 8 * scale;
+    const cellWidth = (maxWidth - gap * (ELECTRONIC_SERIES_COUNT - 1)) / ELECTRONIC_SERIES_COUNT;
+    const cellHeight = 30 * scale;
+    const cellY = startY + 16 * scale;
+
+    series.forEach((value, index) => {
+      const cellX = startX + index * (cellWidth + gap);
+
+      // Überschrift über der Zelle
+      ctx.font = `bold ${10 * scale}px Arial`;
+      ctx.textAlign = "center";
+      ctx.fillStyle = "black";
+      ctx.fillText(`Serie ${index + 1}`, cellX + cellWidth / 2, startY + 10 * scale);
+
+      // Zelle mit Serienergebnis
+      ctx.strokeStyle = "#666";
+      ctx.lineWidth = 1 * scale;
+      ctx.strokeRect(cellX, cellY, cellWidth, cellHeight);
+
+      ctx.font = `bold ${16 * scale}px Arial`;
+      if (value !== null && value !== undefined) {
+        ctx.fillStyle = "black";
+        ctx.fillText(formatScore(value), cellX + cellWidth / 2, cellY + cellHeight / 2 + (6 * scale));
+      } else {
+        ctx.fillStyle = "#ccc";
+        ctx.fillText("—", cellX + cellWidth / 2, cellY + cellHeight / 2 + (6 * scale));
+      }
+    });
+
+    // Zusammenfassung: erfasste Serien und Ergebnis (Summe)
+    const entered = series.filter((v) => v !== null && v !== undefined);
+    const total = entered.reduce((sum, v) => sum + v, 0);
+
+    ctx.font = `bold ${14 * scale}px Arial`;
+    ctx.fillStyle = "black";
+    ctx.textAlign = "left";
+    ctx.fillText(
+      `Serien: ${entered.length}/${ELECTRONIC_SERIES_COUNT}  |  Ergebnis: ${formatScore(Math.round(total * 10) / 10)}`,
+      startX,
+      startY + 70 * scale,
+    );
   }
 
   drawStandardMatrix(ctx, startX, startY, maxWidth, customShots = null, scale = 1) {

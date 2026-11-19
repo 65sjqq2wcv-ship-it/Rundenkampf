@@ -220,7 +220,7 @@
         </div>
         
         <div class="version">
-            <p>Version 1.36 | Aktualisiert: November 2026</p>
+            <p>Version 1.37 | Aktualisiert: November 2026</p>
         </div>
         
         <div class="toc">
@@ -251,7 +251,7 @@
         <div class="feature">
             <strong>✨ Hauptmerkmale:</strong>
             <ul>
-                <li>✅ Drei Wettkampfmodi (Präzision/Duell, Annex Scheibe oder Elektronisch LG/LP)</li>
+                <li>✅ Drei Wettkampfmodi (Präzision/Duell, Annex Scheibe oder Erfassung für LG/LP)</li>
                 <li>✅ Unterstützung für Mannschaften und Einzelschützen</li>
                 <li>✅ Automatische Wertungsberechnung (beste 3 von 4 Schützen)</li>
                 <li>✅ Scheibendokumentation mit Kamera</li>
@@ -279,7 +279,7 @@
             <li><strong>Gesamtergebnis:</strong> Summe aller 40 Schüsse (max. 120 Punkte)</li>
         </ul>
         
-        <h4>⚡ Elektronisch (LG/LP)</h4>
+        <h4>⚡ Erfassung (LG/LP)</h4>
         <p>Dieser Modus ist für Luftgewehr (LG) und Luftpistole (LP) gedacht. Die Serien werden elektronisch
         geschossen, hier werden nur die Serienergebnisse dokumentiert:</p>
         <ul>
@@ -345,6 +345,7 @@
         
         <h3>Navigationsleiste</h3>
         <p>Oben auf jedem Bildschirm befindet sich die Kopfzeile mit dem Titel und dem Menü-Button <span class="button-label">☰</span>.
+        Neben dem Titel steht die aktuelle Versionsnummer der App (z. B. <span class="button-label">v1.37</span>).
         Ein Klick öffnet das Menü. Es enthält folgende Einträge:</p>
         
         <table>
@@ -387,7 +388,7 @@
         
         <h4>Design (Hell/Dunkel)</h4>
         <p>Das Design wird über den Menüeintrag <span class="button-label">☀️ Hell</span> bzw.
-        <span class="button-label">🌙 Dunkel</span> umgeschaltet. Standard ist das dunkle Design. Die Auswahl wird
+        <span class="button-label">🌙 Dunkel</span> umgeschaltet. Standard ist das helle Design. Die Auswahl wird
         auf diesem Gerät gespeichert und nicht mit dem Backup gesichert.</p>
         
         <h3>Filterfunktion</h3>
@@ -475,8 +476,8 @@
             <li>Das Ergebnis wird automatisch gespeichert</li>
         </ol>
         
-        <h3>Elektronische Erfassung (LG/LP)</h3>
-        <p>Im Wettbewerbsmodus <strong>"Elektronisch (LG/LP)"</strong> (siehe Einstellungen) gibt es kein Nummernpad:</p>
+        <h3>Erfassung (LG/LP)</h3>
+        <p>Im Wettbewerbsmodus <strong>"Erfassung"</strong> (siehe Einstellungen) gibt es kein Nummernpad:</p>
         <ol>
             <li>Wählen Sie Mannschaft und Schützen (oder "Einzelschütze") aus. Eine Disziplin-Auswahl gibt es hier nicht</li>
             <li>Tragen Sie die Serienergebnisse in die Felder <strong>Serie 1</strong> bis <strong>Serie 4</strong> ein
@@ -484,7 +485,7 @@
             <li>Drücken Sie auf <span class="button-label">Speichern</span>. Das Ergebnis (Summe der Serien) wird angezeigt</li>
         </ol>
         <div class="tip">
-            <strong>💡 Hinweis:</strong> Die Scheibendokumentation ist für die elektronische Erfassung nicht vorgesehen.
+            <strong>💡 Hinweis:</strong> Auch im Modus "Erfassung" können Fotos mit Overlay versehen werden. Das Overlay zeigt dann die Serien S1–S4 und das Ergebnis statt der Schussmatrix.
         </div>
         
         <h3>Scheibendokumentation</h3>
@@ -495,9 +496,8 @@
             <li>Fotografieren Sie die Schießscheibe</li>
             <li>Das Foto wird automatisch mit folgendem Info-Overlay versehen:
                 <ul>
-                    <li>Mannschaftsname</li>
-                    <li>Schützenname</li>
-                    <li>Datum und Uhrzeit</li>
+                    <li>Name des Schützen, Waffe (falls angegeben), Disziplin, Scheibe und Datum</li>
+                    <li>Schussmatrix (Präzision/Duell, Annex) bzw. Serien S1–S4 mit Ergebnis (Modus "Erfassung")</li>
                 </ul>
             </li>
             <li>Das Bild wird automatisch heruntergeladen</li>
@@ -530,7 +530,7 @@
             <li>✅ Kontaktdaten des Rundenkampfleiters und Mannschaftsführer</li>
         </ul>
         
-        <h3>Anzeige im Modus "Elektronisch (LG/LP)"</h3>
+        <h3>Anzeige im Modus "Erfassung"</h3>
         <p>Übersicht und PDF zeigen je Mannschaft eine Tabelle mit Name, den Serien S1–S4, dem Ergebnis je Schütze
         und der Zeile <strong>Mannschaft Gesamt</strong> (Summe der besten 3 Schützen). Bei vier Schützen wird der
         schlechteste Schütze rot hinterlegt.
@@ -572,16 +572,16 @@
         
         <h4>Wettbewerbsmodus</h4>
         <ul>
-            <li>Wählen Sie zwischen "Präzision/Duell", "Annex Scheibe" oder "Elektronisch (LG/LP)"</li>
+            <li>Wählen Sie zwischen "Präzision/Duell", "Annex Scheibe" oder "Erfassung"</li>
             <li>Diese Einstellung bestimmt, welche Disziplinen in der Erfassung angeboten werden und wie Übersicht und PDF aufgebaut sind</li>
-            <li>Im Modus "Elektronisch (LG/LP)" zeigen Übersicht und PDF je Mannschaft eine Tabelle mit Serien S1–S4, Ergebnis und Mannschaftsergebnis</li>
+            <li>Im Modus "Erfassung" zeigen Übersicht und PDF je Mannschaft eine Tabelle mit Serien S1–S4, Ergebnis und Mannschaftsergebnis</li>
         </ul>
         
         <h4>Zehntelwertung</h4>
         <ul>
-            <li>Schalter für den Modus "Elektronisch (LG/LP)": Wenn er eingeschaltet ist, können Serien mit einer Nachkommastelle
+            <li>Checkbox "Zehntelwertung" (nur Modus "Erfassung"): Wenn sie aktiviert ist, können Serien mit einer Nachkommastelle
             (z.B. 104,5) und Werte bis 109 bei LG und LP erfasst werden</li>
-            <li>Ohne Schalter sind nur ganze Zahlen bis 109 möglich</li>
+            <li>Ohne Haken sind nur ganze Zahlen bis 109 möglich</li>
             <li>Die Einstellung wird mit dem Backup gesichert</li>
         </ul>
         
@@ -791,7 +791,7 @@
         <!-- FOOTER -->
         <div class="page-break"></div>
         <footer>
-            <p><strong>Rundenkampfbericht v1.36</strong></p>
+            <p><strong>Rundenkampfbericht v1.37</strong></p>
             <p>Progressive Web App für digitale Schießsport-Verwaltung</p>
             <p>Alle Daten werden lokal im Browser gespeichert und nicht übertragen.</p>
             <p>© 2024-2026 | Made with ❤️ for shooters</p>

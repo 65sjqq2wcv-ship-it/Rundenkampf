@@ -110,19 +110,17 @@ class SettingsView {
               ${CompetitionType.ANNEX_SCHEIBE}
             </option>
             <option value="${CompetitionType.ELEKTRONISCH}" ${storage.selectedCompetitionType === CompetitionType.ELEKTRONISCH ? "selected" : ""}>
-              ${CompetitionType.ELEKTRONISCH}
+              Erfassung
             </option>
           </select>
         </div>
-        <div class="form-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-          <div>
-            <div class="form-label">Zehntelwertung</div>
-            <div class="text-muted">Nur Modus Elektronisch (LG/LP): Kommazahlen und Serien über 100</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="electronicDecimalsSwitch" ${storage.settings.electronicDecimals ? "checked" : ""}>
-            <span class="switch-slider"></span>
+        <div class="form-row">
+          <label style="display: flex; align-items: center; gap: 8px; font-weight: 500;">
+            <input type="checkbox" id="electronicDecimalsSwitch" ${storage.settings.electronicDecimals ? "checked" : ""}
+                   style="transform: scale(1.2);">
+            <span>Zehntelwertung</span>
           </label>
+          <div class="text-muted" style="margin-top: 4px;">Nur Modus Erfassung: Kommazahlen und Serien über 100</div>
         </div>
       </div>
     `;
@@ -213,10 +211,10 @@ class SettingsView {
           <input type="file" id="logoUpload" accept="image/*" class="form-input">
         </div>
         <div class="form-row" style="display: flex; gap: 8px;">
-          <button class="btn btn-primary" onclick="app.views.settings.uploadLogo()" style="flex: 1;">
+          <button class="btn btn-primary" data-logo-action="upload" style="flex: 1;">
             📂 Hochladen
           </button>
-          <button class="btn btn-danger" onclick="app.views.settings.removeLogo()" style="flex: 1;">
+          <button class="btn btn-danger" data-logo-action="remove" style="flex: 1;">
             🗑️ Löschen
           </button>
         </div>
@@ -1360,7 +1358,7 @@ class SettingsView {
 
       // Loading Indicator
       const uploadButton = document.querySelector(
-        'button[onclick="app.views.settings.uploadLogo()"]',
+        'button[data-logo-action="upload"]',
       );
       const originalText = uploadButton.textContent;
       uploadButton.disabled = true;
@@ -1572,7 +1570,7 @@ class SettingsView {
         }
 
         if (settingsData.exportVersion) {
-          preview += `🏷️ <strong>Version:</strong> ${settingsData.exportVersion}<br>`;
+          preview += `🏷️ <strong>Version:</strong> ${UIUtils.escapeHtml(settingsData.exportVersion)}<br>`;
         }
 
         // Backup-Typ erkennen
@@ -1597,11 +1595,11 @@ class SettingsView {
 
         // EINSTELLUNGEN
         if (settingsData.selectedCompetitionType) {
-          preview += `🎯 <strong>Wettbewerbsmodus:</strong> ${settingsData.selectedCompetitionType}<br>`;
+          preview += `🎯 <strong>Wettbewerbsmodus:</strong> ${UIUtils.escapeHtml(settingsData.selectedCompetitionType)}<br>`;
         }
 
         if (settingsData.selectedDiscipline) {
-          preview += `📋 <strong>Aktuelle Disziplin:</strong> ${settingsData.selectedDiscipline}<br>`;
+          preview += `📋 <strong>Aktuelle Disziplin:</strong> ${UIUtils.escapeHtml(settingsData.selectedDiscipline)}<br>`;
         }
 
         if (settingsData.availableDisciplines && settingsData.availableDisciplines.length > 0) {
@@ -1656,7 +1654,7 @@ class SettingsView {
         if (mergeAnalysis.newTeams.length > 0) {
           mergePreview += `✅ <strong>Neue Teams:</strong> ${mergeAnalysis.newTeams.length}<br>`;
           mergeAnalysis.newTeams.slice(0, 3).forEach(team => {
-            mergePreview += `&nbsp;&nbsp;&nbsp;• ${team}<br>`;
+            mergePreview += `&nbsp;&nbsp;&nbsp;• ${UIUtils.escapeHtml(team)}<br>`;
           });
           if (mergeAnalysis.newTeams.length > 3) {
             mergePreview += `&nbsp;&nbsp;&nbsp;• ... und ${mergeAnalysis.newTeams.length - 3} weitere<br>`;
@@ -1667,7 +1665,7 @@ class SettingsView {
         if (mergeAnalysis.newShooters.length > 0) {
           mergePreview += `✅ <strong>Neue Einzelschützen:</strong> ${mergeAnalysis.newShooters.length}<br>`;
           mergeAnalysis.newShooters.slice(0, 3).forEach(shooter => {
-            mergePreview += `&nbsp;&nbsp;&nbsp;• ${shooter}<br>`;
+            mergePreview += `&nbsp;&nbsp;&nbsp;• ${UIUtils.escapeHtml(shooter)}<br>`;
           });
           if (mergeAnalysis.newShooters.length > 3) {
             mergePreview += `&nbsp;&nbsp;&nbsp;• ... und ${mergeAnalysis.newShooters.length - 3} weitere<br>`;
@@ -1807,6 +1805,7 @@ class SettingsView {
               storage.selectedCompetitionType = backupData.selectedCompetitionType;
             if (backupData.settings)
               storage.settings = { ...storage.settings, ...backupData.settings };
+            storage.sanitizeClubLogo();
             if (backupData.labelSettings)
               storage.saveLabelSettings(backupData.labelSettings);
 

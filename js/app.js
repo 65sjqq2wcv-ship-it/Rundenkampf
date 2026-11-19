@@ -20,6 +20,8 @@ class App {
       this.setupTabNavigation();
       this.setupThemeToggle();
       this.setupHeaderMenu();
+      this.showAppVersion();
+      this.setupDelegatedActions();
       this.isInitialized = true;
       this.showView("overview");
 
@@ -125,7 +127,31 @@ class App {
     });
   }
 
-  // Hell/Dunkel umschalten (Standard: dunkel), Auswahl wird gespeichert
+  // Klick-Aktionen über data-Attribute statt inline onclick (CSP ohne 'unsafe-inline' für Skripte)
+  setupDelegatedActions() {
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-view], [data-logo-action]");
+      if (!btn) return;
+
+      if (btn.dataset.view) {
+        this.showView(btn.dataset.view);
+      } else if (btn.dataset.logoAction === "upload") {
+        this.views.settings.uploadLogo();
+      } else if (btn.dataset.logoAction === "remove") {
+        this.views.settings.removeLogo();
+      }
+    });
+  }
+
+  // Versionsnummer neben dem Titel im Header anzeigen (Quelle: js/version.js)
+  showAppVersion() {
+    const el = document.getElementById("navVersion");
+    if (el && typeof APP_VERSION !== "undefined") {
+      el.textContent = "v" + APP_VERSION;
+    }
+  }
+
+  // Hell/Dunkel umschalten (Standard: hell), Auswahl wird gespeichert
   setupThemeToggle() {
     const btn = document.getElementById("themeToggleBtn");
     if (!btn) return;
@@ -211,7 +237,7 @@ class App {
         <div class="card" style="text-align: center;">
           <h3 style="color: red;">Fehler</h3>
           <p>${message}</p>
-          <button class="btn btn-primary" onclick="location.reload()">Neu laden</button>
+          <button class="btn btn-primary" data-reload="true">Neu laden</button>
         </div>
       `;
     }
@@ -233,6 +259,11 @@ class App {
 
 // Global app instance
 let app = null;
+
+// "Neu laden"-Buttons in Fehlerseiten (auch wenn die App nicht initialisiert werden konnte)
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-reload]")) location.reload();
+});
 
 // Initialize app when DOM is loaded
 function initApp() {
@@ -266,7 +297,7 @@ function initApp() {
           <p style="font-size: 14px; color: var(--text-secondary); margin-top: 16px;">
             Überprüfen Sie die Browser-Konsole für weitere Details.
           </p>
-          <button class="btn btn-primary" onclick="location.reload()" style="margin-top: 16px;">
+          <button class="btn btn-primary" data-reload="true" style="margin-top: 16px;">
             Neu laden
           </button>
         </div>

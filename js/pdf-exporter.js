@@ -501,7 +501,6 @@ class PDFExporter {
     }
 
     return `
-        <p style="margin: 12px 0 4px; font-weight: bold;">Elektronisch (LG/LP)</p>
         <table class="results-table" cellspacing="0">
             <thead>
                 <tr class="header-row">

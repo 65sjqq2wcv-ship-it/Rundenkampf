@@ -67,10 +67,10 @@ class OverviewView {
         <h3>Keine Teams oder Schützen sichtbar</h3>
         <p style="margin: 16px 0;">Passen Sie den Filter an oder fügen Sie Teams und Schützen hinzu.</p>
         <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
-          <button class="btn btn-primary" style="width: 50%; height: 70px;" onclick="app.showView('teams')">
+          <button class="btn btn-primary" style="width: 50%; height: 70px;" data-view="teams">
             Teams verwalten
           </button>
-          <button class="btn btn-secondary" style="width: 50%; height: 70px;" onclick="app.showView('entry')">
+          <button class="btn btn-secondary" style="width: 50%; height: 70px;" data-view="entry">
             Ergebnisse erfassen
           </button>
         </div>
@@ -85,7 +85,7 @@ class OverviewView {
         infoCard.innerHTML = `
         <h4 style="margin: 0 0 8px 0; color: var(--warning-color);">Noch keine Ergebnisse erfasst</h4>
         <p style="margin: 0; color: var(--warning-color);">Die Teams sind angelegt, aber es wurden noch keine Schussergebnisse erfasst.</p>
-        <button class="btn btn-primary" style="width: 100%; height: 70px; margin-top: 20px;" onclick="app.showView('entry')" style="margin-top: 12px;">
+        <button class="btn btn-primary" style="width: 100%; height: 70px; margin-top: 20px;" data-view="entry" style="margin-top: 12px;">
           Jetzt Ergebnisse erfassen
         </button>
       `;
@@ -146,14 +146,14 @@ class OverviewView {
   createInfoCard() {
     const card = document.createElement("div");
     card.className = "card";
-    card.style.cssText = "background: color-mix(in srgb, var(--color-success) 12%, var(--bg-card)); border: 1px solid var(--color-success);";
+    card.style.cssText = "background: color-mix(in srgb, var(--color-info) 12%, var(--bg-card)); border: 1px solid var(--color-info);";
     let venueText = "";
     if (storage.selectedVenue) {
       venueText = `<p style="color: var(--text-secondary); margin-top: 8px;">Wettkampfort: ${UIUtils.escapeHtml(storage.selectedVenue)}</p>`;
     }
     card.innerHTML = `
 			<div style="text-align: center;">
-				<h3>${storage.selectedDiscipline}</h3>
+				<h3>${UIUtils.escapeHtml(storage.selectedDiscipline)}</h3>
 				<!-- <p style="color: var(--text-secondary); margin-top: 8px;">Modus: ${storage.selectedCompetitionType}</p> -->
 				${venueText}
 			</div>

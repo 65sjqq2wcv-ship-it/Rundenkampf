@@ -893,6 +893,16 @@ class Storage {
     };
   }
 
+  // Vereinslogo aus einem Backup nur akzeptieren, wenn es eine echte Bild-Data-URL ist.
+  // Der Wert landet später in img-src und im PDF-HTML.
+  sanitizeClubLogo() {
+    const logo = this.settings && this.settings.clubLogo;
+    if (logo && !/^data:image\/(png|jpeg|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(logo)) {
+      console.warn("Ungültiges Vereinslogo verworfen");
+      this.settings.clubLogo = null;
+    }
+  }
+
   importData(data) {
     try {
       if (data.teams) this.teams = data.teams.map((t) => Team.fromJSON(t));
@@ -919,6 +929,7 @@ class Storage {
       if (data.availableVenues) this.availableVenues = data.availableVenues;
       if (data.selectedVenue) this.selectedVenue = data.selectedVenue;
       if (data.settings) this.settings = { ...this.settings, ...data.settings };
+      this.sanitizeClubLogo();
 
       // NEU: Label-Einstellungen importieren
       if (data.labelSettings) {

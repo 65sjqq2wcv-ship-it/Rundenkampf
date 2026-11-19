@@ -11,7 +11,7 @@
       http-equiv="Content-Security-Policy"
       content="
     default-src 'self';
-    script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+    script-src 'self' https://cdnjs.cloudflare.com;
     style-src 'self' 'unsafe-inline';
     img-src 'self' data: blob:;
     connect-src 'self';
@@ -99,13 +99,8 @@
 
     <link rel="stylesheet" href="css/theme.css" />
     <link rel="stylesheet" href="css/styles.css" />
-    <!-- Theme vor dem Rendern setzen (Standard: dark, siehe STYLEGUIDE.md) -->
-    <script>
-      document.documentElement.setAttribute(
-        "data-theme",
-        localStorage.getItem("rundenkampf-theme") === "light" ? "light" : "dark"
-      );
-    </script>
+    <!-- Theme vor dem Rendern setzen (Standard: light, siehe STYLEGUIDE.md) -->
+    <script src="js/theme-init.js"></script>
   </head>
   <body>
     <div id="app">
@@ -114,6 +109,7 @@
           <div class="nav-title-wrap">
             <img src="icons/icon-192x192.png" alt="" class="nav-logo" />
             <h1 class="nav-title">Rundenkampfbericht</h1>
+            <span class="nav-version" id="navVersion"></span>
           </div>
           <div class="nav-menu-wrap">
             <button
@@ -180,7 +176,10 @@
      <!-- Scripts in der KORREKTEN Reihenfolge -->
     <script src="js/version.js"></script>
     <script src="js/exif-writer.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+      integrity="sha384-Yv5O+t3uE3hunW8uyrbpPW3iw6/5/Y7HitWJBLgqfMoA36NogMmy+8wWZMpn3HWc"
+      crossorigin="anonymous"></script>
     
     <!-- Grundlagen zuerst -->
     <script src="js/models.js"></script>

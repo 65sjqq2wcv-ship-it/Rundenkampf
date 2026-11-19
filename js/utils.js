@@ -171,11 +171,16 @@ class UIUtils {
     }, 2000);
   }
 
+  // Escaped auch Anführungszeichen, damit der Wert in HTML-Attributen (value="…", href="…") bleibt
   static escapeHtml(text) {
     if (!text && text !== 0) return "";
-    const div = document.createElement("div");
-    div.textContent = String(text);
-    return div.innerHTML;
+    return String(text).replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    })[c]);
   }
 
   static sanitizeText(text) {
